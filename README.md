@@ -12,7 +12,15 @@
 
 <br>
 
-<img src="docs/mission-control.png" alt="Liftoff mission control: competitors and patterns from live research, the trend wall, and three directions that each cleared 9 of 9 checks with liftoff confirmed" width="100%">
+<img src="docs/landing.png" alt="Liftoff landing page: paste your brand's website and launch a flight" width="100%">
+
+<sub>Paste a brand's website on the landing page, and Liftoff takes it from there.</sub>
+
+<br><br>
+
+<img src="docs/mission-control.png" alt="Liftoff mission control: this month's viral videos in the category, and the launch videos that passed every check" width="100%">
+
+<sub>Mission control: what's viral in the category this month, then the videos Liftoff made and proved.</sub>
 
 </div>
 
