@@ -28,7 +28,7 @@ ROOT = Path(__file__).resolve().parent
 RUNS = ROOT / "runs"
 
 st.set_page_config(page_title="Liftoff", page_icon="🚀", layout="wide",
-                   initial_sidebar_state="expanded")
+                   initial_sidebar_state="collapsed")
 
 CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
@@ -41,7 +41,7 @@ CSS = """
 [data-testid="stHeader"] { background: var(--bg); }
 [data-testid="stSidebar"] { background: #FFFFFF; border-right: 1px solid var(--line); }
 .block-container { padding-top: 2.6rem; padding-bottom: 3rem; max-width: 1240px; }
-[data-testid="stToolbar"], [data-testid="stDecoration"] { display: none; }
+[data-testid="stToolbar"], [data-testid="stDecoration"], [data-testid="stSidebar"], [data-testid="stSidebarCollapsedControl"], [data-testid="collapsedControl"] { display: none; }
 [data-testid="stHeader"] { height: 0; }
 .stApp { font-size: 15px; }
 [data-testid="stSidebar"] h1 { font-size: 20px; }
@@ -421,36 +421,20 @@ saved_labels = {f["slug"]: f'{f["brand"]}  ·  {f["cleared"]} of {f["total"]} re
 flight_param = (st.query_params.get("flight") or "").strip()
 saved_match = library.find_by_url(url_param) if url_param else None
 
-with st.sidebar:
-    st.title("Liftoff")
-    st.caption("Launch videos that are checked before you see them.")
-    with st.container(border=True):
-        st.markdown("**New launch**")
-        brand_url = st.text_input("Brand website", url_param, placeholder="yourbrand.com",
-                                  help="We read the site for its name, colours and tone.")
-        mission = st.text_input("Brief (optional)", "", placeholder="e.g. playful, for TikTok, summer drop",
-                                help="Leave empty and the brief is written from the website.")
-        with st.expander("Options"):
-            n = st.slider("Videos to make", 1, 5, 3)
-            plant = st.checkbox("Plant a mistake in video A (to show the checks working)", True)
-            mock = st.checkbox("Practice mode: sample videos, no AI", os.environ.get("LIFTOFF_MOCK", "0") == "1")
-        go = st.button("Make videos", type="primary", use_container_width=True)
-    if go:
-        if not brand_url.strip() and not mission.strip():
-            mission = DEFAULT_MISSION  # nothing given: the Fizz demo
-        st.query_params["flight"] = ""
-        st.session_state["launched_for"] = brand_url.strip()
-        start_flight(mission.strip() or DEFAULT_MISSION, "fizz", n, plant, mock, brand_url.strip())
-        st.rerun()
-
-    st.markdown("**Launches**")
-    options = ["live"] + list(saved_labels)
-    default = flight_param if flight_param in saved_labels else "live"
-    choice = st.radio("Launches", options, index=options.index(default), label_visibility="collapsed",
-                      format_func=lambda k: "Latest launch" if k == "live" else saved_labels[k])
-    if choice != flight_param and (choice != "live" or flight_param):
-        st.query_params["flight"] = choice if choice != "live" else ""
-    auto = st.toggle("Update live", True)
+# No sidebar: new launches start from a website on the landing page; switching launches is a menu
+# in the header, the way most apps let you switch projects.
+SITE_URL = os.environ.get("LIFTOFF_SITE_URL", "http://localhost:3000")
+mock = os.environ.get("LIFTOFF_MOCK", "0") == "1"
+auto = True
+options = ["live"] + list(saved_labels)
+default = flight_param if flight_param in saved_labels else "live"
+bar_l, bar_m, bar_r = st.columns([1, 0.42, 0.18], vertical_alignment="center")
+bar_l.markdown('<div style="font-weight:700;font-size:16px">Liftoff</div>', unsafe_allow_html=True)
+choice = bar_m.selectbox("Launch", options, index=options.index(default), label_visibility="collapsed",
+                         format_func=lambda k: "Latest launch" if k == "live" else saved_labels[k])
+bar_r.link_button("New launch", SITE_URL, type="primary", use_container_width=True)
+if choice != flight_param and (choice != "live" or flight_param):
+    st.query_params["flight"] = choice if choice != "live" else ""
 
 # Arriving from the landing page with a website.
 arriving = bool(url_param) and st.session_state.get("launched_for") != url_param
@@ -538,8 +522,18 @@ with t_videos:
             d = v.get("direction", {})
             attempts = v.get("attempts", [])
             with col:
+                # Video first, like every video grid people know: all three line up whatever the text below.
+                mp4 = video_path(attempts[-1]["mp4"]) if attempts else None
+                if mp4 and mp4.exists():
+                    # Opening a second in shows the ad itself, not the empty frame before the product drops in.
+                    _, mid, _ = st.columns([0.1, 0.8, 0.1])
+                    with mid:
+                        st.video(str(mp4), start_time=1)
+                elif running:
+                    st.markdown('<div class="lf-dir" style="height:420px;display:grid;place-items:center;color:var(--hint)">'
+                                'Being made…</div>', unsafe_allow_html=True)
                 st.markdown(
-                    f'<div class="lf-dir{" active" if vid == active and running else ""}" style="margin-bottom:10px">'
+                    f'<div class="lf-dir{" active" if vid == active and running else ""}" style="margin:10px 0">'
                     f'<b>{safe(vid)}. {safe(v.get("name", ""))}</b>'
                     f'<div class="sub">“{safe(d.get("hook", ""))}”<br>{safe(d.get("duration_s", "?"))}s, vertical, '
                     f'{safe(humanize_tag(v.get("pattern", "")).lower())}</div>{status_lines(v, plan_by_id)}'
@@ -547,13 +541,6 @@ with t_videos:
                     f'{footage_credit(d)}</div>',
                     unsafe_allow_html=True)
                 if attempts:
-                    mp4 = video_path(attempts[-1]["mp4"])
-                    if mp4.exists():
-                        # Narrower than the column so a 9:16 video doesn't fill the screen; opening a second
-                        # in shows the ad itself rather than the empty frame before the product drops in.
-                        _, mid, _ = st.columns([0.12, 0.76, 0.12])
-                        with mid:
-                            st.video(str(mp4), start_time=1)
                     with st.expander("Every check, in detail"):
                         for prev in attempts[:-1]:
                             failed = [r for r in prev["verdict"]["results"] if not r["pass"]]
