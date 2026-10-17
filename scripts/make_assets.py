@@ -39,7 +39,14 @@ def darken(rgb, f=0.25):
     return tuple(int(c * (1 - f)) for c in rgb)
 
 
-def make_can(name: str, primary: str, out: Path) -> None:
+def fit(d, text: str, size: int, max_w: int):
+    """Largest font at or below size whose rendering of text fits max_w."""
+    while size > 14 and d.textlength(text, font=font(size)) > max_w:
+        size -= 2
+    return font(size)
+
+
+def make_can(name: str, primary: str, out: Path, sub: str = "COLA") -> None:
     W, H = 300, 600
     img = Image.new("RGBA", (W, H), (0, 0, 0, 0))
     d = ImageDraw.Draw(img)
@@ -55,19 +62,19 @@ def make_can(name: str, primary: str, out: Path) -> None:
     d.ellipse((120, 50, 180, 70), fill=(170, 170, 178))
     # label band
     d.rectangle((40, 220, 260, 400), fill=(255, 255, 255))
-    f = font(72)
+    f = fit(d, name, 72, 200)
     tw = d.textlength(name, font=f)
     d.text(((W - tw) / 2, 265), name, font=f, fill=p)
-    f2 = font(22)
-    sub = "COLA"
+    sub = sub.upper()[:18]
+    f2 = fit(d, sub, 22, 200)
     tw2 = d.textlength(sub, font=f2)
     d.text(((W - tw2) / 2, 350), sub, font=f2, fill=darken(p, 0.4))
     img.save(out)
 
 
 def make_logo(name: str, primary: str, out: Path) -> None:
-    f = font(84)
     tmp = ImageDraw.Draw(Image.new("RGB", (10, 10)))
+    f = fit(tmp, name, 84, 400)  # badge stays inside the 540px frame
     tw = int(tmp.textlength(name, font=f))
     W, H = tw + 80, 150
     img = Image.new("RGBA", (W, H), (255, 255, 255, 255))
@@ -88,7 +95,7 @@ def main() -> None:
     a = ap.parse_args()
     out = ROOT / "assets" / a.name.lower()
     out.mkdir(parents=True, exist_ok=True)
-    make_can(a.name, a.primary, out / "can.png")
+    make_can(a.name, a.primary, out / "can.png", sub=a.category)
     make_logo(a.name, a.primary, out / "logo.png")
     card = {
         "name": a.name, "category": a.category, "market": a.market,

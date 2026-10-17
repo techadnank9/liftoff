@@ -109,6 +109,9 @@ def respond(role: str, messages: list[dict[str, Any]]) -> str:
         return json.dumps(ARBITER_FIXTURE)
     if role == "playbook":
         return json.dumps(PLAYBOOK_FIXTURE)
+    if role == "brand":
+        return json.dumps({"name": "Fizz", "category": "cola", "market": "US", "primary_hex": "#D85A30",
+                           "secondary_hex": "#26215C", "tone": ["bold", "playful", "direct"], "never": []})
     if role in ("scout", "librarian"):
         return json.dumps({"note": "mock"})
     return "{}"

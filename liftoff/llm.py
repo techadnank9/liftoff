@@ -55,13 +55,14 @@ MODELS: dict[str, str] = {
     "verifier_vision": "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
     "director": "deepseek-ai/Deepseek-V4-Flash",
     "librarian": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "brand": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "scout": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "playbook": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
 }
 
 # Roles where Nemotron's thinking costs time without changing the answer.
 # Spec on Super with thinking took ~56s; the prompt is strict enough to run without it.
-THINKING_OFF = {"spec", "librarian", "scout"}
+THINKING_OFF = {"spec", "librarian", "scout", "brand"}
 
 # Crusoe rate limits by concurrent requests ("max_requests_limit"). Every call in the
 # process shares this cap, so parallel flights and parallel vision checks stay under it.

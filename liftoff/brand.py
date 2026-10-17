@@ -50,7 +50,8 @@ def load(name: str = "fizz") -> Brand:
     """Phase 1: fixtures only. Phase 2: look up assets/<name>/brand.json or learn from URL."""
     p = ASSETS / name / "brand.json"
     if p.exists():
-        return Brand(**json.loads(p.read_text()))
+        data = json.loads(p.read_text())
+        return Brand(**{k: v for k, v in data.items() if k in Brand.__dataclass_fields__})
     if name.lower() == "fizz":
         return FIZZ
     raise FileNotFoundError(f"No brand card for {name}. Add assets/{name}/brand.json or run scripts/make_assets.py")

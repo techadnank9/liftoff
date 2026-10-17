@@ -21,8 +21,11 @@ ROOT = Path(__file__).resolve().parent.parent
 RUNS = ROOT / "runs"
 
 
+DEFAULT_MISSION = "Launch video for Fizz cola, bold, for vertical feeds"
+
+
 def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_failure: bool = True,
-           run_dir: Path | None = None, set_latest: bool = True) -> Path:
+           run_dir: Path | None = None, set_latest: bool = True, brand_url: str | None = None) -> Path:
     run_dir = run_dir or RUNS / time.strftime("%Y%m%d-%H%M%S")
     tel = Telemetry(run_dir)
     if set_latest:
@@ -32,7 +35,15 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
         except (OSError, ValueError):
             (RUNS / "latest.txt").write_text(str(run_dir))
 
-    brand = load_brand(brand_name)
+    if brand_url:
+        from .brand_from_url import from_url
+
+        tel.set(phase="brand", brand_url=brand_url)
+        brand = from_url(brand_url, tel)
+        if mission == DEFAULT_MISSION or not mission.strip():
+            mission = f"Launch video for {brand.name} {brand.category}, {brand.tone[0]}, for vertical feeds"
+    else:
+        brand = load_brand(brand_name)
     tel.set(mission=mission, brand=brand.to_dict(), phase="research")
     tel.emit("system", "mission", {"mission": mission, "mock": llm.MOCK})
 
@@ -89,12 +100,13 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--mission", default="Launch video for Fizz cola, bold, for vertical feeds")
+    ap.add_argument("--mission", default=DEFAULT_MISSION)
+    ap.add_argument("--brand-url", default=None, help="build the brand card from this website instead of --brand")
     ap.add_argument("--brand", default="fizz")
     ap.add_argument("--vehicles", type=int, default=3)
     ap.add_argument("--no-plant", action="store_true", help="don't plant the demo failure on vehicle A")
     args = ap.parse_args()
-    flight(args.mission, args.brand, args.vehicles, plant_failure=not args.no_plant)
+    flight(args.mission, args.brand, args.vehicles, plant_failure=not args.no_plant, brand_url=args.brand_url)
 
 
 if __name__ == "__main__":
