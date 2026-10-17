@@ -61,7 +61,11 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 
 .lf-comp { display: flex; gap: 16px; align-items: center; padding: 10px 12px; border-radius: 14px; margin: 0 -12px 6px; }
 .lf-comp:first-of-type { background: #F7F6F2; }
-.lf-av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 18px; flex: none; }
+.lf-av { width: 44px; height: 44px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 18px; flex: none; position: relative; overflow: hidden; }
+.lf-av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 7px; box-sizing: border-box; border-radius: 50%; border: 1px solid var(--line); }
+.lf-tile .top.has-thumb { background-size: cover; background-position: center; position: relative; }
+.lf-tile .top.has-thumb i { color: #fff; border-color: rgba(255,255,255,.9); border-radius: 50%; width: 34px; height: 34px; background: rgba(0,0,0,.35); }
+.lf-tile .plat { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 8px; }
 .lf-comp b { font-weight: 500; font-size: 21px; display: block; }
 .lf-comp span { color: var(--soft); font-size: 18px; }
 .lf-pats { margin-top: 22px; }
@@ -142,6 +146,25 @@ def load(run_dir: Path):
             except json.JSONDecodeError:
                 pass
     return state, events
+
+
+def brand_icon(c: dict) -> str | None:
+    """The brand site's own icon, served by You.com's favicon service; never downloaded."""
+    domain = c.get("domain") or (c["name"].lower().replace(" ", "").replace("'", "") + ".com")
+    return f"https://you.com/favicon?domain={domain}&size=128"
+
+
+def thumb_for(post: dict) -> str | None:
+    if post.get("thumb"):
+        return post["thumb"]
+    url = post.get("url", "")
+    if "REPLACE_ME" in url:
+        return None
+    for marker in ("/shorts/", "v="):
+        if "youtube.com" in url and marker in url:
+            vid = url.split(marker)[1].split("?")[0].split("&")[0].split("/")[0]
+            return f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+    return None
 
 
 def initials(name: str) -> str:
@@ -286,7 +309,8 @@ st.markdown(
 # ---------------- top band ----------------
 comps = "".join(
     f'<div class="lf-comp"><div class="lf-av" style="background:{AVATAR[i % 5][0]};color:{AVATAR[i % 5][1]}">'
-    f'{safe(initials(c["name"]))}</div><div><b>{safe(c["name"])}</b>'
+    f'{safe(initials(c["name"]))}'
+    f'{f"<img alt=\"\" src=\"{safe(brand_icon(c))}\">" if res.get("live") else ""}</div><div><b>{safe(c["name"])}</b>'
     f'<span>{c["videos"]} {"mentions" if res.get("live") else "videos"}</span></div></div>'
     for i, c in enumerate(res.get("competitors", [])[:3])
 )
@@ -297,8 +321,13 @@ for i, post in enumerate(res.get("trend_wall", [])[:6]):
     bg, fg = TILE[i % 6]
     linked = "REPLACE_ME" not in post.get("url", "")
     open_tag = f'<a class="lf-tile" href="{safe(post["url"])}" target="_blank">' if linked else '<div class="lf-tile">'
+    thumb = thumb_for(post)
+    # Platform-served thumbnail (i.ytimg.com), hotlinked at render time; the pastel stays as fallback.
+    top = (f'<div class="top has-thumb" style="background-color:{bg};background-image:url(\'{safe(thumb)}\')">'
+           f'<span class="plat">{safe({"youtube": "YouTube", "tiktok": "TikTok", "instagram": "Instagram"}.get(post.get("platform", ""), post.get("platform", "")))}</span><i></i></div>' if thumb
+           else f'<div class="top" style="background:{bg};color:{fg}"><i></i></div>')
     tiles.append(
-        f'{open_tag}<div class="top" style="background:{bg};color:{fg}"><i></i></div>'
+        f'{open_tag}{top}'
         f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
         f'{views(post["views"]) if post.get("views") else safe(post.get("age") or post.get("platform", ""))}</div>'
         f'<div class="hook">{safe(post["hook"])}</div></div>{"</a>" if linked else "</div>"}'

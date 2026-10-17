@@ -82,10 +82,11 @@ LIBRARIAN_SYSTEM = """You are the Librarian on a launch-video team. You get sear
 2. Tag each numbered post with 1 to 3 pattern tags from this list only:
 {tags}
    Use the articles (marked "(article)") to find challenger brands, not only the leader.
+   Give each brand's official website domain (e.g. "pepsi.com"), or "" if unsure.
 3. Write one short hook line per post (<= 6 words) describing what the video does.
 4. Mark "relevant": false for any post that is not a beverage ad or brand video.
 Return JSON only:
-{{"competitors":[{{"name":str,"role":str}}],
+{{"competitors":[{{"name":str,"role":str,"domain":str}}],
  "posts":[{{"n":int,"tags":[str],"hook":str,"relevant":bool}}]}}"""
 
 
@@ -116,6 +117,7 @@ def _search(you, query: str, count: int = 10, **kw) -> list[dict[str, Any]]:
     for r in web:
         d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
         out.append({"url": d.get("url", ""), "title": d.get("title", ""),
+                    "thumbnail_url": (d.get("thumbnail_url") or "").replace("&amp;", "&"),
                     "description": d.get("description", "") or "", "page_age": d.get("page_age")})
     return out
 
@@ -216,7 +218,10 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
             if t.get("relevant") is False:
                 continue
             tags = [x for x in t.get("tags", []) if x in PATTERN_TAGS]
+            yt = _youtube_id(p["url"])
             wall.append({"platform": p["platform"], "url": p["url"], "views": None,
+                         # Platform-served thumbnail, hotlinked at render time; never downloaded.
+                         "thumb": f"https://i.ytimg.com/vi/{yt}/hqdefault.jpg" if yt else p.get("thumbnail_url") or None,
                          "age": str(p.get("page_age") or "")[:10], "title": p["title"],
                          "hook": t.get("hook") or p["title"][:40], "patterns": tags})
 
@@ -246,6 +251,7 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
             if not name or name.lower() == brand.name.lower():
                 continue
             competitors.append({"name": name, "role": c.get("role", "wildcard"),
+                                "domain": str(c.get("domain", "")).strip().lower().removeprefix("www.") or None,
                                 "videos": text.count(name.lower().split()[0])})
 
         data = {
