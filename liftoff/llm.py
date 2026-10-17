@@ -59,7 +59,7 @@ MODELS: dict[str, str] = {
 
 # Roles where Nemotron's thinking costs time without changing the answer.
 # Spec on Super with thinking took ~56s; the prompt is strict enough to run without it.
-THINKING_OFF = {"spec"}
+THINKING_OFF = {"spec", "librarian", "scout"}
 
 _client = None
 _usage: dict[str, dict[str, int]] = {}

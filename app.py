@@ -286,7 +286,8 @@ st.markdown(
 # ---------------- top band ----------------
 comps = "".join(
     f'<div class="lf-comp"><div class="lf-av" style="background:{AVATAR[i % 5][0]};color:{AVATAR[i % 5][1]}">'
-    f'{safe(initials(c["name"]))}</div><div><b>{safe(c["name"])}</b><span>{c["videos"]} videos</span></div></div>'
+    f'{safe(initials(c["name"]))}</div><div><b>{safe(c["name"])}</b>'
+    f'<span>{c["videos"]} {"mentions" if res.get("live") else "videos"}</span></div></div>'
     for i, c in enumerate(res.get("competitors", [])[:3])
 )
 pats = "".join(f'<span class="lf-tag">{safe(humanize_tag(p["tag"]))}</span>' for p in res.get("patterns", [])[:4])
@@ -298,7 +299,8 @@ for i, post in enumerate(res.get("trend_wall", [])[:6]):
     open_tag = f'<a class="lf-tile" href="{safe(post["url"])}" target="_blank">' if linked else '<div class="lf-tile">'
     tiles.append(
         f'{open_tag}<div class="top" style="background:{bg};color:{fg}"><i></i></div>'
-        f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>{views(post.get("views"))}</div>'
+        f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
+        f'{views(post["views"]) if post.get("views") else safe(post.get("age") or post.get("platform", ""))}</div>'
         f'<div class="hook">{safe(post["hook"])}</div></div>{"</a>" if linked else "</div>"}'
     )
 
@@ -318,7 +320,7 @@ if not dirs:
 st.markdown(
     f'<div class="lf-grid">'
     f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
-    f'<div class="lf-card"><div class="lf-h">Trend wall <small>Last 14 days</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
+    f'<div class="lf-card"><div class="lf-h">Trend wall <small>{"Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Last 14 days"}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
     f'<div class="lf-card"><div class="lf-h">Directions</div>{"".join(dirs)}</div>'
     f'</div>'
     f'<div class="lf-ticker"><span class="lf-dot{" busy" if running else ""}"></span>'

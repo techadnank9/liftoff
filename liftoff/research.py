@@ -13,7 +13,9 @@ which phase produced it.
 """
 from __future__ import annotations
 
+import json
 import os
+from pathlib import Path
 from typing import Any
 
 from .brand import Brand
@@ -57,11 +59,44 @@ FIXTURE: dict[str, Any] = {
 }
 
 
+PATTERN_TAGS = {
+    "hook_under_1_5s": "Text or action hook inside 1.5s",
+    "taste_test": "Blind or street taste test",
+    "asmr": "Can open, ice drop, pour",
+    "text_on_beat": "On-screen text cut to music",
+    "countdown": "Launch day or city countdown",
+    "reaction": "Someone reacts on camera",
+    "process": "How it's made, factory or recipe",
+    "slow_motion": "Slow motion product hero shot",
+    "humor": "Joke or meme format",
+    "challenge": "Challenge or trend participation",
+}
+
+CACHE = Path(__file__).resolve().parent.parent / "research_cache"
+
+LIBRARIAN_SYSTEM = """You are the Librarian on a launch-video team. You get search results
+(titles and descriptions only, never footage) for short-form videos in one product category.
+1. Name the competitor brands that appear, with a role: "incumbent" (category leader),
+   "challenger_won" (newer brand that grew) or "wildcard". Up to 5, most relevant first.
+   Never list the brand we are launching.
+2. Tag each numbered post with 1 to 3 pattern tags from this list only:
+{tags}
+   Use the articles (marked "(article)") to find challenger brands, not only the leader.
+3. Write one short hook line per post (<= 6 words) describing what the video does.
+4. Mark "relevant": false for any post that is not a beverage ad or brand video.
+Return JSON only:
+{{"competitors":[{{"name":str,"role":str}}],
+ "posts":[{{"n":int,"tags":[str],"hook":str,"relevant":bool}}]}}"""
+
+
 def run(brand: Brand, tel: Telemetry) -> dict[str, Any]:
     tel.emit("scout", "start", {"brand": brand.name, "category": brand.category})
-    if os.environ.get("LIFTOFF_LIVE_RESEARCH", "0") == "1":
+    from . import llm
+
+    data = None
+    if os.environ.get("LIFTOFF_LIVE_RESEARCH", "0") == "1" and not llm.MOCK:
         data = _live(brand, tel)
-    else:
+    if data is None:
         data = FIXTURE
         tel.emit("scout", "fixture", {"competitors": len(data["competitors"])})
     tel.emit("librarian", "trend_wall", {"posts": len(data["trend_wall"]), "patterns": len(data["patterns"])})
@@ -69,21 +104,116 @@ def run(brand: Brand, tel: Telemetry) -> dict[str, Any]:
     return data
 
 
-def _live(brand: Brand, tel: Telemetry) -> dict[str, Any]:
-    """Phase 2. Fill in with You.com + YouTube Data API. Falls back to fixture on any error."""
+def _search(you, query: str, count: int = 10, **kw) -> list[dict[str, Any]]:
+    res = you.search(query=query, count=count, **kw)
+    web = (res.results.web if res.results else None) or []
+    out = []
+    for r in web:
+        d = r.model_dump() if hasattr(r, "model_dump") else dict(r)
+        out.append({"url": d.get("url", ""), "title": d.get("title", ""),
+                    "description": d.get("description", "") or "", "page_age": d.get("page_age")})
+    return out
+
+
+def _platform(url: str) -> str | None:
+    if "youtube.com/shorts/" in url or "youtube.com/watch" in url:
+        return "youtube"
+    if "tiktok.com/" in url and "/video/" in url:
+        return "tiktok"
+    if "instagram.com/reel" in url:
+        return "instagram"
+    return None
+
+
+def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
+    """You.com Search for posts, competitors and citations; Nemotron Nano tags patterns from text.
+
+    Fallback order on any failure: last good live result for this brand, then the fixture."""
+    from concurrent.futures import ThreadPoolExecutor
+
+    from . import llm
+
+    cache = CACHE / f"{brand.name.lower()}.json"
     try:
         from youdotcom import You  # type: ignore
 
-        key = os.environ["YDC_API_KEY"]
-        out = dict(FIXTURE)
-        with You(api_key_auth=key) as you:
-            q = f"{brand.category} brand launch short-form video campaign {brand.market} 2026"
-            res = you.search.unified(query=q, count=8)
-            out["sources"] = [{"title": r.get("title", ""), "url": r.get("url", "")}
-                              for r in getattr(res, "results", []) or []][:8]
-        tel.emit("scout", "you_com", {"sources": len(out["sources"])})
-        # TODO Phase 2: competitor discovery, YouTube Data API counts, Nemotron pattern tagging.
-        return out
+        cat, market = brand.category, brand.market
+        queries = {
+            "posts": (f"{cat} brand ad #shorts", dict(count=20, include_domains=["youtube.com", "tiktok.com"])),
+            "posts2": (f"soda {cat} challenger brand tiktok ad", dict(count=15, include_domains=["youtube.com", "tiktok.com"])),
+            "rivals": (f"top {cat} brands {market} market share and fastest growing challenger brands", dict(count=8)),
+            "launches": (f"new {cat} brand launch campaign short-form video {market}", dict(count=10)),
+            "sources": ("short-form video ads brand logo visible first seconds recall best practices", dict(count=6)),
+        }
+        with You(api_key_auth=os.environ["YDC_API_KEY"]) as you, ThreadPoolExecutor(len(queries)) as pool:
+            futs = {k: pool.submit(_search, you, q, **kw) for k, (q, kw) in queries.items()}
+            got = {k: f.result(timeout=30) for k, f in futs.items()}
+
+        posts = []
+        seen = set()
+        for r in got["posts"] + got["posts2"]:
+            plat = _platform(r["url"])
+            if plat and r["url"] not in seen:
+                seen.add(r["url"])
+                posts.append({**r, "platform": plat})
+        posts = posts[:16]
+        if len(posts) < 3:
+            raise RuntimeError(f"only {len(posts)} public posts found")
+        tel.emit("scout", "you_com", {"posts": len(posts), "launch_articles": len(got["launches"]),
+                                      "sources": len(got["sources"])})
+
+        lines = [f"{i + 1}. {p['title']} | {p['description'][:160]}" for i, p in enumerate(posts)]
+        lines += [f"(article) {a['title']} | {a['description'][:160]}" for a in (got["rivals"] + got["launches"])[:12]]
+        tagged = llm.call_json("librarian", [
+            {"role": "system", "content": LIBRARIAN_SYSTEM.format(
+                tags="\n".join(f"- {k}: {v}" for k, v in PATTERN_TAGS.items()))},
+            {"role": "user", "content": f"WE ARE LAUNCHING: {brand.name} ({cat}, {market})\n\n" + "\n".join(lines)},
+        ])
+
+        by_n = {int(t.get("n", 0)): t for t in tagged.get("posts", []) if isinstance(t, dict)}
+        wall = []
+        for i, p in enumerate(posts):
+            t = by_n.get(i + 1, {})
+            if t.get("relevant") is False:
+                continue
+            tags = [x for x in t.get("tags", []) if x in PATTERN_TAGS]
+            wall.append({"platform": p["platform"], "url": p["url"], "views": None,
+                         "age": str(p.get("page_age") or "")[:10], "title": p["title"],
+                         "hook": t.get("hook") or p["title"][:40], "patterns": tags})
+
+        counts: dict[str, int] = {}
+        for w in wall:
+            for tag in w["patterns"]:
+                counts[tag] = counts.get(tag, 0) + 1
+        patterns = [{"tag": k, "share": round(c / len(wall), 2), "note": PATTERN_TAGS[k]}
+                    for k, c in sorted(counts.items(), key=lambda kv: -kv[1])]
+
+        text = " ".join((p["title"] + " " + p["description"]).lower() for p in posts + got["launches"] + got["rivals"])
+        competitors = []
+        for c in tagged.get("competitors", [])[:5]:
+            name = str(c.get("name", "")).strip()
+            if not name or name.lower() == brand.name.lower():
+                continue
+            competitors.append({"name": name, "role": c.get("role", "wildcard"),
+                                "videos": text.count(name.lower().split()[0])})
+
+        data = {
+            "competitors": competitors or FIXTURE["competitors"],
+            "trend_wall": wall,
+            "patterns": patterns or FIXTURE["patterns"],
+            "stats": {"posts_scanned": len(got["posts"]) + len(got["posts2"]), "public_posts": len(wall)},
+            "sources": [{"title": s["title"], "url": s["url"]} for s in got["sources"]]
+                       + FIXTURE["sources"],
+            "live": True,
+        }
+        CACHE.mkdir(exist_ok=True)
+        cache.write_text(json.dumps(data, indent=1))
+        tel.emit("librarian", "tagged", {"competitors": [c["name"] for c in competitors],
+                                         "patterns": [p["tag"] for p in patterns]})
+        return data
     except Exception as e:  # noqa: BLE001
+        if cache.exists():
+            tel.emit("scout", "live_failed_cache", {"error": str(e)[:200]})
+            return {**json.loads(cache.read_text()), "live": "cached"}
         tel.emit("scout", "live_failed_fallback", {"error": str(e)[:200]})
-        return FIXTURE
+        return None
