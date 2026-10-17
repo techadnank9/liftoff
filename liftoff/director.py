@@ -40,7 +40,14 @@ and the pattern tag it draws from. Return JSON only:
 FIX_SYSTEM = """You are the Director. A vehicle failed verification. You get the direction
 JSON and the failing checks with measured values. Return ONLY the JSON fields to change
 (e.g. {"logo_seconds": 3.4, "notes": "..."}). Change the minimum needed. Never change the
-brand name or remove the end card."""
+brand name or remove the end card. Notes alone change nothing in the render; you must
+change a field. The levers the renderer obeys:
+- logo seconds too low: raise "logo_seconds" a little above the threshold (e.g. 3.4 for 3.0).
+- text contrast too low: overlay text is white; set "bg" to the darker brand color
+  ("secondary"). White on primary is about 3.8:1, white on secondary about 14.7:1.
+- background palette off: set "bg" to "primary" or "secondary".
+- duration out of range: set "duration_s" inside the range.
+- hook, end card or wording problems: rewrite "hook", "body" or "end_card"."""
 
 
 def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,

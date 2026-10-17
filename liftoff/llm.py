@@ -45,16 +45,21 @@ MOCK = os.environ.get("LIFTOFF_MOCK", "0") == "1"
 # from Spec / Verifier / Arbiter (Nemotron), so the verifier cannot
 # share the builder's blind spots.
 MODELS: dict[str, str] = {
-    "spec": "nvidia/Nemotron-3-Super-120B-A12B",
-    "arbiter": "nvidia/Nemotron-3-Super-120B-A12B",
-    "goalcheck": "nvidia/Nemotron-3-Super-120B-A12B",
-    "verifier_text": "nvidia/Nemotron-3-Nano-30B-A3B",
+    "spec": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    "arbiter": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
+    # Needs 3 images in one prompt: Super is text only, Super VL takes 1 image, Omni takes 3.
+    "goalcheck": "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
+    "verifier_text": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "verifier_vision": "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
-    "director": "deepseek-ai/DeepSeek-V4-Flash",
-    "librarian": "nvidia/Nemotron-3-Nano-30B-A3B",
-    "scout": "nvidia/Nemotron-3-Nano-30B-A3B",
-    "playbook": "nvidia/Nemotron-3-Super-120B-A12B",
+    "director": "deepseek-ai/Deepseek-V4-Flash",
+    "librarian": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "scout": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
+    "playbook": "nvidia/NVIDIA-Nemotron-3-Super-120B-A12B",
 }
+
+# Roles where Nemotron's thinking costs time without changing the answer.
+# Spec on Super with thinking took ~56s; the prompt is strict enough to run without it.
+THINKING_OFF = {"spec"}
 
 _client = None
 _usage: dict[str, dict[str, int]] = {}
@@ -93,6 +98,8 @@ def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
                                   temperature=temperature, max_tokens=max_tokens)
     if json_mode:
         kwargs["response_format"] = {"type": "json_object"}
+    if role in THINKING_OFF:
+        kwargs["extra_body"] = {"chat_template_kwargs": {"enable_thinking": False}}
     last_err: Exception | None = None
     for attempt in range(retries + 1):
         try:

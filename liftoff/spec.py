@@ -26,11 +26,32 @@ Available checks (use only these; args must match):
 """
 
 SYSTEM = """You are the Spec agent on a launch-video team. You write the definition of done
-BEFORE anyone builds anything. Turn the mission into 6 to 10 executable checks from the
-vocabulary, each with a one-line 'why' that cites the research or brand card where possible.
-Then list every assumption you had to make because the mission was vague (format, language,
-market, duration, audio). If something cannot be assumed safely (a legal claim, an unknown
-brand color, a market with rules you don't know) put it in 'escalations' instead of guessing.
+BEFORE anyone builds anything. Every direction the team builds must pass EVERY check, so
+checks are about the brand and the mission, never about one creative pattern.
+
+Write 8 to 10 checks from the vocabulary, each with a one-line 'why' citing the research or
+brand card. Always include this core, then add up to 2 more that the mission implies:
+- duration_between (6 to 15 s for vertical feeds unless the mission says otherwise)
+- aspect_ratio from the mission's format
+- logo_seconds_at_least 3.0 (the category norm in research sources: brand visible 3s+)
+- palette_within 60
+- text_contrast_at_least 4.5 (WCAG AA)
+- vision_yes about a readable hook in the "first-second frame"
+- vision_yes about the brand name shown as an end card in the "last-second frame"
+- vision_no about logos of other brands or a health claim being visible
+
+Vision checks see ONE still frame at a time and nothing else. Only ask what a single
+picture can answer: text, logos, colors, objects. Never ask about sound, music, beats,
+motion, timing or pacing. Name the frame in the question ("first-second frame",
+"last-second frame", or "this frame").
+
+Assumptions: list every gap you filled in because the mission was vague (format, language,
+market, duration, audio). Ordinary unknowns go here, stated as the choice you made.
+
+Escalations stop the whole flight and page a human, so they are rare. Escalate ONLY when
+building would require a decision an agent must not make: the brand card has no palette
+or no brand name, or the mission asks for a health, medical or legal claim. Otherwise
+"escalations" is an empty list.
 Use each check's argument names exactly as listed, numbers as numbers. Every id must be unique.
 Never invent a check name. Return JSON only, no prose, no code fences:
 {"flight_plan":[{"id":str,"check":str,"args":{},"why":str}],
@@ -48,6 +69,7 @@ def run(mission: str, brand: Brand, research: dict[str, Any], tel: Telemetry) ->
     plan = llm.call_json("spec", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}])
     plan.setdefault("assumptions", [])
     plan.setdefault("escalations", [])
+    plan["escalations"] += [e for e in _card_escalations(brand) if e not in plan["escalations"]]
     plan["flight_plan"] = [p for p in plan.get("flight_plan", []) if _valid(p)]
     tel.set(flight_plan=plan["flight_plan"], assumptions=plan["assumptions"],
             escalations=plan["escalations"], spec_locked=True)
@@ -59,6 +81,21 @@ def run(mission: str, brand: Brand, research: dict[str, Any], tel: Telemetry) ->
     for e in plan["escalations"]:
         tel.emit("spec", "escalation", {"text": e})
     return plan
+
+
+def _card_escalations(brand: Brand) -> list[str]:
+    """Deterministic backstop: some brand card gaps always page a human, whatever the model says."""
+    from .arbiter import HUMAN_ONLY
+
+    out = []
+    if not (brand.primary_hex and brand.secondary_hex):
+        out.append("Brand card has no palette; an agent must not pick brand colors.")
+    for line in brand.must_haves + brand.never:
+        hit = next((w for w in HUMAN_ONLY if w in line.lower()), None)
+        # "never: health claims" is a rule we enforce, not a gap; only must_haves can raise it.
+        if hit and line in brand.must_haves:
+            out.append(f"Brand card says '{line}'; needs a human decision ({hit}).")
+    return out
 
 
 ARGS = {
