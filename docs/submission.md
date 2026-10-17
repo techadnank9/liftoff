@@ -2,15 +2,11 @@
 
 ## Project Description
 
-Liftoff makes launch videos for a brand and proves each one is ready to post before a person ever sees it.
+Liftoff makes launch videos for your brand, and checks them before you see them.
 
-Paste a brand's website. Liftoff reads the site for the brand's name, colours and tone, then pulls this month's viral short videos in its category (100K+ views, last 30 days) to see what is working right now. Before making anything, it writes a quality checklist for this launch: the right length and shape, the logo on screen for at least 3 seconds, text readable on a phone (WCAG contrast 4.5:1), a hook in the first second, ending on the brand name, no competitor logos, no health claims. Then it makes three videos and an independent checker measures every one against that list. A video that misses is sent back with exactly what failed ("logo on screen 2.25s, needs 3s") and fixed, until it passes or is dropped after three tries. A final reviewer that sees only the brief and the frames confirms each video does what was asked.
+Paste your website. Liftoff learns your brand (name, colours, tone), looks at what's going viral in your category this month, and writes down what "good" means for your launch, like your logo staying on screen long enough and text you can actually read on a phone. Then it makes three videos and checks each one. If a video misses, it fixes it and checks again, and it learns from its own mistakes so the next launch gets it right sooner.
 
-The problem: AI can generate content endlessly, but nobody checks whether it is actually done. Brand rules get broken, text is unreadable, logos flash by, and a human has to review everything. Liftoff writes its own definition of done first, verifies against it with measurements and a different model family from the one that made the video, and only asks a human when an agent must not decide (for example, a brand with no colours on its site).
-
-It also improves itself: after each batch of launches it turns its own failures into rules and keeps a rule only if it raises first-try passes on briefs it has never seen. In a real run, first-try passes on unseen briefs went from 0% to 50%, with overall passes holding at 100%.
-
-Real results: poppi (from drinkpoppi.com) 3 of 3 videos ready to post, 0 times a human was needed; the fictional Fizz demo, 3 of 3.
+For poppi, all three videos passed without a human stepping in.
 
 ## Public GitHub Repository
 
