@@ -21,7 +21,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import llm, motion, playbook_files
+from . import footage, llm, motion, playbook_files
 from .brand import Brand, hex_to_rgb
 from .telemetry import Telemetry
 
@@ -33,11 +33,13 @@ pattern list from research, propose exactly {n} short vertical video directions.
 Each must be buildable from: a hook line (<= 6 words), a body line (<= 8 words),
 an end_card line (<= 5 words, must include the brand name), duration_s (6 to 15),
 logo_seconds (how long the end card with the logo badge holds), bg ("primary"|"secondary"),
-and the pattern tag it draws from. Nothing on the brand card's "never" list may appear in any
+the pattern tag it draws from, and footage_query: a 3 to 6 word stock video search for the real
+scene under the words (people, place, action, e.g. "friends laughing street food stall"), never a
+brand or product name, never a logo. Nothing on the brand card's "never" list may appear in any
 line: for "health claims" that means no wellness, gut, digestion, immunity, sugar or "good for you"
 claims, even if the brand's own website makes them. Return JSON only:
 {{"directions":[{{"id":"A","name":str,"pattern":str,"hook":str,"body":str,"end_card":str,
- "duration_s":int,"logo_seconds":float,"bg":str,"notes":str}}]}}"""
+ "duration_s":int,"logo_seconds":float,"bg":str,"footage_query":str,"notes":str}}]}}"""
 
 FIX_SYSTEM = """You are the Director. A vehicle failed verification. You get the direction
 JSON and the failing checks with measured values. Return ONLY the JSON fields to change
@@ -51,7 +53,9 @@ change a field. The levers the renderer obeys:
   "end_card" so no line says it.
 - background palette off: set "bg" to "primary" or "secondary".
 - duration out of range: set "duration_s" inside the range.
-- hook, end card or wording problems: rewrite "hook", "body" or "end_card"."""
+- hook, end card or wording problems: rewrite "hook", "body" or "end_card".
+- another brand's logo or anything forbidden showing in the scene: set a different
+  "footage_query" (a different scene), so a new real clip is used."""
 
 
 def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
@@ -77,6 +81,10 @@ def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
         d["duration_s"] = int(max(6, min(15, d.get("duration_s", 9))))
         d["logo_seconds"] = float(d.get("logo_seconds", 3.5))
         d.setdefault("bg", "primary")
+        d["footage"] = footage.find(str(d.get("footage_query", "")), d["duration_s"] - d["logo_seconds"])
+        if d["footage"]:
+            tel.emit("director", "footage", {"query": d["footage"]["query"], "credit": d["footage"]["credit"]},
+                     vehicle=d["id"])
     if plant_failure and dirs:
         # Demo move: make vehicle A miss the logo threshold so the verifier catches it live.
         dirs[0]["logo_seconds"] = min(dirs[0]["logo_seconds"], 2.4)
@@ -106,6 +114,13 @@ def fix(direction: dict[str, Any], failing: list[dict[str, Any]], tel: Telemetry
     new = {**direction, **patch}
     new["duration_s"] = int(max(6, min(15, new["duration_s"])))
     new["logo_seconds"] = float(min(new["logo_seconds"], new["duration_s"] - HOOK_S - 0.5))
+    if new.get("footage") or new.get("footage_query"):
+        # A new scene search, or a clip that showed something it shouldn't: fetch a different clip.
+        need = new["duration_s"] - new["logo_seconds"]
+        clip_failed = any(f.get("check") == "vision_no" for f in failing)  # something showed that must not
+        if patch.get("footage_query") or clip_failed or not new.get("footage"):
+            old = {new["footage"]["id"]} if new.get("footage") else set()
+            new["footage"] = footage.find(str(new.get("footage_query", "")), need, avoid=old) or new.get("footage")
     tel.emit("director", "fix", {"patch": patch}, vehicle=direction["id"])
     return new
 

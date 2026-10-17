@@ -164,6 +164,29 @@ def kinetic(img: Image.Image, text: str, size: int, color, y_center: int, t: flo
         y += lh
 
 
+PANEL_H = int(H * 0.45)
+
+
+def footage_frames(clip: dict | None, seconds: float, out_dir: Path) -> list[Path]:
+    """Frames of the real clip, scaled and cropped to fill the area under the brand panel."""
+    import subprocess
+
+    if not clip or not Path(clip.get("path", "")).exists():
+        return []
+    d = Path(out_dir).parent / (Path(out_dir).name + "_clip")
+    d.mkdir(parents=True, exist_ok=True)
+    for old in d.glob("c_*.png"):
+        old.unlink()
+    h = H - PANEL_H
+    vf = f"fps={FPS},scale={W}:{h}:force_original_aspect_ratio=increase,crop={W}:{h}"
+    try:
+        subprocess.run(["ffmpeg", "-y", "-loglevel", "error", "-t", f"{seconds + 0.2:.2f}", "-i", clip["path"],
+                        "-vf", vf, str(d / "c_%04d.png")], check=True, timeout=120)
+    except Exception:  # noqa: BLE001
+        return []
+    return sorted(d.glob("c_*.png"))
+
+
 def frames(direction: dict, brand, out_dir: Path) -> int:
     """Render every frame of one vehicle into out_dir as f_0000.png... Returns the frame count."""
     bg_hex = brand.primary_hex if direction.get("bg") == "primary" else brand.secondary_hex
@@ -184,10 +207,34 @@ def frames(direction: dict, brand, out_dir: Path) -> int:
     end_start = dur - logo_s
     speed = 0.55 if slow else 1.0
 
+    clip_frames = footage_frames(direction.get("footage"), end_start, out_dir) if direction.get("footage") else []
+    if clip_frames:
+        panel = Image.new("RGB", (W, H), color)  # flat brand colour behind the words (top 45%)
+        small_can = lit_can(Image.open(brand.can_path).convert("RGBA"), 250)
+
     for i in range(n):
         t = i / FPS
         img = bg.copy()
-        if t < end_start:
+        if t < end_start and clip_frames:
+            # "Text on top, real video below": the common Reels/TikTok ad format. The words sit on
+            # flat brand colour, so readability and brand-colour checks measure the real thing.
+            img = panel.copy()
+            fr = clip_frames[min(i, len(clip_frames) - 1)]
+            img.paste(Image.open(fr).convert("RGB"), (0, PANEL_H))
+            # product in the corner of the real scene, gently floating
+            fy = int(math.sin(t * 2.0) * 5)
+            pop = ease_out_back(t / 0.5, 1.4)
+            if pop > 0.05:
+                c = small_can if pop >= 0.999 else small_can.resize(
+                    (max(1, int(small_can.width * pop)), max(1, int(small_can.height * pop))), Image.BILINEAR)
+                img.paste(c, (W - c.width - 6, H - c.height - 10 + fy), c)
+            if t < HOOK_S:
+                kinetic(img, direction["hook"], 66, fg, PANEL_H // 2 + 10, t)
+            else:
+                kinetic(img, direction["body"], 54, fg, PANEL_H // 2 + 10, t - HOOK_S, stagger=0.06)
+            if 0 <= t - HOOK_S < 2 / FPS:
+                img = Image.blend(img, Image.new("RGB", (W, H), (255, 255, 255)), 0.2)
+        elif t < end_start:
             # product: drop in with a bounce, then float and slowly push in
             drop = ease_out_back(t / (0.9 if slow else 0.6), 1.3)
             push = 1 + 0.07 * ease_out(t / max(1.0, end_start))

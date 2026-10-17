@@ -343,6 +343,14 @@ def miss_sentence(r: dict, plan_by_id: dict) -> str:
     return title
 
 
+def footage_credit(d: dict) -> str:
+    f = d.get("footage")
+    if not f:
+        return ""
+    return (f'<div class="why" style="font-size:11px;margin-top:8px;color:var(--hint)">Footage: '
+            f'<a href="{safe(f.get("url", ""))}" target="_blank" style="color:var(--hint)">{safe(f.get("credit", ""))} on Pexels</a></div>')
+
+
 def try_trail(attempts: list[dict], plan_by_id: dict) -> str:
     """The self-checking loop, visible: each try, what failed and by how much, then the fix."""
     if not attempts:
@@ -535,7 +543,8 @@ with t_videos:
                     f'<b>{safe(vid)}. {safe(v.get("name", ""))}</b>'
                     f'<div class="sub">“{safe(d.get("hook", ""))}”<br>{safe(d.get("duration_s", "?"))}s, vertical, '
                     f'{safe(humanize_tag(v.get("pattern", "")).lower())}</div>{status_lines(v, plan_by_id)}'
-                    f'{try_trail(attempts, plan_by_id)}</div>',
+                    f'{try_trail(attempts, plan_by_id)}'
+                    f'{footage_credit(d)}</div>',
                     unsafe_allow_html=True)
                 if attempts:
                     mp4 = video_path(attempts[-1]["mp4"])

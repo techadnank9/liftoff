@@ -6,3 +6,4 @@ __pycache__/
 research_cache/
 assets/*
 !assets/fizz/
+footage_cache/
