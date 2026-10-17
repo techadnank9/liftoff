@@ -94,7 +94,12 @@ def run(brand: Brand, tel: Telemetry) -> dict[str, Any]:
     from . import llm
 
     data = None
-    if os.environ.get("LIFTOFF_LIVE_RESEARCH", "0") == "1" and not llm.MOCK:
+    cache = CACHE / f"{brand.name.lower()}.json"
+    if os.environ.get("LIFTOFF_RESEARCH_CACHED") == "1" and cache.exists() and not llm.MOCK:
+        # Batch runs (playbook evals) reuse one live search instead of repeating it per flight.
+        data = {**json.loads(cache.read_text()), "live": "cached"}
+        tel.emit("scout", "cache", {"posts": len(data["trend_wall"])})
+    elif os.environ.get("LIFTOFF_LIVE_RESEARCH", "0") == "1" and not llm.MOCK:
         data = _live(brand, tel)
     if data is None:
         data = FIXTURE

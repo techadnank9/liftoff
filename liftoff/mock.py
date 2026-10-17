@@ -63,10 +63,18 @@ FIX_FIXTURE = {"logo_seconds": 3.4, "notes": "Extended logo hold on end card to 
 GOALCHECK_FIXTURE = {"satisfies_goal": True,
                      "reason": "A 9s vertical spot with a hook in the first second, the Fizz name held for over 3s, and an end card. Matches 'launch video for Fizz cola, bold, vertical feeds'."}
 
+PLAYBOOK_FIXTURE = {
+    "director": ["Draft logo_seconds at 3.4 or more; the flight plan asks for 3.0 and sampling loses about 0.25s.",
+                 "Use bg secondary for any direction with white overlay text; white on primary measures 3.8 against 4.5."],
+    "spec": ["Keep logo_seconds_at_least at 3.0 and text_contrast_at_least at 4.5; both caught real misses."],
+    "summary": "Most holds were logo time and contrast on the primary background.",
+}
+
 ARBITER_FIXTURE = {"decision": "GO", "reason": "All checks pass; nothing left to fix."}
 
 
 def respond(role: str, messages: list[dict[str, Any]]) -> str:
+    system = messages[0]["content"] if messages and messages[0].get("role") == "system" else ""
     last = messages[-1]["content"]
     text = last if isinstance(last, str) else " ".join(p.get("text", "") for p in last if isinstance(p, dict))
     low = text.lower()
@@ -81,6 +89,13 @@ def respond(role: str, messages: list[dict[str, Any]]) -> str:
             if "text_legible" in low or "contrast" in low:
                 patch["bg"] = "secondary"
             return json.dumps(patch)
+        if "PLAYBOOK" in str(system) and "logo_seconds" in str(system):
+            # A Director that read the playbook drafts above the thresholds it learned.
+            fixed = json.loads(json.dumps(DIRECTIONS_FIXTURE))
+            for d in fixed["directions"]:
+                d["logo_seconds"] = max(d["logo_seconds"], 3.4)
+                d["bg"] = "secondary"
+            return json.dumps(fixed)
         return json.dumps(DIRECTIONS_FIXTURE)
     if role == "verifier_vision":
         # The vision verifier answers yes/no. In mock we answer the way a good
@@ -92,6 +107,8 @@ def respond(role: str, messages: list[dict[str, Any]]) -> str:
         return json.dumps(GOALCHECK_FIXTURE)
     if role == "arbiter":
         return json.dumps(ARBITER_FIXTURE)
-    if role in ("scout", "librarian", "playbook"):
+    if role == "playbook":
+        return json.dumps(PLAYBOOK_FIXTURE)
+    if role in ("scout", "librarian"):
         return json.dumps({"note": "mock"})
     return "{}"

@@ -21,7 +21,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import llm
+from . import llm, playbook_files
 from .brand import Brand, hex_to_rgb
 from .telemetry import Telemetry
 
@@ -55,7 +55,7 @@ def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
     tel.emit("director", "plan_start", {"n": n})
     user = (f"BRAND CARD:\n{json.dumps(brand.to_dict(), indent=1)}\n\n"
             f"PATTERNS:\n{json.dumps(research.get('patterns', []), indent=1)}\n\nPropose {n} directions.")
-    out = llm.call_json("director", [{"role": "system", "content": SYSTEM.format(n=n)},
+    out = llm.call_json("director", [{"role": "system", "content": SYSTEM.format(n=n) + playbook_files.read("director")},
                                      {"role": "user", "content": user}])
     dirs = out.get("directions", [])[:n]
     for i, d in enumerate(dirs):
@@ -73,11 +73,21 @@ def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
     return dirs
 
 
-def fix(direction: dict[str, Any], failing: list[dict[str, Any]], tel: Telemetry) -> dict[str, Any]:
+def fix(direction: dict[str, Any], failing: list[dict[str, Any]], tel: Telemetry,
+        switch_strategy: bool = False) -> dict[str, Any]:
     user = (f"DIRECTION:\n{json.dumps(direction, indent=1)}\n\nFAILING CHECKS:\n{json.dumps(failing, indent=1)}\n\n"
             "Return only the fields to change so these checks pass.")
-    patch = llm.call_json("director", [{"role": "system", "content": FIX_SYSTEM},
-                                       {"role": "user", "content": user}])
+    if switch_strategy:
+        # The arbiter saw the same check fail with the same measurement twice: the last fix
+        # did nothing. Push for a different lever and loosen sampling so we don't repeat it.
+        user += ("\n\nLOOP DETECTED: your last fix left these measurements unchanged. Do not repeat it. "
+                 "Change a different field than last time (another bg, rewrite hook/body/end_card, "
+                 "or a different pattern), and say which lever you switched to in notes.")
+        tel.emit("director", "strategy_switch", {"failing": [f.get("id") for f in failing]},
+                 vehicle=direction["id"])
+    patch = llm.call_json("director", [{"role": "system", "content": FIX_SYSTEM + playbook_files.read("director")},
+                                       {"role": "user", "content": user}],
+                          temperature=0.8 if switch_strategy else 0.2)
     patch = {k: v for k, v in patch.items() if k in direction or k in ("notes",)}
     new = {**direction, **patch}
     new["duration_s"] = int(max(6, min(15, new["duration_s"])))

@@ -394,6 +394,31 @@ if vehicles:
                     st.markdown(f'<div class="lf-note {"gocard" if gc["satisfies_goal"] else ""}"><b>{word}</b> '
                                 f'{safe(gc["reason"])}</div>', unsafe_allow_html=True)
 
+# ---------------- Version N+1: the playbook loop ----------------
+report_path = RUNS / "playbook" / "report.json"
+if report_path.exists():
+    rep = json.loads(report_path.read_text())
+    fl = rep.get("flights", [])
+    if fl:
+        st.markdown('<div class="lf-sec">Version N+1</div>', unsafe_allow_html=True)
+        st.caption("The team reviews its own holds, rewrites its playbook, and keeps the change only if "
+                   "held-out missions clear on the first attempt more often.")
+        bars = "".join(
+            f'<div class="lf-row"><div>Flight {f["flight"]}'
+            f'<div class="why">{"baseline" if f["flight"] == 1 else ("kept" if f["kept"] else "reverted")}'
+            f'{" · " + safe(f.get("summary", "")) if f.get("summary") else ""}</div></div>'
+            f'<div class="lf-num"><b class="{"ok" if f["kept"] else "idle"}">'
+            f'{f["held_out"]["first_attempt_go_rate"]:.0%}</b><small>first attempt GO, held out</small></div></div>'
+            for f in fl
+        )
+        kept = next((f["playbook"] for f in reversed(fl) if f["kept"]), {})
+        rules = "".join(f'<div class="lf-row"><div><span class="why">{safe(role)}</span> {safe(line.lstrip("- "))}</div></div>'
+                        for role, text in kept.items() for line in text.splitlines() if line.strip())
+        c1, c2 = st.columns([1, 1.25], gap="large")
+        c1.markdown(f'<div class="lf-card">{bars}</div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="lf-card">{rules or "<div class=lf-row>No rules kept yet</div>"}</div>',
+                    unsafe_allow_html=True)
+
 # ---------------- raw telemetry ----------------
 with st.expander("Telemetry"):
     rows = "".join(

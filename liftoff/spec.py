@@ -10,7 +10,7 @@ from __future__ import annotations
 import json
 from typing import Any
 
-from . import llm
+from . import llm, playbook_files
 from .brand import Brand
 from .telemetry import Telemetry
 
@@ -66,7 +66,8 @@ def run(mission: str, brand: Brand, research: dict[str, Any], tel: Telemetry) ->
         f"RESEARCH (patterns, stats, sources):\n{json.dumps({k: research.get(k) for k in ('patterns', 'stats', 'sources')}, indent=1)}\n\n"
         f"{CHECK_VOCAB}\nWrite the flight plan."
     )
-    plan = llm.call_json("spec", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}])
+    plan = llm.call_json("spec", [{"role": "system", "content": SYSTEM + playbook_files.read("spec")},
+                                  {"role": "user", "content": user}])
     plan.setdefault("assumptions", [])
     plan.setdefault("escalations", [])
     plan["escalations"] += [e for e in _card_escalations(brand) if e not in plan["escalations"]]

@@ -22,14 +22,15 @@ RUNS = ROOT / "runs"
 
 
 def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_failure: bool = True,
-           run_dir: Path | None = None) -> Path:
+           run_dir: Path | None = None, set_latest: bool = True) -> Path:
     run_dir = run_dir or RUNS / time.strftime("%Y%m%d-%H%M%S")
     tel = Telemetry(run_dir)
-    (RUNS / "latest").unlink(missing_ok=True)
-    try:
-        (RUNS / "latest").symlink_to(run_dir.name)
-    except OSError:
-        (RUNS / "latest.txt").write_text(str(run_dir))
+    if set_latest:
+        (RUNS / "latest").unlink(missing_ok=True)
+        try:
+            (RUNS / "latest").symlink_to(run_dir.relative_to(RUNS))
+        except (OSError, ValueError):
+            (RUNS / "latest.txt").write_text(str(run_dir))
 
     brand = load_brand(brand_name)
     tel.set(mission=mission, brand=brand.to_dict(), phase="research")
@@ -66,7 +67,7 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
             if decision["decision"] in ("GO", "SCRUB", "CALL"):
                 break
             # HOLD: Director fixes and we go again
-            d = director.fix(d, decision["failing"], tel)
+            d = director.fix(d, decision["failing"], tel, switch_strategy=decision.get("switch_strategy", False))
             tel.vehicle(vid, direction=d, status="building")
 
         if decision["decision"] == "GO":
