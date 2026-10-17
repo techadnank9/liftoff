@@ -272,7 +272,8 @@ flowchart LR
 | `librarian`, `scout`, `verifier_text` | `nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B` | Cheap, fast classification of text |
 | `verifier_vision` | `nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B` | The verifier's eyes. One frame per question |
 | `goalcheck` | `nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B` | Needs 3 images in one prompt. Super is text only on Crusoe; Super VL accepts one image |
-| `director` | `deepseek-ai/Deepseek-V4-Flash` | **A different family on purpose**, so the verifier can't share the builder's blind spots |
+| `director` | `deepseek-ai/DeepSeek-V4-Pro` | Writes the creative. Won an 8-model bake-off on Crusoe for copy plus reliable JSON. **A different family on purpose**, so the verifier can't share its blind spots |
+| `director_fix` | `deepseek-ai/Deepseek-V4-Flash` | Mechanical field patches after a HOLD, about 2s; also the fallback if the creative reply is unusable |
 
 > Model names live in exactly one place, `llm.MODELS`. `scripts/check_models.py` verifies them against your account.
 
@@ -385,7 +386,7 @@ flowchart LR
 
 ---
 
-## 📈 Version N+1: the team gets better
+## 📈 It learns from every launch (Version N+1)
 
 After a flight, the team reviews itself. A playbook agent reads every HOLD (what failed, the measured number, the fix that cleared it) and every goal re-check failure, then writes rules for the Director and the Spec agent. The change is **kept only if held-out missions improve.**
 

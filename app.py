@@ -458,29 +458,43 @@ if vehicles:
                     st.markdown(f'<div class="lf-note {"gocard" if gc["satisfies_goal"] else ""}"><b>{word}</b> '
                                 f'{safe(gc["reason"])}</div>', unsafe_allow_html=True)
 
-# ---------------- Version N+1: the playbook loop ----------------
+# ---------------- learning: the playbook loop (liftoff/playbook.py) ----------------
 report_path = RUNS / "playbook" / "report.json"
 if report_path.exists():
     rep = json.loads(report_path.read_text())
     fl = rep.get("flights", [])
     if fl:
-        st.markdown('<div class="lf-sec">Version N+1</div>', unsafe_allow_html=True)
-        st.caption("The team reviews its own holds, rewrites its playbook, and keeps the change only if "
-                   "held-out missions clear on the first attempt more often.")
-        bars = "".join(
-            f'<div class="lf-row"><div>Flight {f["flight"]}'
-            f'<div class="why">{"baseline" if f["flight"] == 1 else ("kept" if f["kept"] else "reverted")}'
-            f'{" · " + safe(f.get("summary", "")) if f.get("summary") else ""}</div></div>'
-            f'<div class="lf-num"><b class="{"ok" if f["kept"] else "idle"}">'
-            f'{f["held_out"]["first_attempt_go_rate"]:.0%}</b><small>first attempt GO, held out</small></div></div>'
-            for f in fl
-        )
+        n_missions = (rep.get("missions_per_split") or 6)
+        st.markdown('<div class="lf-sec">It learns from every launch</div>', unsafe_allow_html=True)
+        st.caption(
+            "Every time a video is sent back, Liftoff records what failed, the number it measured, and the fix "
+            "that made it pass. After a batch of launches it turns those into rules for itself, like \"keep the "
+            "logo on screen at least 3.25 seconds\". Before trusting a rule it tries it on launch briefs it has "
+            "never seen. If more videos pass on the first try, the rule stays. If not, it is thrown away.")
+
+        def label(f: dict) -> tuple[str, str]:
+            if f["flight"] == 1:
+                return "Before learning", "no rules yet"
+            if f["kept"]:
+                return f"After learning round {f['flight'] - 1}", "rules kept: more videos passed first time"
+            return f"After learning round {f['flight'] - 1}", "rules thrown away: no improvement"
+
+        rows = ""
+        for f in fl:
+            title, sub = label(f)
+            ho = f["held_out"]
+            rows += (f'<div class="lf-row"><div>{safe(title)}<div class="why">{safe(sub)}</div></div>'
+                     f'<div class="lf-num"><b class="{"ok" if f["kept"] and f["flight"] > 1 else "idle"}">'
+                     f'{ho["first_attempt_go_rate"]:.0%}</b><small>passed on the first try</small></div></div>')
         kept = next((f["playbook"] for f in reversed(fl) if f["kept"]), {})
-        rules = "".join(f'<div class="lf-row"><div><span class="why">{safe(role)}</span> {safe(line.lstrip("- "))}</div></div>'
+        who = {"director": "The video maker follows", "spec": "The checklist writer follows"}
+        rules = "".join(f'<div class="lf-row"><div><div class="why">{safe(who.get(role, role))}</div>{safe(line.lstrip("- "))}</div></div>'
                         for role, text in kept.items() for line in text.splitlines() if line.strip())
         c1, c2 = st.columns([1, 1.25], gap="large")
-        c1.markdown(f'<div class="lf-card">{bars}</div>', unsafe_allow_html=True)
-        c2.markdown(f'<div class="lf-card">{rules or "<div class=lf-row>No rules kept yet</div>"}</div>',
+        c1.markdown(f'<div class="lf-card"><div class="why" style="padding:10px 0 4px">Tested on new launch briefs '
+                    f'it had never seen</div>{rows}</div>', unsafe_allow_html=True)
+        c2.markdown(f'<div class="lf-card"><div class="why" style="padding:10px 0 4px">Rules it wrote for itself '
+                    f'and kept</div>{rules or "<div class=lf-row>No rules kept yet</div>"}</div>',
                     unsafe_allow_html=True)
 
 # ---------------- raw telemetry ----------------

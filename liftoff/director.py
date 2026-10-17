@@ -21,7 +21,7 @@ from typing import Any
 
 from PIL import Image, ImageDraw, ImageFont
 
-from . import llm, playbook_files
+from . import llm, motion, playbook_files
 from .brand import Brand, hex_to_rgb
 from .telemetry import Telemetry
 
@@ -57,8 +57,16 @@ def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
             f" a product, a setting or a length, into the hook, body or end card): {mission}\n\n"
             f"BRAND CARD:\n{json.dumps(brand.to_dict(), indent=1)}\n\n"
             f"PATTERNS:\n{json.dumps(research.get('patterns', []), indent=1)}\n\nPropose {n} directions.")
-    out = llm.call_json("director", [{"role": "system", "content": SYSTEM.format(n=n) + playbook_files.read("director")},
-                                     {"role": "user", "content": user}])
+    msgs = [{"role": "system", "content": SYSTEM.format(n=n) + playbook_files.read("director")},
+            {"role": "user", "content": user}]
+    try:
+        out = llm.call_json("director", msgs, temperature=0.7)
+        if len(out.get("directions", [])) < n:
+            raise ValueError(f"only {len(out.get('directions', []))} directions")
+    except Exception as e:  # noqa: BLE001
+        # A flight never dies on one bad creative reply: the fast model takes over.
+        tel.emit("director", "fallback", {"error": str(e)[:160], "model": llm.MODELS["director_fix"]})
+        out = llm.call_json("director_fix", msgs)
     dirs = out.get("directions", [])[:n]
     for i, d in enumerate(dirs):
         d.setdefault("id", "ABCDEFG"[i])
@@ -87,7 +95,7 @@ def fix(direction: dict[str, Any], failing: list[dict[str, Any]], tel: Telemetry
                  "or a different pattern), and say which lever you switched to in notes.")
         tel.emit("director", "strategy_switch", {"failing": [f.get("id") for f in failing]},
                  vehicle=direction["id"])
-    patch = llm.call_json("director", [{"role": "system", "content": FIX_SYSTEM + playbook_files.read("director")},
+    patch = llm.call_json("director_fix", [{"role": "system", "content": FIX_SYSTEM + playbook_files.read("director")},
                                        {"role": "user", "content": user}],
                           temperature=0.8 if switch_strategy else 0.2)
     patch = {k: v for k, v in patch.items() if k in direction or k in ("notes",)}
@@ -144,38 +152,14 @@ def render(direction: dict[str, Any], brand: Brand, out_dir: Path, tel: Telemetr
     frames_dir.mkdir(parents=True)
     mp4 = out_dir / f"vehicle_{vid}_a{attempt}.mp4"
 
-    bg_hex = brand.primary_hex if direction.get("bg") == "primary" else brand.secondary_hex
-    bg = hex_to_rgb(bg_hex)
-    fg = hex_to_rgb(brand.text_hex)
-    can = Image.open(brand.can_path).convert("RGBA")
-    can = can.resize((int(can.width * (420 / can.height)), 420))
-    logo = Image.open(brand.logo_path).convert("RGBA")
+    n_frames = motion.frames(direction, brand, frames_dir)
+    dur, logo_s = direction["duration_s"], direction["logo_seconds"]
 
-    dur = direction["duration_s"]
-    logo_s = direction["logo_seconds"]
-    n_frames = int(dur * FPS)
-    end_start = dur - logo_s
-
-    for i in range(n_frames):
-        t = i / FPS
-        img = Image.new("RGB", (W, H), bg)
-        if t < end_start:
-            # can with a slow rise
-            rise = int(40 * min(1.0, t / 2.0))
-            img.paste(can, ((W - can.width) // 2, H - can.height - 60 - rise), can)
-            if t < HOOK_S:
-                _text_block(img, direction["hook"], 64, fg, 300)
-            else:
-                _text_block(img, direction["body"], 48, fg, 300)
-        else:
-            img.paste(logo, ((W - logo.width) // 2, 320), logo)
-            _text_block(img, direction["end_card"], 44, fg, 320 + logo.height + 80)
-        img.save(frames_dir / f"f_{i:04d}.png")
-
-    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(FPS),
-           "-i", str(frames_dir / "f_%04d.png"), "-c:v", "libx264", "-pix_fmt", "yuv420p",
+    cmd = ["ffmpeg", "-y", "-loglevel", "error", "-framerate", str(motion.FPS),
+           "-i", str(frames_dir / "f_%04d.png"), "-c:v", "libx264", "-preset", "veryfast", "-crf", "18",
+           "-pix_fmt", "yuv420p",
            "-movflags", "+faststart", str(mp4)]
     subprocess.run(cmd, check=True)
     tel.emit("director", "rendered", {"mp4": mp4.name, "frames": n_frames, "duration_s": dur,
                                       "logo_seconds": logo_s}, vehicle=vid)
-    return {"mp4": str(mp4), "frames_dir": str(frames_dir), "fps": FPS}
+    return {"mp4": str(mp4), "frames_dir": str(frames_dir), "fps": motion.FPS}

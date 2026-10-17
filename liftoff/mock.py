@@ -80,7 +80,7 @@ def respond(role: str, messages: list[dict[str, Any]]) -> str:
     low = text.lower()
     if role == "spec":
         return json.dumps(SPEC_FIXTURE)
-    if role == "director":
+    if role in ("director", "director_fix"):
         if "failing checks" in low and "fields to change" in low:
             # Repair based on which checks failed, the way a real Director would.
             patch: dict[str, Any] = {"notes": "mock fix"}

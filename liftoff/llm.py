@@ -53,7 +53,11 @@ MODELS: dict[str, str] = {
     "goalcheck": "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
     "verifier_text": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "verifier_vision": "nvidia/Nemotron-3-Nano-Omni-Reasoning-30B-A3B",
-    "director": "deepseek-ai/Deepseek-V4-Flash",
+    # Director writes the creative. Bake-off on Crusoe (8 models): GLM-5.3 had the best copy but
+    # returned valid JSON only half the time; DeepSeek V4 Pro was close on copy and reliable.
+    # Fixes are mechanical field patches, so they use the fast Flash. Neither is Nemotron.
+    "director": "deepseek-ai/DeepSeek-V4-Pro",
+    "director_fix": "deepseek-ai/Deepseek-V4-Flash",
     "librarian": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "brand": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
     "scout": "nvidia/NVIDIA-Nemotron-3-Nano-30B-A3B",
