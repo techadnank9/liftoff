@@ -1,0 +1,24 @@
+{
+  "name": "Fizz",
+  "category": "cola",
+  "market": "US",
+  "primary_hex": "#D85A30",
+  "secondary_hex": "#26215C",
+  "text_hex": "#FFFFFF",
+  "tone": [
+    "bold",
+    "playful",
+    "direct"
+  ],
+  "logo_path": "/Users/adnan/Documents/liftoff/assets/fizz/logo.png",
+  "can_path": "/Users/adnan/Documents/liftoff/assets/fizz/can.png",
+  "must_haves": [
+    "brand name visible",
+    "vertical 9:16",
+    "under 15 seconds"
+  ],
+  "never": [
+    "health claims",
+    "competitor logos"
+  ]
+}

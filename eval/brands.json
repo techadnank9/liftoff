@@ -1,0 +1,27 @@
+{
+  "train": [
+    "Launch video for Fizz cola, bold, for vertical feeds",
+    "Teaser for Fizz cola, under 8 seconds, sound-on feel",
+    "Fizz cola taste test spot, street setting, vertical",
+    "Countdown spot for Fizz launching in 12 cities Friday",
+    "Fizz cola end-of-summer spot, calm tone, vertical",
+    "Fizz zero sugar announcement, direct, 10 seconds",
+    "Fizz cola spot for a cricket match day audience, vertical",
+    "Fizz for office afternoons, playful, no voiceover",
+    "Fizz cola spot that lands the name in the first second",
+    "Fizz vertical ad for a 4th of July weekend"
+  ],
+  "held_out": [
+    "Fizz cola launch spot for Instagram Reels, bold",
+    "Fizz ice cold, ASMR style, under 9 seconds",
+    "Fizz cola spot for a music festival weekend, vertical",
+    "Announce Fizz now in 24-packs, direct, 12 seconds",
+    "Fizz cola spot for college move-in week",
+    "Fizz spot for late-night gaming sessions, vertical",
+    "Fizz cola spot, minimal text, let the can carry it",
+    "Fizz launch spot in two colors only, vertical",
+    "Fizz cola spot for a rainy day, playful",
+    "Fizz spot that explains the swap in one line, vertical"
+  ],
+  "note": "Phase 2: run flights on train, score on held_out, keep a playbook change only if held_out go-rate rises."
+}
