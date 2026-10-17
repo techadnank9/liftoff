@@ -104,6 +104,8 @@ python -m liftoff.playbook --rounds 2 --limit 6   # Version N+1 on held-out miss
 |---|---|
 | `python -m liftoff.run` | One flight. `--mission`, `--brand fizz`, `--vehicles 3`, `--no-plant` (skip the demo's planted failure) |
 | `python -m liftoff.playbook` | Version N+1 loop. `--rounds`, `--limit` missions per split, `--workers`, `--vehicles` |
+| `python -m liftoff.library save runs/<id> --url brand.com` | Save a finished flight to `library/` (SQLite index plus videos). Mission control opens saved flights instantly, and a landing page URL that matches one offers it before flying again |
+| `python scripts/serve_site.py` | The landing page at `localhost:3000`; mission control runs on `8501` |
 | `python scripts/check_models.py` | Lists your Crusoe models and flags any name in `llm.MODELS` that doesn't exist |
 | `python scripts/make_assets.py` | Regenerates `assets/fizz/` (can, logo, brand card) |
 | `streamlit run app.py` | Mission control. Start flights from the sidebar; it tails `runs/latest` |

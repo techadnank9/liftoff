@@ -21,6 +21,7 @@ from pathlib import Path
 import streamlit as st
 import streamlit.components.v1 as components
 
+from liftoff import library
 from liftoff.arbiter import MAX_ATTEMPTS
 
 ROOT = Path(__file__).resolve().parent
@@ -293,36 +294,67 @@ def start_flight(mission: str, brand: str, n: int, plant: bool, mock: bool, bran
 # A brand URL from the landing page (?brand_url=...) prefills the sidebar and offers a one-click flight.
 url_param = (st.query_params.get("brand_url") or "").strip()[:120]
 
-# ---------------- sidebar: launch a flight ----------------
+# ---------------- sidebar: saved flights + launch a flight ----------------
+saved = library.flights()
+saved_labels = {f["slug"]: f'{f["brand"]} ({f["cleared"]}/{f["total"]} cleared)' for f in saved}
+flight_param = (st.query_params.get("flight") or "").strip()
+saved_match = library.find_by_url(url_param) if url_param else None
+
 with st.sidebar:
     st.title("Liftoff")
     st.caption("Your launch video doesn't leave the pad until mission control says go.")
+    options = ["live"] + list(saved_labels)
+    default = flight_param if flight_param in saved_labels else "live"
+    choice = st.selectbox("Show", options, index=options.index(default),
+                          format_func=lambda k: "Latest flight (live)" if k == "live" else f"Saved: {saved_labels[k]}",
+                          help="Saved flights open instantly from the library; no new run, no model calls.")
+    if choice != flight_param and (choice != "live" or flight_param):
+        st.query_params["flight"] = choice if choice != "live" else ""
+    st.divider()
     brand_url = st.text_input("Brand website", url_param, placeholder="yourbrand.com",
                               help="We read the site for name, colours and tone. Leave empty for the Fizz demo.")
     mission = st.text_input("Mission", DEFAULT_MISSION,
                             help="With a website, leave this as is and the mission is written from the brand.")
-    brand_in = "fizz"
     n = st.slider("Directions to build", 1, 5, 3)
     plant = st.checkbox("Plant a failure on direction A (demo)", True)
     mock = st.checkbox("Mock inference (no API key)", os.environ.get("LIFTOFF_MOCK", "0") == "1")
-    if st.button("Start flight", type="primary"):
-        start_flight(mission, brand_in, n, plant, mock, brand_url.strip())
+    if st.button("Start a new flight", type="primary"):
+        st.query_params["flight"] = ""
+        start_flight(mission, "fizz", n, plant, mock, brand_url.strip())
+        st.rerun()
     auto = st.checkbox("Live refresh", True)
-    st.caption("Crusoe Managed Inference. Spec and verifier on Nemotron 3; Director on a different model family.")
+    if saved:
+        st.caption(f"{len(saved)} saved flights. Save one with `python -m liftoff.library save runs/<id>`.")
 
-if url_param and st.session_state.get("launched_for") != url_param:
+# Arriving from the landing page with a website.
+if url_param and st.session_state.get("launched_for") != url_param and choice == "live":
     with st.container(border=True):
-        st.markdown(f"#### Build a launch video for **{safe(url_param)}**")
-        st.caption("Liftoff reads the site for its name, colours and tone, researches its category live, writes the "
-                   "definition of done, then builds and proves three directions. About two minutes.")
-        if st.button(f"Launch a flight for {url_param}", type="primary"):
-            st.session_state["launched_for"] = url_param
-            start_flight(DEFAULT_MISSION, "fizz", 3, True, mock, url_param)
-            st.rerun()
+        st.markdown(f"#### Launch videos for **{safe(url_param)}**")
+        if saved_match:
+            st.caption(f"A finished flight for this brand is saved: {saved_match['cleared']} of "
+                       f"{saved_match['total']} videos cleared, {saved_match['human_pings']} human pings. "
+                       "Open it instantly, or fly a fresh one (about two minutes).")
+            c1, c2 = st.columns([1, 1])
+            if c1.button("Open the saved flight", type="primary"):
+                st.query_params["flight"] = saved_match["slug"]
+                st.session_state["launched_for"] = url_param
+                st.rerun()
+            if c2.button("Fly a fresh one"):
+                st.session_state["launched_for"] = url_param
+                start_flight(DEFAULT_MISSION, "fizz", 3, True, mock, url_param)
+                st.rerun()
+        else:
+            st.caption("Liftoff reads the site for its name, colours and tone, researches its category live, writes "
+                       "the definition of done, then builds and proves three videos. About two minutes.")
+            if st.button(f"Launch a flight for {url_param}", type="primary"):
+                st.session_state["launched_for"] = url_param
+                start_flight(DEFAULT_MISSION, "fizz", 3, True, mock, url_param)
+                st.rerun()
 
-run_dir = latest_run_dir()
+is_saved = choice != "live"
+run_dir = library.path(choice) if is_saved else latest_run_dir()
 if not run_dir:
-    st.info("No flights yet. Open the sidebar and start one.")
+    st.info("No flights yet. Paste a website on the left and start one.")
     st.stop()
 
 state, events = load(run_dir)
@@ -334,97 +366,87 @@ brand = state.get("brand") or {}
 res = state.get("research") or {}
 vehicles = state.get("vehicles", {})
 plan_by_id = {p["id"]: p for p in state.get("flight_plan", [])}
-running = state.get("phase") != "done"
+running = state.get("phase") != "done" and not is_saved
+
+
+def video_path(rel: str) -> Path:
+    p = Path(rel)
+    return p if p.is_absolute() else run_dir / p
+
 
 # ---------------- header ----------------
 active = next((vid for vid, v in vehicles.items() if v.get("status") in ("building", "polling", "hold")),
               next(iter(vehicles), None))
 active_round = len(vehicles[active].get("attempts", [])) if active else 0
 category = str(brand.get("category", "")).title()
+round_or_saved = ("Saved flight" if is_saved else f"Round {max(active_round, 1)} of {MAX_ATTEMPTS}")
 st.markdown(
     f'<div class="lf-head"><span class="lf-sq"></span>'
     f'<div class="lf-brand">{safe(brand.get("name", "Brand"))} {safe(category)}</div>'
     f'<div class="lf-pill">{safe(category or "Launch")}, {safe(brand.get("market", ""))} launch</div>'
-    f'<div class="lf-round"><span class="lf-sq sm"></span>Round {max(active_round, 1)} of {MAX_ATTEMPTS}</div></div>'
-    f'<div class="lf-mission">{safe(state.get("mission", ""))}</div>',
+    f'<div class="lf-round"><span class="lf-sq sm"></span>{round_or_saved}</div></div>'
+    f'<div class="lf-mission">{safe(state.get("mission", ""))}</div>'
+    f'<div class="lf-ticker" style="margin-top:0"><span class="lf-dot{" busy" if running else ""}"></span>'
+    f'<span>{safe(ticker_line(events, plan_by_id))}</span>'
+    f'<span class="pings">Human pings: {state.get("human_pings", 0)}</span></div>',
     unsafe_allow_html=True,
 )
 
-# ---------------- top band ----------------
-comps = "".join(
-    f'<div class="lf-comp"><div class="lf-av" style="background:{AVATAR[i % 5][0]};color:{AVATAR[i % 5][1]}">'
-    f'{safe(initials(c["name"]))}'
-    f'{f"<img alt=\"\" src=\"{safe(brand_icon(c))}\">" if res.get("live") and brand_icon(c) else ""}</div><div><b>{safe(c["name"])}</b>'
-    f'<span>{c["videos"]} {"mentions" if res.get("live") else "videos"}</span></div></div>'
-    for i, c in enumerate(res.get("competitors", [])[:3])
-)
-pats = "".join(f'<span class="lf-tag">{safe(humanize_tag(p["tag"]))}</span>' for p in res.get("patterns", [])[:4])
+# ---------------- the output: one card per launch video ----------------
+st.markdown('<div class="lf-sec">Your launch videos</div>', unsafe_allow_html=True)
+st.caption("Each one is measured against the definition of done below before you see it. A held video is "
+           "sent back with the numbers that failed and rebuilt.")
+if not vehicles:
+    st.info("The Director is writing the directions…" if running else "No directions in this flight.")
+else:
+    cols = st.columns(len(vehicles), gap="medium")
+    for col, (vid, v) in zip(cols, vehicles.items()):
+        d = v.get("direction", {})
+        attempts = v.get("attempts", [])
+        with col:
+            st.markdown(
+                f'<div class="lf-dir{" active" if vid == active and running else ""}" style="margin-bottom:10px">'
+                f'<b>{safe(vid)}. {safe(v.get("name", ""))}</b>'
+                f'<div class="sub">“{safe(d.get("hook", ""))}”<br>{safe(d.get("duration_s", "?"))}s, vertical, '
+                f'{safe(humanize_tag(v.get("pattern", "")).lower())}</div>{status_lines(v, plan_by_id)}</div>',
+                unsafe_allow_html=True)
+            if attempts:
+                mp4 = video_path(attempts[-1]["mp4"])
+                if mp4.exists():
+                    # Narrower than the column so a 9:16 video doesn't fill the screen; opening a second
+                    # in shows the ad itself rather than the empty frame before the product drops in.
+                    _, mid, _ = st.columns([0.12, 0.76, 0.12])
+                    with mid:
+                        st.video(str(mp4), start_time=1)
+                with st.expander(f"Checks and history ({len(attempts)} attempt{'s' if len(attempts) > 1 else ''})"):
+                    for prev in attempts[:-1]:
+                        failed = [r for r in prev["verdict"]["results"] if not r["pass"]]
+                        if failed:
+                            ev = " · ".join(f'{r["id"]} {safe(r["measured"])} (needs {r["expected"]})' for r in failed)
+                            st.markdown(f'<div class="lf-note"><b>Attempt {prev["attempt"]}: HOLD.</b> {ev}</div>',
+                                        unsafe_allow_html=True)
+                    rows = "".join(
+                        f'<div class="lf-row"><div class="{"ok" if r["pass"] else "bad"}">'
+                        f'{"Pass" if r["pass"] else "Fail"} · {safe(r["id"])}</div>'
+                        f'<div class="lf-num">{safe(r["measured"])}<small>needs {safe(r["expected"])}</small></div></div>'
+                        for r in attempts[-1]["verdict"]["results"])
+                    st.markdown(f'<div class="lf-card" style="padding:4px 14px">{rows}</div>', unsafe_allow_html=True)
+                    dec, gc = v.get("decision"), v.get("goalcheck")
+                    if dec:
+                        kind = {"GO": "gocard", "CALL": "callcard"}.get(dec["decision"], "")
+                        st.markdown(f'<div class="lf-note {kind}"><b>Arbiter: {safe(dec["decision"])}.</b> '
+                                    f'{safe(dec["reason"])}</div>', unsafe_allow_html=True)
+                    if gc:
+                        word = "Liftoff confirmed." if gc["satisfies_goal"] else "Goal re-check failed."
+                        st.markdown(f'<div class="lf-note {"gocard" if gc["satisfies_goal"] else ""}"><b>{word}</b> '
+                                    f'{safe(gc["reason"])}</div>', unsafe_allow_html=True)
+            else:
+                st.caption("Rendering…")
 
-tiles = []
-for i, post in enumerate(res.get("trend_wall", [])[:6]):
-    bg, fg = TILE[i % 6]
-    linked = "REPLACE_ME" not in post.get("url", "")
-    embed = embed_url(post) if linked else None
-    # Plays in place through the platform's own embed player; nothing is downloaded.
-    open_tag = f'<div class="lf-tile" data-embed="{safe(embed)}">' if embed else '<div class="lf-tile">'
-    thumb = thumb_for(post)
-    # Platform-served thumbnail (i.ytimg.com), hotlinked at render time; the pastel stays as fallback.
-    top = (f'<div class="top has-thumb" style="background-color:{bg};background-image:url(\'{safe(thumb)}\')">'
-           f'<span class="plat">{safe({"youtube": "YouTube", "tiktok": "TikTok", "instagram": "Instagram"}.get(post.get("platform", ""), post.get("platform", "")))}</span><i></i></div>' if thumb
-           else f'<div class="top" style="background:{bg};color:{fg}"><i></i></div>')
-    open_link = f'<a class="open" href="{safe(post["url"])}" target="_blank">open ↗</a>' if linked else ""
-    tiles.append(
-        f'{open_tag}{top}'
-        f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
-        f'{views(post["views"]) if post.get("views") else safe(post.get("age") or post.get("platform", ""))}</div>'
-        f'{open_link}'
-        f'<div class="hook">{safe(post["hook"])}</div></div></div>'
-    )
-
-dirs = []
-for vid, v in vehicles.items():
-    d = v.get("direction", {})
-    base = brand.get("secondary_hex" if d.get("bg") == "secondary" else "primary_hex", "#D85A30")
-    swatches = "".join(f'<i style="background:{tint(base, a)}"></i>' for a in (0.85, 0.55, 0.3, 0))
-    dirs.append(
-        f'<div class="lf-dir{" active" if vid == active else ""}"><b>{safe(vid)}. {safe(v.get("name", ""))}</b>'
-        f'<div class="sub">{safe(d.get("duration_s", "?"))}s, vertical, {safe(humanize_tag(v.get("pattern", "")).replace("ASMR", "asmr").lower().replace("asmr", "ASMR"))}</div>'
-        f'<div class="lf-sw">{swatches}</div>{status_lines(v, plan_by_id)}</div>'
-    )
-if not dirs:
-    dirs.append('<div class="lf-st idle">The Director is planning…</div>')
-
-TOP_JS = """
-<script>
-document.querySelectorAll('.lf-tile[data-embed]').forEach(function (tile) {
-  tile.addEventListener('click', function (e) {
-    if (e.target.closest('a.open')) return;
-    var top = tile.querySelector('.top');
-    if (top.classList.contains('playing')) return;
-    top.classList.add('playing');
-    top.innerHTML = '<iframe src="' + tile.dataset.embed + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
-  });
-});
-</script>"""
-band_html = (
-    f'<div class="lf-grid">'
-    f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
-    f'<div class="lf-card"><div class="lf-h">Trend wall <small>{"Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Last 14 days"}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
-    f'<div class="lf-card"><div class="lf-h">Directions</div>{"".join(dirs)}</div>'
-    f'</div>'
-    f'<div class="lf-ticker"><span class="lf-dot{" busy" if running else ""}"></span>'
-    f'<span>{safe(ticker_line(events, plan_by_id))}</span>'
-    f'<span class="pings">Human pings: {state.get("human_pings", 0)}</span></div>'
-)
-# A component iframe, not st.markdown, because the click-to-play script must run.
-band_height = max(860, 140 + 300 * len(vehicles)) + 480  # room for one tile to open to 9:16
-components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}</style></head>'
-                f'<body>{band_html}{TOP_JS}</body></html>', height=band_height, scrolling=True)
-
-# ---------------- flight plan + ledger ----------------
+# ---------------- definition of done ----------------
 left, right = st.columns([1.25, 1], gap="large")
 with left:
-    st.markdown('<div class="lf-sec">Flight plan</div>', unsafe_allow_html=True)
+    st.markdown('<div class="lf-sec">Definition of done</div>', unsafe_allow_html=True)
     st.caption("Written by the Spec agent before anything was built, then locked.")
     def plan_row(p: dict) -> str:
         args = p["args"]
@@ -440,51 +462,64 @@ with left:
     rows = "".join(plan_row(p) for p in state.get("flight_plan", [])) or '<div class="lf-row">Writing the definition of done…</div>'
     st.markdown(f'<div class="lf-card">{rows}</div>', unsafe_allow_html=True)
 with right:
-    st.markdown('<div class="lf-sec">Assumption ledger</div>', unsafe_allow_html=True)
-    st.caption("Every gap the Spec agent filled in, said out loud.")
+    st.markdown('<div class="lf-sec">Assumptions</div>', unsafe_allow_html=True)
+    st.caption("Every gap in the brief that the Spec agent filled in, said out loud.")
     led = "".join(f'<div class="lf-row"><div>{safe(a)}</div></div>' for a in state.get("assumptions", []))
     esc = "".join(f'<div class="lf-note callcard">Human only: {safe(e)}</div>' for e in state.get("escalations", []))
     st.markdown(f'<div class="lf-card">{led or "<div class=lf-row>None yet</div>"}{esc}</div>', unsafe_allow_html=True)
 
-# ---------------- each direction: video + go/no-go poll ----------------
-if vehicles:
-    st.markdown('<div class="lf-sec">Go/no-go polls</div>', unsafe_allow_html=True)
-    tabs = st.tabs([f"{vid}. {v.get('name', '')}" for vid, v in vehicles.items()])
-    for tab, (vid, v) in zip(tabs, vehicles.items()):
-        with tab:
-            attempts = v.get("attempts", [])
-            if not attempts:
-                st.caption("Rendering…")
-                continue
-            last = attempts[-1]
-            vcol, ccol = st.columns([0.55, 1.6], gap="large")
-            with vcol:
-                mp4 = Path(last["mp4"])
-                if mp4.exists():
-                    st.video(str(mp4))
-            with ccol:
-                for prev in attempts[:-1]:
-                    failed = [r for r in prev["verdict"]["results"] if not r["pass"]]
-                    if failed:
-                        ev = " · ".join(f'{r["id"]} {r["measured"]} (needs {r["expected"]})' for r in failed)
-                        st.markdown(f'<div class="lf-note"><b>Attempt {prev["attempt"]}: HOLD.</b> {safe(ev)}</div>',
-                                    unsafe_allow_html=True)
-                rows = "".join(
-                    f'<div class="lf-row"><div class="{"ok" if r["pass"] else "bad"}">'
-                    f'{"Pass" if r["pass"] else "Fail"} · {safe(r["id"])}</div>'
-                    f'<div class="lf-num">{safe(r["measured"])}<small>needs {safe(r["expected"])}</small></div></div>'
-                    for r in last["verdict"]["results"]
-                )
-                st.markdown(f'<div class="lf-card" style="padding:8px 20px">{rows}</div>', unsafe_allow_html=True)
-                dec, gc = v.get("decision"), v.get("goalcheck")
-                if dec:
-                    kind = {"GO": "gocard", "CALL": "callcard"}.get(dec["decision"], "")
-                    st.markdown(f'<div class="lf-note {kind}"><b>Arbiter: {safe(dec["decision"])}.</b> '
-                                f'{safe(dec["reason"])}</div>', unsafe_allow_html=True)
-                if gc:
-                    word = "Liftoff confirmed." if gc["satisfies_goal"] else "Goal re-check failed."
-                    st.markdown(f'<div class="lf-note {"gocard" if gc["satisfies_goal"] else ""}"><b>{word}</b> '
-                                f'{safe(gc["reason"])}</div>', unsafe_allow_html=True)
+# ---------------- research: what the directions were built from ----------------
+comps = "".join(
+    f'<div class="lf-comp"><div class="lf-av" style="background:{AVATAR[i % 5][0]};color:{AVATAR[i % 5][1]}">'
+    f'{safe(initials(c["name"]))}'
+    f'{f"<img alt=\"\" src=\"{safe(brand_icon(c))}\">" if res.get("live") and brand_icon(c) else ""}</div><div><b>{safe(c["name"])}</b>'
+    f'<span>{c["videos"]} {"mentions" if res.get("live") else "videos"}</span></div></div>'
+    for i, c in enumerate(res.get("competitors", [])[:4])
+)
+pats = "".join(f'<span class="lf-tag">{safe(humanize_tag(p["tag"]))}</span>' for p in res.get("patterns", [])[:5])
+tiles = []
+for i, post in enumerate(res.get("trend_wall", [])[:6]):
+    bg, fg = TILE[i % 6]
+    linked = "REPLACE_ME" not in post.get("url", "")
+    embed = embed_url(post) if linked else None
+    # Plays in place through the platform's own embed player; nothing is downloaded.
+    open_tag = f'<div class="lf-tile" data-embed="{safe(embed)}">' if embed else '<div class="lf-tile">'
+    thumb = thumb_for(post)
+    top = (f'<div class="top has-thumb" style="background-color:{bg};background-image:url(\'{safe(thumb)}\')">'
+           f'<span class="plat">{safe({"youtube": "YouTube", "tiktok": "TikTok", "instagram": "Instagram"}.get(post.get("platform", ""), post.get("platform", "")))}</span><i></i></div>' if thumb
+           else f'<div class="top" style="background:{bg};color:{fg}"><i></i></div>')
+    open_link = f'<a class="open" href="{safe(post["url"])}" target="_blank">open ↗</a>' if linked else ""
+    tiles.append(
+        f'{open_tag}{top}'
+        f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
+        f'{views(post["views"]) if post.get("views") else safe(post.get("age") or {"tiktok": "TikTok", "youtube": "YouTube", "instagram": "Instagram"}.get(post.get("platform", ""), ""))}</div>'
+        f'{open_link}<div class="hook">{safe(post["hook"])}</div></div></div>')
+
+TOP_JS = """
+<script>
+document.querySelectorAll('.lf-tile[data-embed]').forEach(function (tile) {
+  tile.addEventListener('click', function (e) {
+    if (e.target.closest('a.open')) return;
+    var top = tile.querySelector('.top');
+    if (top.classList.contains('playing')) return;
+    top.classList.add('playing');
+    top.innerHTML = '<iframe src="' + tile.dataset.embed + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+  });
+});
+</script>"""
+if res:
+    st.markdown('<div class="lf-sec">What the videos were built from</div>', unsafe_allow_html=True)
+    st.caption("Live research: who the brand competes with, what is working in the category right now, and the "
+               "real posts behind it. Tap a post to play it here.")
+    source = "Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Sample research"
+    research_html = (
+        f'<div class="lf-research">'
+        f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
+        f'<div class="lf-card"><div class="lf-h">Trend wall <small>{source}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
+        f'</div>')
+    components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}'
+                    f'.lf-research{{display:grid;grid-template-columns:1fr 2.6fr;gap:24px}}@media(max-width:900px){{.lf-research{{grid-template-columns:1fr}}}}</style></head>'
+                    f'<body>{research_html}{TOP_JS}</body></html>', height=1260, scrolling=True)
 
 # ---------------- learning: the playbook loop (liftoff/playbook.py) ----------------
 report_path = RUNS / "playbook" / "report.json"

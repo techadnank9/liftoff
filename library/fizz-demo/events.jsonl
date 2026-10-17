@@ -1,0 +1,87 @@
+{"t": 0.0, "agent": "system", "event": "mission", "vehicle": null, "payload": {"mission": "Launch video for Fizz cola, bold, for vertical feeds", "mock": false}}
+{"t": 0.0, "agent": "scout", "event": "start", "vehicle": null, "payload": {"brand": "Fizz", "category": "cola"}}
+{"t": 1.81, "agent": "scout", "event": "you_com", "vehicle": null, "payload": {"posts": 13, "launch_articles": 10, "sources": 6}}
+{"t": 8.59, "agent": "scout", "event": "youtube_views", "vehicle": null, "payload": {"posts": 11, "total_views": 210913500}}
+{"t": 8.59, "agent": "librarian", "event": "tagged", "vehicle": null, "payload": {"competitors": ["Pepsi", "Dr Pepper", "Keurig Dr Pepper", "Monster", "Sprite"], "patterns": ["challenge", "humor", "process", "slow_motion", "reaction", "taste_test", "countdown", "asmr", "text_on_beat"]}}
+{"t": 8.6, "agent": "librarian", "event": "trend_wall", "vehicle": null, "payload": {"posts": 13, "patterns": 9}}
+{"t": 8.6, "agent": "spec", "event": "start", "vehicle": null, "payload": {"mission": "Launch video for Fizz cola, bold, for vertical feeds"}}
+{"t": 28.63, "agent": "spec", "event": "locked", "vehicle": null, "payload": {"checks": 9, "assumptions": 5, "escalations": 0}}
+{"t": 28.63, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Format: vertical 9:16 video (from mission and brand card must_haves)"}}
+{"t": 28.63, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Language: English (US market per brand card)"}}
+{"t": 28.63, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Market: US (explicit in brand card)"}}
+{"t": 28.63, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Duration: 6-15 seconds (mission says under 15s; vertical feed norm from research)"}}
+{"t": 28.63, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Audio: Not constrained by mission or brand card; no checks written as vision-only"}}
+{"t": 28.63, "agent": "director", "event": "plan_start", "vehicle": null, "payload": {"n": 3}}
+{"t": 39.61, "agent": "director", "event": "direction", "vehicle": "A", "payload": {"name": "Fizz Face-Off Challenge", "pattern": "challenge", "hook": "Can you handle the FIZZ?", "duration_s": 10, "logo_seconds": 2.4}}
+{"t": 39.61, "agent": "director", "event": "direction", "vehicle": "B", "payload": {"name": "Unhinged Fizz Meme", "pattern": "humor", "hook": "POV: You opened a Fizz", "duration_s": 8, "logo_seconds": 3.25}}
+{"t": 39.61, "agent": "director", "event": "direction", "vehicle": "C", "payload": {"name": "Fizz Slow-Mo Blast", "pattern": "slow_motion", "hook": "This is Fizz in slo-mo", "duration_s": 12, "logo_seconds": 3.75}}
+{"t": 44.0, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a1.mp4", "frames": 240, "duration_s": 10, "logo_seconds": 2.4}}
+{"t": 44.39, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 10.0, "expected": "6.0-15.0s"}}
+{"t": 44.39, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 45.03, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-1", "pass": true, "measured": 2.2, "expected": "<= 60.0"}}
+{"t": 45.42, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-1", "pass": false, "measured": 3.8, "expected": ">= 4.5"}}
+{"t": 46.34, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": false, "measured": 2.25, "expected": ">= 3.0s"}}
+{"t": 47.29, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 47.57, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 47.68, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 47.77, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 47.78, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": false, "passed": 7, "total": 9}}
+{"t": 47.78, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "HOLD", "reason": "Failing: logo-1 (2.25 vs >= 3.0s), contrast-1 (3.8 vs >= 4.5). Sending back to Director.", "failing": [{"pass": false, "measured": 2.25, "expected": ">= 3.0s", "first_seen_t": 7.75, "id": "logo-1", "check": "logo_seconds_at_least"}, {"pass": false, "measured": 3.8, "expected": ">= 4.5", "id": "contrast-1", "check": "text_contrast_at_least"}]}}
+{"t": 48.34, "agent": "director", "event": "fix", "vehicle": "A", "payload": {"patch": {"logo_seconds": 3.4, "bg": "secondary"}}}
+{"t": 52.6, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a2.mp4", "frames": 240, "duration_s": 10, "logo_seconds": 3.4}}
+{"t": 53.01, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 10.0, "expected": "6.0-15.0s"}}
+{"t": 53.01, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 53.73, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-1", "pass": true, "measured": 3.7, "expected": "<= 60.0"}}
+{"t": 53.99, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-1", "pass": true, "measured": 13.32, "expected": ">= 4.5"}}
+{"t": 54.91, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": true, "measured": 3.25, "expected": ">= 3.0s"}}
+{"t": 57.11, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 57.19, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 57.98, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 57.98, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 57.98, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 57.99, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 2."}}
+{"t": 57.99, "agent": "goalcheck", "event": "start", "vehicle": "A", "payload": {}}
+{"t": 61.04, "agent": "goalcheck", "event": "verdict", "vehicle": "A", "payload": {"satisfies_goal": true, "reason": "The video is vertical, displays the Fizz brand name clearly in each frame, uses bold, playful, direct copy, and meets all must-have requirements."}}
+{"t": 64.46, "agent": "director", "event": "rendered", "vehicle": "B", "payload": {"mp4": "vehicle_B_a1.mp4", "frames": 192, "duration_s": 8, "logo_seconds": 3.25}}
+{"t": 64.98, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "dur-1", "pass": true, "measured": 8.0, "expected": "6.0-15.0s"}}
+{"t": 64.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 65.69, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "palette-1", "pass": true, "measured": 3.7, "expected": "<= 60.0"}}
+{"t": 66.1, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "contrast-1", "pass": true, "measured": 13.32, "expected": ">= 4.5"}}
+{"t": 66.87, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-1", "pass": true, "measured": 3.0, "expected": ">= 3.0s"}}
+{"t": 68.19, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 68.19, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 68.25, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 68.71, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 68.71, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 68.71, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 1."}}
+{"t": 68.71, "agent": "goalcheck", "event": "start", "vehicle": "B", "payload": {}}
+{"t": 70.84, "agent": "goalcheck", "event": "verdict", "vehicle": "B", "payload": {"satisfies_goal": true, "reason": "The video features the Fizz brand name prominently, uses a bold and playful tone with short, direct copy, is formatted vertically, and contains no prohibited content, meeting all mission requirements."}}
+{"t": 77.35, "agent": "director", "event": "rendered", "vehicle": "C", "payload": {"mp4": "vehicle_C_a1.mp4", "frames": 288, "duration_s": 12, "logo_seconds": 3.75}}
+{"t": 77.8, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
+{"t": 77.8, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 78.5, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "palette-1", "pass": true, "measured": 2.2, "expected": "<= 60.0"}}
+{"t": 78.85, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "contrast-1", "pass": false, "measured": 3.8, "expected": ">= 4.5"}}
+{"t": 80.21, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
+{"t": 81.35, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 81.35, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 81.39, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 82.62, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 82.62, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": false, "passed": 8, "total": 9}}
+{"t": 82.62, "agent": "arbiter", "event": "decision", "vehicle": "C", "payload": {"decision": "HOLD", "reason": "Failing: contrast-1 (3.8 vs >= 4.5). Sending back to Director.", "failing": [{"pass": false, "measured": 3.8, "expected": ">= 4.5", "id": "contrast-1", "check": "text_contrast_at_least"}]}}
+{"t": 83.34, "agent": "director", "event": "fix", "vehicle": "C", "payload": {"patch": {"bg": "secondary"}}}
+{"t": 89.13, "agent": "director", "event": "rendered", "vehicle": "C", "payload": {"mp4": "vehicle_C_a2.mp4", "frames": 288, "duration_s": 12, "logo_seconds": 3.75}}
+{"t": 89.73, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
+{"t": 89.73, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 90.36, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "palette-1", "pass": true, "measured": 3.7, "expected": "<= 60.0"}}
+{"t": 90.62, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "contrast-1", "pass": true, "measured": 13.32, "expected": ">= 4.5"}}
+{"t": 91.75, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
+{"t": 93.36, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 93.51, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 93.69, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 94.23, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 94.23, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 94.23, "agent": "arbiter", "event": "decision", "vehicle": "C", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 2."}}
+{"t": 94.23, "agent": "goalcheck", "event": "start", "vehicle": "C", "payload": {}}
+{"t": 95.72, "agent": "goalcheck", "event": "verdict", "vehicle": "C", "payload": {"satisfies_goal": true, "reason": "The video shows the Fizz brand name clearly in all frames, uses a vertical layout, delivers bold messaging ('This is Fizz in', 'Can cracks. Fizz erupts. Ice shatters.', 'Fizz: Bold Moves'), matches the bold, playful, direct tone, and contains no prohibited content, meeting all must-have requirements."}}
+{"t": 95.73, "agent": "system", "event": "liftoff", "vehicle": null, "payload": {"cleared": 3, "total": 3}}
+{"t": 95.73, "agent": "system", "event": "usage", "vehicle": null, "payload": {"librarian": {"prompt": 1844, "completion": 762, "calls": 1}, "spec": {"prompt": 1538, "completion": 716, "calls": 1}, "director": {"prompt": 719, "completion": 454, "calls": 1}, "verifier_vision": {"prompt": 17210, "completion": 4079, "calls": 30}, "director_fix": {"prompt": 1043, "completion": 28, "calls": 2}, "goalcheck": {"prompt": 5589, "completion": 740, "calls": 3}}}

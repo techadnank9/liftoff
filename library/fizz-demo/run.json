@@ -1,0 +1,1202 @@
+{
+ "mission": "Launch video for Fizz cola, bold, for vertical feeds",
+ "brand": {
+  "name": "Fizz",
+  "category": "cola",
+  "market": "US",
+  "primary_hex": "#D85A30",
+  "secondary_hex": "#26215C",
+  "text_hex": "#FFFFFF",
+  "tone": [
+   "bold",
+   "playful",
+   "direct"
+  ],
+  "logo_path": "/Users/adnan/Documents/liftoff/assets/fizz/logo.png",
+  "can_path": "/Users/adnan/Documents/liftoff/assets/fizz/can.png",
+  "must_haves": [
+   "brand name visible",
+   "vertical 9:16",
+   "under 15 seconds"
+  ],
+  "never": [
+   "health claims",
+   "competitor logos"
+  ]
+ },
+ "phase": "done",
+ "flight_plan": [
+  {
+   "id": "dur-1",
+   "check": "duration_between",
+   "args": {
+    "min_s": 6.0,
+    "max_s": 15.0
+   },
+   "why": "Mission requires under 15 seconds; vertical feed norm is 6-15s"
+  },
+  {
+   "id": "ar-1",
+   "check": "aspect_ratio",
+   "args": {
+    "ratio": "9:16"
+   },
+   "why": "Mission specifies vertical feeds; brand card requires vertical 9:16"
+  },
+  {
+   "id": "logo-1",
+   "check": "logo_seconds_at_least",
+   "args": {
+    "min_s": 3.0
+   },
+   "why": "Category norm: brand visible 3s+ in short-form (research source)"
+  },
+  {
+   "id": "palette-1",
+   "check": "palette_within",
+   "args": {
+    "max_distance": 60.0
+   },
+   "why": "Brand card provides primary_hex #D85A30 and secondary_hex #26215C for background conformity"
+  },
+  {
+   "id": "contrast-1",
+   "check": "text_contrast_at_least",
+   "args": {
+    "min_ratio": 4.5
+   },
+   "why": "WCAG AA standard for text readability; brand card text_hex #FFFFFF needs sufficient contrast"
+  },
+  {
+   "id": "vision-hook",
+   "check": "vision_yes",
+   "args": {
+    "question": "Does the first-second frame contain a readable hook?"
+   },
+   "why": "Research: First five seconds critical for unskippable ads (Think with Google source)"
+  },
+  {
+   "id": "vision-endcard",
+   "check": "vision_yes",
+   "args": {
+    "question": "Does the last-second frame show the brand name as an end card?"
+   },
+   "why": "Brand card must_haves: brand name visible; recall boost from end-frame branding"
+  },
+  {
+   "id": "vision-no-competitor",
+   "check": "vision_no",
+   "args": {
+    "question": "Are any competitor logos visible in this frame?"
+   },
+   "why": "Brand card never list includes competitor logos"
+  },
+  {
+   "id": "vision-no-health",
+   "check": "vision_no",
+   "args": {
+    "question": "Is any health or medical claim visible in this frame?"
+   },
+   "why": "Brand card never list includes health claims; mission implies no medical/legal claims"
+  }
+ ],
+ "assumptions": [
+  "Format: vertical 9:16 video (from mission and brand card must_haves)",
+  "Language: English (US market per brand card)",
+  "Market: US (explicit in brand card)",
+  "Duration: 6-15 seconds (mission says under 15s; vertical feed norm from research)",
+  "Audio: Not constrained by mission or brand card; no checks written as vision-only"
+ ],
+ "escalations": [],
+ "research": {
+  "competitors": [
+   {
+    "name": "Pepsi",
+    "role": "challenger_won",
+    "domain": "pepsi.com",
+    "videos": 16
+   },
+   {
+    "name": "Dr Pepper",
+    "role": "wildcard",
+    "domain": "drpepper.com",
+    "videos": 18
+   },
+   {
+    "name": "Keurig Dr Pepper",
+    "role": "wildcard",
+    "domain": "keurigdrpepper.com",
+    "videos": 1
+   },
+   {
+    "name": "Monster",
+    "role": "wildcard",
+    "domain": "monsterenergy.com",
+    "videos": 1
+   },
+   {
+    "name": "Sprite",
+    "role": "challenger_won",
+    "domain": "sprite.com",
+    "videos": 2
+   }
+  ],
+  "trend_wall": [
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=ojGj7Hpa-OQ",
+    "views": 100577056,
+    "thumb": "https://i.ytimg.com/vi/ojGj7Hpa-OQ/hqdefault.jpg",
+    "age": "2025-05-06",
+    "title": "Coca-Cola",
+    "hook": "Everyone drinks Coke",
+    "patterns": [
+     "reaction"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/KykFWfl9FvM",
+    "views": 67844933,
+    "thumb": "https://i.ytimg.com/vi/KykFWfl9FvM/hqdefault.jpg",
+    "age": "2026-08-23",
+    "title": "Coca Cola\u2019s best ad \ud83d\ude09 - YouTube",
+    "hook": "Pepsi vs Coke rivalry",
+    "patterns": [
+     "humor",
+     "challenge"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/AgsHs9AnKvk",
+    "views": 36480177,
+    "thumb": "https://i.ytimg.com/vi/AgsHs9AnKvk/hqdefault.jpg",
+    "age": "2025-10-15",
+    "title": "Coca-Cola's Best Marketing Idea Ever! - YouTube",
+    "hook": "Experiential Coke magic",
+    "patterns": [
+     "process",
+     "slow_motion"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=VGa1imApfdg",
+    "views": 5444954,
+    "thumb": "https://i.ytimg.com/vi/VGa1imApfdg/hqdefault.jpg",
+    "age": "2023-03-06",
+    "title": "Coca-Cola\u00ae Masterpiece - YouTube",
+    "hook": "Real Magic Coke story",
+    "patterns": [
+     "process",
+     "slow_motion"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/dopETP43y1Q",
+    "views": 367277,
+    "thumb": "https://i.ytimg.com/vi/dopETP43y1Q/hqdefault.jpg",
+    "age": "2026-09-24",
+    "title": "COCA-COLA Funny scene \ud83d\ude02 #shorts - YouTube",
+    "hook": "Balenciaga tongue protector",
+    "patterns": [
+     "humor",
+     "challenge"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/njCGZH79oKA",
+    "views": 159598,
+    "thumb": "https://i.ytimg.com/vi/njCGZH79oKA/hqdefault.jpg",
+    "age": "2023-03-26",
+    "title": "Coca Cola advert #short #commercial #ad #shorts #slowmotion #drink - YouTube",
+    "hook": "Sip the slow-mo fizz",
+    "patterns": [
+     "slow_motion",
+     "taste_test",
+     "asmr"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/Z9n0Wj8iBwE",
+    "views": 20637,
+    "thumb": "https://i.ytimg.com/vi/Z9n0Wj8iBwE/hqdefault.jpg",
+    "age": "2026-01-09",
+    "title": "This Coca-Cola ad shows parenting without the filter - YouTube",
+    "hook": "Parenting with Coke",
+    "patterns": [
+     "reaction"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=yvppvjFxIC4",
+    "views": 11283,
+    "thumb": "https://i.ytimg.com/vi/yvppvjFxIC4/hqdefault.jpg",
+    "age": "2022-04-05",
+    "title": "Coca Cola Advertisement 2022 - YouTube",
+    "hook": "Coke taste test",
+    "patterns": [
+     "challenge"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/_CqQkbPvtG8",
+    "views": 4168,
+    "thumb": "https://i.ytimg.com/vi/_CqQkbPvtG8/hqdefault.jpg",
+    "age": "2026-09-06",
+    "title": "Coca-cola vs pepsi ad\ud83d\udc80 #usashorts #usa - YouTube",
+    "hook": "Pepsi vs Coke meme",
+    "patterns": [
+     "humor",
+     "challenge"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/watch?v=ttGttSMrhTw",
+    "views": 3353,
+    "thumb": "https://i.ytimg.com/vi/ttGttSMrhTw/hqdefault.jpg",
+    "age": "2023-02-09",
+    "title": "Coca Cola \ud83e\udd64 #shorts #commercial #video - YouTube",
+    "hook": "How Coke is made",
+    "patterns": [
+     "process"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/eQzeVoio3pk",
+    "views": 64,
+    "thumb": "https://i.ytimg.com/vi/eQzeVoio3pk/hqdefault.jpg",
+    "age": "2024-04-26",
+    "title": "Coca-Cola\u2019s New Ad Campaign #cocacola #shorts - YouTube",
+    "hook": "Countdown to launch",
+    "patterns": [
+     "countdown",
+     "text_on_beat"
+    ]
+   },
+   {
+    "platform": "tiktok",
+    "url": "https://www.tiktok.com/@therealanthonyeats/video/7545620218425511199?lang=en",
+    "views": null,
+    "thumb": null,
+    "age": "",
+    "title": "COLA SODA",
+    "hook": "Brand cola battle",
+    "patterns": [
+     "taste_test",
+     "challenge"
+    ]
+   },
+   {
+    "platform": "tiktok",
+    "url": "https://www.tiktok.com/@stuffaboutadvertising/video/7367461634597555502",
+    "views": null,
+    "thumb": null,
+    "age": "",
+    "title": "This new Coca Cola ad campaign has me irrationally annoyed so of course I have to talk about it. I need to chat with the person who decided the spills had to be completely exaggerated. \ud83d\ude24 #advertisingtiktok #adcampaign #marketing #commercial",
+    "hook": "Annoyed by Coke ad",
+    "patterns": [
+     "countdown"
+    ]
+   }
+  ],
+  "patterns": [
+   {
+    "tag": "challenge",
+    "share": 0.38,
+    "note": "Challenge or trend participation"
+   },
+   {
+    "tag": "humor",
+    "share": 0.23,
+    "note": "Joke or meme format"
+   },
+   {
+    "tag": "process",
+    "share": 0.23,
+    "note": "How it's made, factory or recipe"
+   },
+   {
+    "tag": "slow_motion",
+    "share": 0.23,
+    "note": "Slow motion product hero shot"
+   },
+   {
+    "tag": "reaction",
+    "share": 0.15,
+    "note": "Someone reacts on camera"
+   },
+   {
+    "tag": "taste_test",
+    "share": 0.15,
+    "note": "Blind or street taste test"
+   },
+   {
+    "tag": "countdown",
+    "share": 0.15,
+    "note": "Launch day or city countdown"
+   },
+   {
+    "tag": "asmr",
+    "share": 0.08,
+    "note": "Can open, ice drop, pour"
+   },
+   {
+    "tag": "text_on_beat",
+    "share": 0.08,
+    "note": "On-screen text cut to music"
+   }
+  ],
+  "stats": {
+   "posts_scanned": 32,
+   "public_posts": 13
+  },
+  "sources": [
+   {
+    "title": "The First Five Seconds: Creating Unskippable Video Ads - Think with Google",
+    "url": "https://business.google.com/aunz/think/marketing-strategies/creating-youtube-ads-that-break-through-in-a-skippable-world/"
+   },
+   {
+    "title": "Video Ad Tricks to Win Viewers Fast - Zeely AI",
+    "url": "https://zeely.ai/blog/mastering-video-ad-best-practices/"
+   },
+   {
+    "title": "YouTube Shorts: Is It the Right Platform for Your Brand? A Guide to Short-Form Video Advertising",
+    "url": "https://www.collectivemeasures.com/insights/youtube-shorts-is-it-the-right-platform-for-your-brand-a-guide-to-short-form-video-advertising"
+   },
+   {
+    "title": "2025 Video Ads Best Practices for Your Next Campaign",
+    "url": "https://www.makeitbloom.com/blog/11-best-practices-to-create-effective-video-ads/"
+   },
+   {
+    "title": "Master Short-Form Video Ads: Insights for Advertisers",
+    "url": "https://target-video.com/short-form-video-advertising/"
+   },
+   {
+    "title": "Best Practices for Short-Form Video Ads - Techlasi",
+    "url": "https://techlasi.com/savvy/best-practices-for-short-form-video-ads/"
+   },
+   {
+    "title": "Category norm: brand visible 3s+ in short-form",
+    "url": "https://example.com/replace-with-you-com-citation"
+   }
+  ],
+  "live": true
+ },
+ "vehicles": {
+  "A": {
+   "id": "A",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "A",
+      "name": "Fizz Face-Off Challenge",
+      "pattern": "challenge",
+      "hook": "Can you handle the FIZZ?",
+      "body": "Crack, chug, don't flinch. Tag your rival.",
+      "end_card": "Fizz: No Mercy Cola",
+      "duration_s": 10,
+      "logo_seconds": 2.4,
+      "bg": "primary",
+      "notes": "Fast cuts of people chugging Fizz with exaggerated bold reactions. Text overlays in white with high contrast. End card on bold orange background with logo badge holding 3.5s. [planted: logo under threshold]"
+     },
+     "mp4": "vehicle_A_a1.mp4",
+     "verdict": {
+      "pass": false,
+      "passed": 7,
+      "total": 9,
+      "results": [
+       {
+        "pass": true,
+        "measured": 10.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "540x960",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": false,
+        "measured": 2.25,
+        "expected": ">= 3.0s",
+        "first_seen_t": 7.75,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 2.2,
+        "expected": "<= 60.0",
+        "id": "palette-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": false,
+        "measured": 3.8,
+        "expected": ">= 4.5",
+        "id": "contrast-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.9,
+          "reason": "The text 'Can you handle the' is clearly visible and forms a hook, which is a common element in engaging content to prompt further interest."
+         }
+        ],
+        "id": "vision-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0040.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The image displays 'Fizz' in a prominent white box, which is the brand name, and the overall layout with the title suggests it's an end card."
+         }
+        ],
+        "id": "vision-endcard",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the Fizz Cola brand is shown."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible in the frame; only the Fizz brand elements are present."
+         }
+        ],
+        "id": "vision-no-competitor",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No health or medical claims are visible in the frame."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame."
+         }
+        ],
+        "id": "vision-no-health",
+        "check": "vision_no"
+       }
+      ]
+     }
+    },
+    {
+     "attempt": 2,
+     "direction": {
+      "id": "A",
+      "name": "Fizz Face-Off Challenge",
+      "pattern": "challenge",
+      "hook": "Can you handle the FIZZ?",
+      "body": "Crack, chug, don't flinch. Tag your rival.",
+      "end_card": "Fizz: No Mercy Cola",
+      "duration_s": 10,
+      "logo_seconds": 3.4,
+      "bg": "secondary",
+      "notes": "Fast cuts of people chugging Fizz with exaggerated bold reactions. Text overlays in white with high contrast. End card on bold orange background with logo badge holding 3.5s. [planted: logo under threshold]"
+     },
+     "mp4": "vehicle_A_a2.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 9,
+      "total": 9,
+      "results": [
+       {
+        "pass": true,
+        "measured": 10.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "540x960",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.25,
+        "expected": ">= 3.0s",
+        "first_seen_t": 6.75,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.7,
+        "expected": "<= 60.0",
+        "id": "palette-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 13.32,
+        "expected": ">= 4.5",
+        "id": "contrast-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The text 'Can you handle the' is clearly visible and forms a readable hook in the first and second frames."
+         }
+        ],
+        "id": "vision-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0040.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The last-second frame features a prominent 'Fizz' logo in a box, which serves as the brand's end card element."
+         }
+        ],
+        "id": "vision-endcard",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the Fizz Cola brand is present."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No competitor logos are visible; the image only displays the Fizz brand elements."
+         }
+        ],
+        "id": "vision-no-competitor",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame; only brand and product name text."
+         }
+        ],
+        "id": "vision-no-health",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "status": "go",
+   "name": "Fizz Face-Off Challenge",
+   "pattern": "challenge",
+   "direction": {
+    "id": "A",
+    "name": "Fizz Face-Off Challenge",
+    "pattern": "challenge",
+    "hook": "Can you handle the FIZZ?",
+    "body": "Crack, chug, don't flinch. Tag your rival.",
+    "end_card": "Fizz: No Mercy Cola",
+    "duration_s": 10,
+    "logo_seconds": 3.4,
+    "bg": "secondary",
+    "notes": "Fast cuts of people chugging Fizz with exaggerated bold reactions. Text overlays in white with high contrast. End card on bold orange background with logo badge holding 3.5s. [planted: logo under threshold]"
+   },
+   "drift": 0.33,
+   "mp4": "vehicle_A_a2.mp4",
+   "decision": {
+    "decision": "GO",
+    "reason": "All 9 checks pass on attempt 2."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video is vertical, displays the Fizz brand name clearly in each frame, uses bold, playful, direct copy, and meets all must-have requirements."
+   }
+  },
+  "B": {
+   "id": "B",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "B",
+      "name": "Unhinged Fizz Meme",
+      "pattern": "humor",
+      "hook": "POV: You opened a Fizz",
+      "body": "Instant chaos. Zero regrets. Full send.",
+      "end_card": "Fizz: Drink Loud",
+      "duration_s": 8,
+      "logo_seconds": 3.25,
+      "bg": "secondary",
+      "notes": "Meme-format jump cuts of absurd over-the-top reactions to opening a can. Dark secondary background makes white text pop. End card on deep blue with bold Fizz logo."
+     },
+     "mp4": "vehicle_B_a1.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 9,
+      "total": 9,
+      "results": [
+       {
+        "pass": true,
+        "measured": 8.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "540x960",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.0,
+        "expected": ">= 3.0s",
+        "first_seen_t": 5.0,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.7,
+        "expected": "<= 60.0",
+        "id": "palette-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 13.32,
+        "expected": ">= 4.5",
+        "id": "contrast-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The text 'POV: You opened a' is clearly visible and forms a recognizable hook (Point of View format), making it readable."
+         }
+        ],
+        "id": "vision-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0032.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The image displays 'Fizz' in a prominent box, indicating it's the brand name as an end card."
+         }
+        ],
+        "id": "vision-endcard",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0017.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible in the frame; only the Fizz Cola brand is present."
+         },
+         {
+          "frame": "s_0032.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No competitor logos are visible; only the Fizz logo and related text are present."
+         }
+        ],
+        "id": "vision-no-competitor",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0017.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame; the text is promotional slogans without health-related statements."
+         },
+         {
+          "frame": "s_0032.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No health or medical claims are visible; the text only includes the brand name and a slogan about drinking loudly."
+         }
+        ],
+        "id": "vision-no-health",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "status": "go",
+   "name": "Unhinged Fizz Meme",
+   "pattern": "humor",
+   "direction": {
+    "id": "B",
+    "name": "Unhinged Fizz Meme",
+    "pattern": "humor",
+    "hook": "POV: You opened a Fizz",
+    "body": "Instant chaos. Zero regrets. Full send.",
+    "end_card": "Fizz: Drink Loud",
+    "duration_s": 8,
+    "logo_seconds": 3.25,
+    "bg": "secondary",
+    "notes": "Meme-format jump cuts of absurd over-the-top reactions to opening a can. Dark secondary background makes white text pop. End card on deep blue with bold Fizz logo."
+   },
+   "drift": 0.33,
+   "mp4": "vehicle_B_a1.mp4",
+   "decision": {
+    "decision": "GO",
+    "reason": "All 9 checks pass on attempt 1."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video features the Fizz brand name prominently, uses a bold and playful tone with short, direct copy, is formatted vertically, and contains no prohibited content, meeting all mission requirements."
+   }
+  },
+  "C": {
+   "id": "C",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "C",
+      "name": "Fizz Slow-Mo Blast",
+      "pattern": "slow_motion",
+      "hook": "This is Fizz in slo-mo",
+      "body": "Can cracks. Fizz erupts. Ice shatters.",
+      "end_card": "Fizz: Bold Moves",
+      "duration_s": 12,
+      "logo_seconds": 3.75,
+      "bg": "primary",
+      "notes": "Hero product shot in 120fps slow motion: condensation drips, can opens, cola splashes over ice. High contrast white text over warm orange background. Logo badge holds 3.75s for brand retention."
+     },
+     "mp4": "vehicle_C_a1.mp4",
+     "verdict": {
+      "pass": false,
+      "passed": 8,
+      "total": 9,
+      "results": [
+       {
+        "pass": true,
+        "measured": 12.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "540x960",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.5,
+        "expected": ">= 3.0s",
+        "first_seen_t": 8.5,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 2.2,
+        "expected": "<= 60.0",
+        "id": "palette-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": false,
+        "measured": 3.8,
+        "expected": ">= 4.5",
+        "id": "contrast-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The text 'This is Fizz in' is clearly legible with high contrast against the orange background, making it a readable hook."
+         }
+        ],
+        "id": "vision-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0048.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The image displays 'Fizz' in a prominent box, which functions as an end card with the brand name clearly visible."
+         }
+        ],
+        "id": "vision-endcard",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; the only brand shown is Fizz on the can."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the Fizz brand is present."
+         }
+        ],
+        "id": "vision-no-competitor",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame; the text describes physical actions (cracks, erupts, shatters) without any health-related statements."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame; only brand name and slogan are present."
+         }
+        ],
+        "id": "vision-no-health",
+        "check": "vision_no"
+       }
+      ]
+     }
+    },
+    {
+     "attempt": 2,
+     "direction": {
+      "id": "C",
+      "name": "Fizz Slow-Mo Blast",
+      "pattern": "slow_motion",
+      "hook": "This is Fizz in slo-mo",
+      "body": "Can cracks. Fizz erupts. Ice shatters.",
+      "end_card": "Fizz: Bold Moves",
+      "duration_s": 12,
+      "logo_seconds": 3.75,
+      "bg": "secondary",
+      "notes": "Hero product shot in 120fps slow motion: condensation drips, can opens, cola splashes over ice. High contrast white text over warm orange background. Logo badge holds 3.75s for brand retention."
+     },
+     "mp4": "vehicle_C_a2.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 9,
+      "total": 9,
+      "results": [
+       {
+        "pass": true,
+        "measured": 12.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "540x960",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.5,
+        "expected": ">= 3.0s",
+        "first_seen_t": 8.5,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.7,
+        "expected": "<= 60.0",
+        "id": "palette-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 13.32,
+        "expected": ">= 4.5",
+        "id": "contrast-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.9,
+          "reason": "The text 'This is Fizz in' is clearly readable (white text on dark blue background) and functions as a hook by introducing the product name in a concise, attention-grabbing manner."
+         }
+        ],
+        "id": "vision-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0048.png",
+          "answer": "yes",
+          "confidence": 0.9,
+          "reason": "The image displays 'Fizz' in a prominent box and 'Fizz: Bold Moves' as text, indicating it's a branded end card."
+         }
+        ],
+        "id": "vision-endcard",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the Fizz brand is shown on the can."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the Fizz logo is present."
+         }
+        ],
+        "id": "vision-no-competitor",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame; the text describes physical actions (cracks, erupts, shatters) related to the can and drink, not health or medical benefits."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No health or medical claims are visible in the frame."
+         }
+        ],
+        "id": "vision-no-health",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "status": "go",
+   "name": "Fizz Slow-Mo Blast",
+   "pattern": "slow_motion",
+   "direction": {
+    "id": "C",
+    "name": "Fizz Slow-Mo Blast",
+    "pattern": "slow_motion",
+    "hook": "This is Fizz in slo-mo",
+    "body": "Can cracks. Fizz erupts. Ice shatters.",
+    "end_card": "Fizz: Bold Moves",
+    "duration_s": 12,
+    "logo_seconds": 3.75,
+    "bg": "secondary",
+    "notes": "Hero product shot in 120fps slow motion: condensation drips, can opens, cola splashes over ice. High contrast white text over warm orange background. Logo badge holds 3.75s for brand retention."
+   },
+   "drift": 0.33,
+   "mp4": "vehicle_C_a2.mp4",
+   "decision": {
+    "decision": "GO",
+    "reason": "All 9 checks pass on attempt 2."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video shows the Fizz brand name clearly in all frames, uses a vertical layout, delivers bold messaging ('This is Fizz in', 'Can cracks. Fizz erupts. Ice shatters.', 'Fizz: Bold Moves'), matches the bold, playful, direct tone, and contains no prohibited content, meeting all must-have requirements."
+   }
+  }
+ },
+ "goalcheck": null,
+ "human_pings": 0,
+ "started_at": 1792277344.9569228,
+ "finished_at": 1792277440.685418,
+ "spec_locked": true,
+ "summary": {
+  "cleared": 3,
+  "total": 3,
+  "human_pings": 0
+ },
+ "saved_from": "20261017-154904"
+}
