@@ -79,7 +79,10 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
             summary={"cleared": len(cleared), "total": len(directions), "human_pings": tel.state["human_pings"]})
     tel.emit("system", "liftoff", {"cleared": len(cleared), "total": len(directions)})
     tel.emit("system", "usage", llm.usage_report())
-    print(f"\nrun dir: {run_dir}")
+    print(f"\nliftoff: {len(cleared)}/{len(directions)} cleared, human pings: {tel.state['human_pings']}")
+    for role, u in llm.usage_report().items():
+        print(f"  {role:16} calls={u['calls']:3}  prompt={u['prompt']:7}  completion={u['completion']:6}")
+    print(f"run dir: {run_dir}")
     return run_dir
 
 

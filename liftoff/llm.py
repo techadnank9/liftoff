@@ -15,9 +15,28 @@ from __future__ import annotations
 import base64
 import json
 import os
+import re
 import time
 from pathlib import Path
 from typing import Any
+
+
+def _load_dotenv() -> None:
+    """Read KEY=VALUE lines from the repo's .env. Real environment variables win."""
+    env = Path(__file__).resolve().parent.parent / ".env"
+    if not env.exists():
+        return
+    for line in env.read_text().splitlines():
+        line = line.strip()
+        if not line or line.startswith("#") or "=" not in line:
+            continue
+        k, v = line.split("=", 1)
+        v = v.strip().strip('"').strip("'")
+        if v:
+            os.environ.setdefault(k.strip(), v)
+
+
+_load_dotenv()
 
 BASE_URL = os.environ.get("CRUSOE_BASE_URL", "https://api.inference.crusoecloud.com/v1")
 MOCK = os.environ.get("LIFTOFF_MOCK", "0") == "1"
@@ -61,7 +80,7 @@ def usage_report() -> dict[str, dict[str, int]]:
 
 
 def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
-         temperature: float = 0.2, max_tokens: int = 2000, retries: int = 2) -> str:
+         temperature: float = 0.2, max_tokens: int = 4000, retries: int = 2) -> str:
     """Chat completion for a role. Returns the text content."""
     if MOCK:
         from . import mock
@@ -83,7 +102,16 @@ def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
                 u["prompt"] += resp.usage.prompt_tokens or 0
                 u["completion"] += resp.usage.completion_tokens or 0
                 u["calls"] += 1
-            return resp.choices[0].message.content or ""
+            msg = resp.choices[0].message
+            text = msg.content or ""
+            if not text.strip():
+                # Reasoning models sometimes leave content empty and put everything in reasoning.
+                text = getattr(msg, "reasoning_content", None) or getattr(msg, "reasoning", None) or ""
+            if json_mode and not _looks_like_json(text) and attempt < retries:
+                last_err = ValueError(f"no JSON in reply: {text[:200]!r}")
+                kwargs.pop("response_format", None)
+                continue
+            return text
         except Exception as e:  # noqa: BLE001
             last_err = e
             if json_mode and "response_format" in kwargs:
@@ -99,15 +127,56 @@ def call_json(role: str, messages: list[dict[str, Any]], **kw) -> Any:
     return parse_json(text)
 
 
+def list_models() -> list[str]:
+    """Model ids visible to this CRUSOE_API_KEY."""
+    return sorted(m.id for m in _get_client().models.list().data)
+
+
+def _strip_reasoning(text: str) -> str:
+    """Drop <think>...</think> blocks (closed or dangling) that reasoning models emit."""
+    text = re.sub(r"<think>.*?</think>", "", text, flags=re.S)
+    if "</think>" in text:
+        text = text.split("</think>")[-1]
+    return text.strip()
+
+
+def _looks_like_json(text: str) -> bool:
+    try:
+        parse_json(text)
+        return True
+    except (ValueError, json.JSONDecodeError):
+        return False
+
+
 def parse_json(text: str) -> Any:
-    text = text.strip()
-    if text.startswith("```"):
-        text = text.split("```", 2)[1]
-        if text.startswith("json"):
-            text = text[4:]
-    start = min([i for i in (text.find("{"), text.find("[")) if i >= 0] or [0])
-    end = max(text.rfind("}"), text.rfind("]"))
-    return json.loads(text[start:end + 1])
+    """Parse the JSON object in a model reply. Survives think blocks, code fences and prose.
+
+    Prefers the last top-level object, since reasoning models often think out loud first."""
+    text = _strip_reasoning(text or "")
+    try:
+        return json.loads(text)
+    except json.JSONDecodeError:
+        pass
+    for fence in re.findall(r"```(?:json)?\s*(.*?)```", text, flags=re.S):
+        try:
+            return json.loads(fence)
+        except json.JSONDecodeError:
+            continue
+    dec = json.JSONDecoder()
+    found = None
+    i = text.find("{")
+    while i >= 0:
+        try:
+            obj, end = dec.raw_decode(text[i:])
+        except json.JSONDecodeError:
+            i = text.find("{", i + 1)
+            continue
+        if isinstance(obj, dict) and obj:
+            found = obj
+        i = text.find("{", i + end)  # skip past this object so nested dicts never win
+    if found is None:
+        raise ValueError(f"no JSON object in model reply: {text[:200]!r}")
+    return found
 
 
 def image_content(path: str | Path, text: str) -> list[dict[str, Any]]:

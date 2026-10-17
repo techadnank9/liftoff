@@ -28,6 +28,9 @@ def run(mission: str, brand: Brand, frames: list[Path], tel: Telemetry, vehicle:
     for fp in pick:
         content += llm.image_content(fp, f"frame {fp.name}")
     out = llm.call_json("goalcheck", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": content}])
-    out = {"satisfies_goal": bool(out.get("satisfies_goal")), "reason": out.get("reason", "")}
+    raw = out.get("satisfies_goal") if isinstance(out, dict) else None
+    # Models sometimes answer "false" or "no" as strings; bool("false") would be True.
+    ok = raw is True or str(raw).strip().lower() in ("true", "yes", "1")
+    out = {"satisfies_goal": ok, "reason": out.get("reason", "") if isinstance(out, dict) else str(out)}
     tel.emit("goalcheck", "verdict", out, vehicle=vehicle)
     return out

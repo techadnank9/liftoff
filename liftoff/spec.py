@@ -31,7 +31,8 @@ vocabulary, each with a one-line 'why' that cites the research or brand card whe
 Then list every assumption you had to make because the mission was vague (format, language,
 market, duration, audio). If something cannot be assumed safely (a legal claim, an unknown
 brand color, a market with rules you don't know) put it in 'escalations' instead of guessing.
-Return JSON only:
+Use each check's argument names exactly as listed, numbers as numbers. Every id must be unique.
+Never invent a check name. Return JSON only, no prose, no code fences:
 {"flight_plan":[{"id":str,"check":str,"args":{},"why":str}],
  "assumptions":[str], "escalations":[str], "spec_notes":str}
 """
@@ -60,7 +61,31 @@ def run(mission: str, brand: Brand, research: dict[str, Any], tel: Telemetry) ->
     return plan
 
 
+ARGS = {
+    "duration_between": {"min_s", "max_s"},
+    "aspect_ratio": {"ratio"},
+    "logo_seconds_at_least": {"min_s"},
+    "palette_within": {"max_distance"},
+    "text_contrast_at_least": {"min_ratio"},
+    "vision_yes": {"question"},
+    "vision_no": {"question"},
+}
+
+
 def _valid(p: dict[str, Any]) -> bool:
+    """Keep only checks in the vocabulary with exactly the right args. Coerces numeric strings."""
     from .verifier import CHECKS
 
-    return isinstance(p, dict) and p.get("check") in CHECKS and isinstance(p.get("args"), dict)
+    if not (isinstance(p, dict) and p.get("check") in CHECKS and isinstance(p.get("args"), dict)):
+        return False
+    args = p["args"]
+    if set(args) != ARGS[p["check"]]:
+        return False
+    for k, v in args.items():
+        if k not in ("ratio", "question"):
+            try:
+                args[k] = float(v)
+            except (TypeError, ValueError):
+                return False
+    p.setdefault("id", p["check"])
+    return True

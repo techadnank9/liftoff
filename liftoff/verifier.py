@@ -148,6 +148,9 @@ def _vision(ctx: dict, question: str, want: str) -> dict:
         prompt = (f"Brand in the overlay: {ctx['brand'].name}. Question: {question} "
                   'Answer JSON only: {"answer":"yes"|"no","confidence":0-1,"reason":str}')
         out = llm.call_json("verifier_vision", [{"role": "user", "content": llm.image_content(fp, prompt)}])
+        if not isinstance(out, dict):
+            out = {"answer": str(out)}
+        out["answer"] = str(out.get("answer", "")).strip().lower()
         answers.append({"frame": fp.name, **out})
     ok = all(str(a.get("answer", "")).lower().startswith(want) for a in answers)
     return {"pass": ok, "measured": [a.get("answer") for a in answers], "expected": want, "detail": answers}
