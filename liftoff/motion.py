@@ -167,6 +167,38 @@ def kinetic(img: Image.Image, text: str, size: int, color, y_center: int, t: flo
 PANEL_H = int(H * 0.45)
 
 
+def scene_style(pattern: str) -> str:
+    """Which visual style a direction gets, from the pattern it draws on."""
+    p = pattern.lower()
+    if any(k in p for k in ("taste", "challenge", "versus", "vs", "swap", "reaction")):
+        return "split"
+    if any(k in p for k in ("asmr", "slow", "process", "pour")):
+        return "macro"
+    if any(k in p for k in ("countdown", "humor", "hook", "beat", "meme", "launch")):
+        return "kinetic"
+    return "hero"
+
+
+def mystery(can: Image.Image) -> Image.Image:
+    """The rival can in a taste test: greyed out, label hidden behind a big question mark."""
+    from PIL import ImageOps
+
+    g = ImageOps.grayscale(can.convert("RGB")).convert("RGBA")
+    g.putalpha(can.getchannel("A"))
+    g = Image.blend(g, Image.new("RGBA", g.size, (120, 120, 126, 255)), 0.35)
+    g.putalpha(can.getchannel("A"))
+    d = ImageDraw.Draw(g)
+    f = font(int(g.width * 0.55))
+    w = d.textlength("?", font=f)
+    d.text(((g.width - w) / 2, g.height * 0.38), "?", font=f, fill=(255, 255, 255, 255))
+    return g
+
+
+def droplets(seed: int, n: int):
+    rnd = random.Random(seed + 7)
+    return [(rnd.uniform(0.15, 0.85), rnd.uniform(0, 1), rnd.uniform(2.5, 6), rnd.uniform(0.05, 0.16)) for _ in range(n)]
+
+
 def footage_frames(clip: dict | None, seconds: float, out_dir: Path) -> list[Path]:
     """Frames of the real clip, scaled and cropped to fill the area under the brand panel."""
     import subprocess
@@ -207,6 +239,17 @@ def frames(direction: dict, brand, out_dir: Path) -> int:
     end_start = dur - logo_s
     speed = 0.55 if slow else 1.0
 
+    style = direction.get("style") or scene_style(pattern)
+    other = rgb(brand.secondary_hex if direction.get("bg") == "primary" else brand.primary_hex)
+    if style == "split":
+        half_can = lit_can(Image.open(brand.can_path).convert("RGBA"), 300)
+        rival = mystery(half_can)
+    if style == "macro":
+        big_can = lit_can(Image.open(brand.can_path).convert("RGBA"), 980)
+        drops = droplets(hash(direction.get("id", "A")) & 0xFFFF, 26)
+        parts = bubbles(hash(direction.get("id", "A")) & 0xFFFF, 90)
+    if style == "kinetic":
+        mini_can = lit_can(Image.open(brand.can_path).convert("RGBA"), 300)
     clip_frames = footage_frames(direction.get("footage"), end_start, out_dir) if direction.get("footage") else []
     if clip_frames:
         panel = Image.new("RGB", (W, H), color)  # flat brand colour behind the words (top 45%)
@@ -234,6 +277,64 @@ def frames(direction: dict, brand, out_dir: Path) -> int:
                 kinetic(img, direction["body"], 54, fg, PANEL_H // 2 + 10, t - HOOK_S, stagger=0.06)
             if 0 <= t - HOOK_S < 2 / FPS:
                 img = Image.blend(img, Image.new("RGB", (W, H), (255, 255, 255)), 0.2)
+        elif t < end_start and style == "split":
+            # Taste test: a mystery can on one side, yours on the other; your side takes over.
+            take = ease_out(max(0.0, (t - end_start * 0.55) / 0.6))  # 0 -> 1 near the end
+            mid = int(W / 2 - take * W / 2)
+            lower = Image.new("RGB", (W, H - PANEL_H), mix(other, (0, 0, 0), 0.25))
+            ImageDraw.Draw(lower).rectangle((mid, 0, W, H), fill=mix(color, (255, 255, 255), 0.18))
+            img.paste(lower, (0, PANEL_H))
+            d = ImageDraw.Draw(img)
+            fl = font(54)
+            if mid > 40:
+                d.text((mid / 2 - 18, PANEL_H + 24), "A", font=fl, fill=(255, 255, 255))
+                img.paste(rival, (int(mid / 2 - rival.width / 2), H - rival.height - 40 + int(math.sin(t * 2.6) * 5)), rival)
+            d.text(((mid + W) / 2 - 18, PANEL_H + 24), "B", font=fl, fill=fg)
+            bob = int(math.sin(t * 2.6 + 1.5) * 5)
+            img.paste(half_can, (int((mid + W) / 2 - half_can.width / 2), H - half_can.height - 40 + bob), half_can)
+            if t < HOOK_S:
+                kinetic(img, direction["hook"], 76, fg, PANEL_H // 2, t)
+            else:
+                kinetic(img, direction["body"], 60, fg, PANEL_H // 2, t - HOOK_S, stagger=0.06)
+        elif t < end_start and style == "macro":
+            # Close-up: the can fills the frame, condensation runs down it, a slow push-in.
+            z = 1 + 0.10 * ease_out(t / max(1.0, end_start))
+            c = big_can.resize((int(big_can.width * z), int(big_can.height * z)), Image.BILINEAR)
+            # the label sits mid-frame; the can's top runs behind the word panel
+            cx, cy = (W - c.width) // 2, int(PANEL_H - c.height * 0.30 + (1 - ease_out(t / 0.8)) * 220)
+            img.paste(c, (cx, cy), c)
+            ov = Image.new("RGBA", (W, H), (0, 0, 0, 0))
+            od = ImageDraw.Draw(ov)
+            for x, ph, r, v in drops:  # drops slide down the can face, below the words
+                y = PANEL_H + 20 + ((ph + t * v) % 1.0) * (H - PANEL_H - 40)
+                xx = cx + c.width * x
+                od.ellipse((xx - r, y - r * 1.4, xx + r, y + r * 1.4), fill=(255, 255, 255, 120))
+                od.ellipse((xx - r * 0.3, y - r * 0.9, xx + r * 0.15, y - r * 0.4), fill=(255, 255, 255, 220))
+            draw_bubbles(od, parts, t, 0.6, PANEL_H + 10, H)
+            img.paste(ov, (0, 0), ov)
+            img.paste(Image.new("RGB", (W, PANEL_H), color), (0, 0))  # keep the words on flat brand colour
+            if t < HOOK_S:
+                kinetic(img, direction["hook"], 76, fg, PANEL_H // 2, t)
+            else:
+                kinetic(img, direction["body"], 60, fg, PANEL_H // 2, t - HOOK_S, stagger=0.09)
+        elif t < end_start and style == "kinetic":
+            # Kinetic type: big words land on the beat, stripes pulse, a small can bounces in time.
+            beat = 0.42
+            k = (t % beat) / beat
+            d = ImageDraw.Draw(img)
+            shade = mix(color, (0, 0, 0), 0.18)
+            off = int((t * 160) % 80)
+            for x0 in range(-H, W + H, 80):  # diagonal stripes below the words
+                d.polygon([(x0 + off, H), (x0 + 40 + off, H), (x0 + 40 + off - (H - PANEL_H), PANEL_H),
+                           (x0 + off - (H - PANEL_H), PANEL_H)], fill=shade)
+            img.paste(Image.new("RGB", (W, PANEL_H), color), (0, 0))
+            hop = int(abs(math.sin(math.pi * k)) * 36)
+            img.paste(mini_can, ((W - mini_can.width) // 2, H - mini_can.height - 50 - hop), mini_can)
+            words = direction["hook"] if t < HOOK_S else direction["body"]
+            tt = t if t < HOOK_S else t - HOOK_S
+            kinetic(img, words, 92 if t < HOOK_S else 74, fg, PANEL_H // 2, tt, stagger=0.16)
+            if k < 0.12 and t > 0.3:  # a short flash on each beat
+                img = Image.blend(img, Image.new("RGB", (W, H), (255, 255, 255)), 0.10)
         elif t < end_start:
             # product: drop in with a bounce, then float and slowly push in
             drop = ease_out_back(t / (0.9 if slow else 0.6), 1.3)

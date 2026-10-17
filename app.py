@@ -78,7 +78,9 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 .lf-av { width: 32px; height: 32px; border-radius: 50%; display: grid; place-items: center; font-weight: 600; font-size: 12px; flex: none; position: relative; overflow: hidden; }
 .lf-av img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; background: #fff; padding: 7px; box-sizing: border-box; border-radius: 50%; border: 1px solid var(--line); }
 .lf-tile .top.has-thumb { background-size: cover; background-position: center; position: relative; }
-.lf-tile .top.has-thumb i { color: #fff; border-color: rgba(255,255,255,.9); border-radius: 50%; width: 34px; height: 34px; background: rgba(0,0,0,.35); }
+.lf-tile .top.has-thumb i { width: 44px; height: 44px; border: 0; border-radius: 50%; background: rgba(0,0,0,.6); position: relative; transition: transform .15s, background .15s; }
+.lf-tile .top.has-thumb i::after { content: ""; position: absolute; left: 17px; top: 13px; border-style: solid; border-width: 9px 0 9px 14px; border-color: transparent transparent transparent #fff; }
+.lf-tile[data-embed]:hover .top.has-thumb i { background: #E8732B; }
 .lf-tile .plat { position: absolute; top: 8px; left: 8px; background: rgba(0,0,0,.6); color: #fff; font-size: 12px; padding: 2px 8px; border-radius: 8px; }
 .lf-comp b { font-weight: 500; font-size: 14px; display: block; }
 .lf-comp span { color: var(--soft); font-size: 12px; }
@@ -88,12 +90,12 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 .lf-wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; align-items: start; }
 @media (max-width: 700px) { .lf-wall { grid-template-columns: repeat(2, 1fr); } }
 .lf-tile { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; text-decoration: none !important; color: var(--ink) !important; display: block; }
-.lf-tile .top { height: 120px; display: grid; place-items: center; }
+.lf-tile .top { aspect-ratio: 16 / 9; height: auto; display: grid; place-items: center; }
 .lf-tile .top i { width: 28px; height: 28px; border: 3px solid currentColor; display: block; border-radius: 2px; }
 .lf-tile .meta { padding: 8px 10px 10px; }
 .lf-tile[data-embed] { cursor: pointer; }
 .lf-tile[data-embed]:hover .top i { transform: scale(1.12); }
-.lf-tile .top.playing { height: 430px; background: #000 !important; }
+.lf-tile .top.playing { background: #000 !important; }  /* same horizontal size while it plays */
 .lf-tile .top.playing iframe { width: 100%; height: 100%; border: 0; display: block; }
 .lf-tile .open { color: var(--hint); font-size: 11px; text-decoration: none; float: right; }
 .lf-tile .views { color: var(--soft); font-size: 12px; }
@@ -123,7 +125,7 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 @keyframes lfpulse { 50% { opacity: .35; } }
 .lf-ticker .pings { margin-left: auto; color: var(--soft); white-space: nowrap; }
 
-.lf-sec { font-size: 16px; font-weight: 600; margin: 18px 0 6px; }
+.lf-sec { font-size: 17px; font-weight: 600; margin: 34px 0 6px; }
 .lf-row { display: flex; justify-content: space-between; gap: 16px; padding: 9px 0; border-bottom: 1px solid var(--line); font-size: 14px; }
 .lf-row:last-child { border-bottom: none; }
 .lf-row .why { color: var(--soft); font-size: 13px; margin-top: 3px; }
@@ -518,8 +520,8 @@ st.markdown(
     f'<span class="pings">{("Needed you " + str(pings) + " times") if pings else "Didn&#39;t need you once"}</span></div>',
     unsafe_allow_html=True,
 )
-t_research, t_videos, t_post, t_check, t_activity = st.tabs(
-    ["Trending now", "Your videos", "Review & post", "Quality checklist", "How it improves"])
+# One page, read top to bottom: what's trending, your videos, posting, the checklist, how it improves.
+t_research, t_videos, t_post, t_check, t_activity = (st.container() for _ in range(5))
 
 with t_videos:
     # ---------------- the output: one card per launch video ----------------
@@ -629,8 +631,6 @@ def post_dialog(vid: str, v: dict) -> None:
             day = dcol.date_input("Date", datetime.date.today() + datetime.timedelta(days=1), key=key + "_day")
             tm = tcol.time_input("Time", datetime.time(17, 0), key=key + "_time")
             stamp = f"{day:%b %d} at {tm:%I:%M %p}".replace(" 0", " ")
-        st.info("Demo: social accounts aren't connected, so nothing is published. Connecting TikTok, Instagram "
-                "and YouTube is the next step.", icon=":material/info:")
         b, n = st.columns(2)
         if b.button("Back", use_container_width=True):
             st.session_state[key + "_step"] = 2
@@ -646,6 +646,7 @@ def post_dialog(vid: str, v: dict) -> None:
 
 
 with t_post:
+    st.markdown('<div class="lf-sec" style="margin-top:28px">Review and post</div>', unsafe_allow_html=True)
     ready = [(vid, v) for vid, v in vehicles.items() if v.get("status") == "go" and v.get("attempts")]
     if not ready:
         st.info("Videos appear here once they pass every check." if running else "No videos are ready to post yet.")
@@ -750,7 +751,7 @@ with t_research:
     )
     pats = "".join(f'<span class="lf-tag">{safe(humanize_tag(p["tag"]))}</span>' for p in res.get("patterns", [])[:5])
     tiles = []
-    for i, post in enumerate(res.get("trend_wall", [])[:9]):
+    for i, post in enumerate(res.get("trend_wall", [])[:8]):
         bg, fg = TILE[i % 6]
         linked = "REPLACE_ME" not in post.get("url", "")
         embed = embed_url(post) if linked else None
@@ -763,7 +764,7 @@ with t_research:
         open_link = f'<a class="open" href="{safe(post["url"])}" target="_blank">open ↗</a>' if linked else ""
         tiles.append(
             f'{open_tag}{top}'
-            f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
+            f'<div class="meta"><div class="views">'
             f'{(views(post["views"]) + " views") if post.get("views") else ""}{" · " if post.get("views") and post.get("age") else ""}{safe(ago(post.get("age", "")))}</div>'
             f'{open_link}<div class="hook">{safe(post["hook"])}</div></div></div>')
 
@@ -785,13 +786,12 @@ with t_research:
                    "from what is working here. Tap one to play it.")
         source = "Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Sample research"
         research_html = (
-            f'<div class="lf-research">'
-            f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
-            f'<div class="lf-card"><div class="lf-h">Viral this month <small>{source}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
-            f'</div>')
+            f'<div class="lf-card"><div class="lf-h">Viral this month <small>{source}</small></div>'
+            f'{f"<div class=lf-pats style=margin:0 0 12px><span class=why style=font-size:12px;color:var(--soft);margin-right:6px>Working now:</span>{pats}</div>" if pats else ""}'
+            f'<div class="lf-wall">{"".join(tiles)}</div></div>')
         components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}'
-                        f'.lf-research{{display:grid;grid-template-columns:1fr 2.6fr;gap:24px}}@media(max-width:900px){{.lf-research{{grid-template-columns:1fr}}}}</style></head>'
-                        f'<body>{research_html}{TOP_JS}</body></html>', height=980, scrolling=True)
+                        f'.lf-wall{{grid-template-columns:repeat(4,1fr)}}@media(max-width:900px){{.lf-wall{{grid-template-columns:repeat(2,1fr)}}}}</style></head>'
+                        f'<body>{research_html}{TOP_JS}</body></html>', height=560, scrolling=False)
 
 
 with t_activity:

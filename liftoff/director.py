@@ -85,6 +85,14 @@ def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
         if d["footage"]:
             tel.emit("director", "footage", {"query": d["footage"]["query"], "credit": d["footage"]["credit"]},
                      vehicle=d["id"])
+    # Three directions should look like three different videos: give each a distinct style,
+    # preferring the one its pattern suggests.
+    used: set[str] = set()
+    for d in dirs:
+        want = motion.scene_style(str(d.get("pattern", "")))
+        d["style"] = want if want not in used else next(
+            (st for st in ("split", "macro", "kinetic", "hero") if st not in used), want)
+        used.add(d["style"])
     if plant_failure and dirs:
         # Demo move: make vehicle A miss the logo threshold so the verifier catches it live.
         dirs[0]["logo_seconds"] = min(dirs[0]["logo_seconds"], 2.4)
