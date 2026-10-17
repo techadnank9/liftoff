@@ -35,7 +35,7 @@ SPEC_FIXTURE = {
         "Assumed 9:16 vertical because the mission said 'for vertical feeds'.",
         "Assumed English on-screen text; mission did not specify a language.",
         "Assumed US launch because no market was named; competitor set chosen accordingly.",
-        "Assumed no audio track is required for pass/fail; sound is a Phase 2 check.",
+        "Assumed the videos must work with the sound off, so nothing depends on audio.",
     ],
     "escalations": [],
     "spec_notes": "Logo threshold of 3s from category norms (see research.sources).",

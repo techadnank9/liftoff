@@ -28,7 +28,8 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
            run_dir: Path | None = None, set_latest: bool = True, brand_url: str | None = None) -> Path:
     run_dir = run_dir or RUNS / time.strftime("%Y%m%d-%H%M%S")
     tel = Telemetry(run_dir)
-    if set_latest:
+    # Terminal test runs in practice mode never replace what the app shows as the latest launch.
+    if set_latest and (not llm.MOCK or os.environ.get("LIFTOFF_SET_LATEST") == "1"):
         (RUNS / "latest").unlink(missing_ok=True)
         try:
             (RUNS / "latest").symlink_to(run_dir.relative_to(RUNS))
