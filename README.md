@@ -403,7 +403,22 @@ flowchart LR
 
 **The score is the first-attempt GO rate on held-out missions**: how often a direction clears every check without a single HOLD. Overall GO rate is a guard, so a rule that trades correctness for speed gets reverted.
 
-<!-- PLAYBOOK_RESULTS -->
+**Real run on Crusoe** (`python -m liftoff.playbook --rounds 2 --limit 6`, 6 train and 6 held-out missions, 2 directions each, no planted failures, 14 minutes):
+
+| | Held-out first-attempt GO | Held-out overall GO | Avg attempts | Decision |
+|---|---:|---:|---:|---|
+| ✈️ Flight 1, empty playbook | **0%** | 100% | 2.00 | baseline |
+| ✈️ Flight 2, after 14 train HOLDs | **50%** | 100% | 1.67 | ✅ kept |
+| ✈️ Flight 3, after 10 more HOLDs | 50% | 100% | 1.50 | ↩️ reverted: no gain on the score |
+
+The rules the team wrote for itself and kept (`playbook/director.md`):
+
+```text
+- logo_seconds must be greater than or equal to 3.25 seconds
+- text_contrast must be greater than or equal to 4.5
+```
+
+Both came from measured failures: logo time read 2.0 to 2.5s against a 3.0s check (the extra 0.25s covers 4fps sampling), and white on the orange primary measured 3.8 against 4.5. Half the held-out directions now clear on the first draft, and no direction got worse. Flight 3's patch didn't raise the score, so it was thrown away. The keep test does what it says.
 
 Rules must hold for every mission. The first real run learned `duration_s <= 8.0` from a single "under 8 seconds" teaser. That would have broken every 12 second mission, so the playbook prompt now forbids copying one mission's constraint, and the keep test catches it if it slips through anyway.
 
