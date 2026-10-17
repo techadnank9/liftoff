@@ -1,0 +1,477 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liftoff: launch videos proven before liftoff</title>
+<meta name="description" content="Type one line. An agent team writes what done means, builds launch video directions, and an independent verifier proves each one on Crusoe and NVIDIA Nemotron.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0B; --panel: #131315; --panel-2: #1A1A1D; --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+  --ink: #F2F1EE; --soft: #A3A19B; --dim: #66645F;
+  --flame: #F2853A; --flame-2: #FFB067; --go: #5BD08A; --hold: #F2C063;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; scroll-padding-top: 84px; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 17px/1.6 'Inter Tight', system-ui, sans-serif; overflow-x: hidden; }
+a { color: inherit; }
+:focus-visible { outline: 2px solid var(--flame-2); outline-offset: 3px; border-radius: 8px; }
+.mono { font-family: var(--mono); font-size: 12px; letter-spacing: .04em; color: var(--dim); }
+.num { font-variant-numeric: tabular-nums; }
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+
+/* nav: floating glass pill */
+.nav { position: fixed; top: 14px; left: 50%; transform: translateX(-50%); z-index: 20; display: flex; align-items: center; gap: 28px;
+  padding: 8px 8px 8px 18px; border-radius: 16px; background: rgba(20,20,22,.72); border: 1px solid var(--line-2);
+  backdrop-filter: blur(14px); -webkit-backdrop-filter: blur(14px); width: min(720px, calc(100% - 24px)); }
+.nav .mark { display: flex; align-items: center; gap: 9px; font-weight: 600; text-decoration: none; }
+.nav .mark svg { width: 20px; height: 20px; }
+.nav .links { display: flex; gap: 22px; margin-left: auto; font-size: 14px; }
+.nav .links a { text-decoration: none; color: var(--soft); }
+.nav .links a:hover { color: var(--ink); }
+
+/* buttons */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 10px; height: 46px; padding: 0 20px; border-radius: 12px;
+  font-weight: 600; font-size: 15px; text-decoration: none; border: 1px solid var(--line-2); color: var(--ink); background: #1C1C1F; }
+.btn:hover { background: #242428; }
+.btn.flame { color: #fff; border-color: rgba(255,190,140,.55);
+  background: linear-gradient(180deg, #F79A55 0%, #E8732B 100%);
+  box-shadow: 0 0 0 1px rgba(242,133,58,.25), 0 8px 30px -6px rgba(242,133,58,.65), inset 0 1px 0 rgba(255,255,255,.35); }
+.btn.flame:hover { background: linear-gradient(180deg, #FAA663 0%, #EE7C33 100%); }
+.btn.sm { height: 36px; padding: 0 14px; font-size: 14px; border-radius: 10px; }
+.btn svg { width: 17px; height: 17px; }
+
+/* hero */
+.hero { padding: 150px 0 40px; text-align: center; position: relative; }
+.hero h1 { font-weight: 600; font-size: clamp(44px, 7vw, 92px); line-height: .98; letter-spacing: -0.045em; margin: 0 auto 22px; max-width: 15ch; }
+.hero p { color: var(--soft); font-size: 19px; max-width: 54ch; margin: 0 auto 30px; }
+.hero .ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.hero .notes { margin-top: 16px; display: flex; gap: 22px; justify-content: center; }
+.pad { position: relative; height: 420px; margin-top: 30px; }
+#rocket { width: 100%; height: 100%; display: block; }
+.pad::after { content: ""; position: absolute; inset: auto 0 0 0; height: 120px; background: linear-gradient(transparent, var(--bg)); pointer-events: none; }
+
+/* tools strip */
+.tools { padding: 10px 0 70px; text-align: center; }
+.tools .row { display: flex; justify-content: center; gap: clamp(28px, 6vw, 72px); flex-wrap: wrap; margin-top: 18px; }
+.tools .row span { font-size: clamp(20px, 2.4vw, 30px); font-weight: 600; letter-spacing: -0.02em; color: #5B5A56; }
+
+/* one flight: sticky story */
+.flight { border-top: 1px solid var(--line); }
+.flight-head { padding: 80px 0 20px; }
+.flight-head h2 { font-size: clamp(30px, 3.6vw, 44px); letter-spacing: -0.03em; font-weight: 600; margin: 6px 0 0; }
+.story { position: relative; height: calc(6 * 85vh); }
+.stage { position: sticky; top: 0; height: 100vh; display: grid; grid-template-columns: 1.1fr 1fr 210px; gap: 40px; align-items: center; }
+.panel-wrap { position: relative; min-height: 520px; }
+.panel { position: absolute; inset: 0; opacity: 0; transform: translateY(14px); transition: opacity .45s, transform .45s; pointer-events: none; }
+.panel.on { opacity: 1; transform: none; pointer-events: auto; }
+.panel .k { display: block; margin-bottom: 10px; }
+.panel h3 { font-size: clamp(30px, 3.4vw, 46px); line-height: 1.02; letter-spacing: -0.035em; font-weight: 600; margin: 0 0 22px; }
+.panel h3 span { color: var(--dim); }
+.card { background: var(--panel); border: 1px solid var(--line-2); border-radius: 18px; padding: 18px; }
+.card .top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.chip { display: inline-block; padding: 4px 10px; border-radius: 8px; background: var(--panel-2); border: 1px solid var(--line); font-size: 13px; color: var(--soft); margin: 0 6px 6px 0; }
+.input { font-size: 16px; padding: 14px 16px; border-radius: 12px; background: #0E0E10; border: 1px solid var(--line-2); margin-bottom: 14px; }
+.input b { color: var(--flame-2); font-weight: 500; }
+.mini { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.mini div { background: var(--panel-2); border: 1px solid var(--line); border-radius: 10px; padding: 10px; }
+.mini b { display: block; font-size: 20px; font-weight: 600; }
+.mini span { font-size: 12px; color: var(--soft); }
+.chk { display: grid; grid-template-columns: 1fr auto 52px; gap: 12px; padding: 9px 2px; border-top: 1px solid var(--line); font-size: 14px; align-items: center; }
+.chk:first-of-type { border-top: 0; }
+.chk .v { text-align: right; font-family: var(--mono); font-size: 13px; color: var(--soft); }
+.chk .t { justify-self: end; font-family: var(--mono); font-size: 11px; padding: 2px 7px; border-radius: 6px; color: var(--go); background: rgba(91,208,138,.12); }
+.chk.h .t { color: var(--hold); background: rgba(242,192,99,.12); }
+.chk.h .v { color: var(--hold); }
+.say { margin-top: 12px; padding: 11px 13px; border-radius: 10px; font-size: 14px; border-left: 2px solid var(--hold); background: rgba(242,192,99,.07); color: var(--soft); }
+.say.go { border-color: var(--go); background: rgba(91,208,138,.07); }
+.say b { color: var(--ink); }
+.gif { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.gif img { width: 100%; border-radius: 12px; display: block; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 14px; }
+.tbl td, .tbl th { padding: 10px 6px; border-top: 1px solid var(--line); text-align: left; }
+.tbl th { color: var(--dim); font-weight: 500; font-family: var(--mono); font-size: 11px; border-top: 0; }
+.tbl .r { text-align: right; font-family: var(--mono); }
+.tbl .big { color: var(--flame-2); font-size: 18px; }
+.rule { font-family: var(--mono); font-size: 12px; color: var(--soft); margin-top: 12px; line-height: 1.8; }
+
+/* trajectory */
+.traj { position: relative; height: 600px; }
+.traj svg { width: 100%; height: 100%; overflow: visible; }
+.stops { list-style: none; margin: 0; padding: 0; }
+.stops li { display: flex; justify-content: space-between; gap: 10px; padding: 7px 0; color: var(--dim); font-size: 15px; transition: color .3s; }
+.stops li .mono { color: inherit; }
+.stops li.on { color: var(--ink); }
+.stops li .name { border-left: 2px solid transparent; padding-left: 10px; margin-left: -12px; transition: border-color .3s; }
+.stops li.on .name { border-left-color: var(--flame); }
+
+/* proof */
+section.band { border-top: 1px solid var(--line); padding: 100px 0; }
+.band h2 { font-size: clamp(30px, 3.6vw, 48px); letter-spacing: -0.035em; font-weight: 600; line-height: 1.02; margin: 8px 0 14px; max-width: 18ch; }
+.band p.lead { color: var(--soft); max-width: 60ch; margin: 0 0 40px; font-size: 18px; }
+.shot { border-radius: 20px; border: 1px solid var(--line-2); overflow: hidden; background: var(--panel);
+  box-shadow: 0 40px 120px -40px rgba(242,133,58,.25); }
+.shot img { width: 100%; display: block; }
+.stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line-2); border-radius: 18px; margin-top: 28px; background: var(--panel); }
+.stats div { padding: 22px; }
+.stats div + div { border-left: 1px solid var(--line); }
+.stats b { display: block; font-size: 36px; font-weight: 600; letter-spacing: -0.03em; }
+.stats span { color: var(--soft); font-size: 14px; }
+
+.indep { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.indep .card h4 { margin: 0 0 8px; font-size: 18px; font-weight: 600; }
+.indep .card p { margin: 0; color: var(--soft); font-size: 15px; }
+.indep .card .never { color: var(--hold); }
+
+.final { text-align: center; padding: 120px 0; border-top: 1px solid var(--line); position: relative; overflow: hidden; }
+.final::before { content: ""; position: absolute; left: 50%; top: 100%; width: 900px; height: 500px; transform: translate(-50%, -55%);
+  background: radial-gradient(closest-side, rgba(242,133,58,.28), transparent); pointer-events: none; }
+.final h2 { font-size: clamp(36px, 5vw, 64px); letter-spacing: -0.04em; font-weight: 600; line-height: 1; margin: 0 auto 18px; max-width: 14ch; position: relative; }
+.final p { color: var(--soft); margin: 0 auto 28px; max-width: 50ch; position: relative; }
+.final .ctas { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; position: relative; }
+code.k { font-family: var(--mono); font-size: 13px; background: #18181B; border: 1px solid var(--line); padding: 2px 8px; border-radius: 6px; color: var(--soft); }
+footer { border-top: 1px solid var(--line); padding: 36px 0 48px; display: flex; justify-content: space-between; flex-wrap: wrap; gap: 16px; color: var(--dim); font-size: 14px; }
+
+/* phones and tablets: no sticky stage, panels flow in order */
+@media (max-width: 980px) {
+  .nav .links a.hide-md { display: none; }
+  .story { height: auto; }
+  .stage { position: static; height: auto; display: block; }
+  .traj, .stops { display: none; }
+  .panel-wrap { min-height: 0; }
+  .panel { position: static; opacity: 1; transform: none; pointer-events: auto; margin-bottom: 64px; }
+  .stats { grid-template-columns: 1fr 1fr; }
+  .stats div:nth-child(3) { border-left: 0; }
+  .stats div:nth-child(n+3) { border-top: 1px solid var(--line); }
+  .indep { grid-template-columns: 1fr; }
+  .pad { height: 300px; }
+}
+@media (max-width: 560px) {
+  .wrap { padding: 0 16px; }
+  .nav { gap: 12px; }
+  .nav .links { display: none; }
+  .nav .btn.sm { margin-left: auto; }
+  .hero { padding-top: 110px; }
+  .hero p { font-size: 17px; }
+  .hero .ctas .btn { width: 100%; }
+  .hero .notes { flex-direction: column; gap: 4px; }
+  .mini { grid-template-columns: 1fr 1fr; }
+  .stats { grid-template-columns: 1fr; }
+  .stats div + div { border-left: 0; border-top: 1px solid var(--line); }
+  .final .ctas .btn { width: 100%; }
+}
+@media (prefers-reduced-motion: reduce) { .panel { transition: none; } html { scroll-behavior: auto; } }
+</style>
+</head>
+<body>
+
+<nav class="nav" aria-label="Main">
+  <a class="mark" href="#top" aria-label="Liftoff home">
+    <svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 2c3 2.5 4.5 6 4.5 10.5L14 16h-4l-2.5-3.5C7.5 8 9 4.5 12 2Z" fill="#F2853A"/><path d="M10 16l-1 5 3-2 3 2-1-5" fill="#FFB067"/><circle cx="12" cy="9" r="1.6" fill="#0A0A0B"/></svg>
+    Liftoff
+  </a>
+  <div class="links">
+    <a href="#flight">How it works</a>
+    <a href="#proof" class="hide-md">Proof</a>
+    <a href="https://github.com/techadnank9/liftoff">GitHub</a>
+  </div>
+  <a class="btn flame sm mc" href="http://localhost:3000">Open mission control</a>
+</nav>
+
+<main id="top">
+  <header class="hero wrap">
+    <h1>Launch videos, proven before liftoff</h1>
+    <p>Type one line. An agent team writes what done means, builds the video directions, and an independent verifier measures every one before you ever see it.</p>
+    <div class="ctas">
+      <a class="btn flame mc" href="http://localhost:3000">Open mission control</a>
+      <a class="btn" href="#flight">See one flight</a>
+    </div>
+    <div class="notes"><span class="mono">open source on GitHub</span><span class="mono">every model call on Crusoe</span></div>
+    <div class="pad" aria-hidden="true"><canvas id="rocket"></canvas></div>
+  </header>
+
+  <section class="tools wrap" aria-label="Built with">
+    <span class="mono">runs on</span>
+    <div class="row"><span>Crusoe</span><span>NVIDIA Nemotron</span><span>You.com</span><span>DeepSeek</span><span>YouTube Data API</span></div>
+  </section>
+
+  <section class="flight" id="flight">
+    <div class="wrap flight-head">
+      <span class="mono">your launch video, from one line</span>
+      <h2>One flight of Liftoff</h2>
+    </div>
+    <div class="story" id="story">
+      <div class="stage wrap">
+        <div class="panel-wrap">
+
+          <article class="panel on" data-step="0">
+            <span class="mono k">01 / mission</span>
+            <h3>One line in. <span>Real research out.</span></h3>
+            <div class="card">
+              <div class="input">Launch video for <b>Fizz cola</b>, bold, for vertical feeds</div>
+              <div class="top"><span class="mono">found live on You.com</span><span class="mono">13 public posts</span></div>
+              <span class="chip">Pepsi</span><span class="chip">Dr Pepper</span><span class="chip">Humor</span><span class="chip">Slow motion</span><span class="chip">Taste test</span><span class="chip">Countdown</span>
+              <div class="mini" style="margin-top:8px">
+                <div><b class="num">100.6M</b><span>top Short views</span></div>
+                <div><b class="num">6</b><span>citations</span></div>
+                <div><b class="num">9s</b><span>to research</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel" data-step="1">
+            <span class="mono k">02 / flight plan</span>
+            <h3>Done is written first. <span>Then locked.</span></h3>
+            <div class="card">
+              <div class="top"><span class="mono">Nemotron Super</span><span class="mono">9 checks, 5 assumptions</span></div>
+              <div class="chk"><span>Duration 6 to 15s</span><span class="v">ffprobe</span><span class="t">locked</span></div>
+              <div class="chk"><span>Vertical 9:16</span><span class="v">ffprobe</span><span class="t">locked</span></div>
+              <div class="chk"><span>Logo on screen 3s or more</span><span class="v">template match</span><span class="t">locked</span></div>
+              <div class="chk"><span>Text contrast 4.5 or more</span><span class="v">WCAG</span><span class="t">locked</span></div>
+              <div class="chk"><span>Readable hook in the first second</span><span class="v">Nemotron Omni</span><span class="t">locked</span></div>
+              <div class="chk"><span>No other brand's logo</span><span class="v">Nemotron Omni</span><span class="t">locked</span></div>
+              <div class="say">Assumed 9:16 because the mission said vertical. Assumed English and a US launch. Nothing silent.</div>
+            </div>
+          </article>
+
+          <article class="panel" data-step="2">
+            <span class="mono k">03 / go/no-go poll</span>
+            <h3>Measured, <span>not claimed.</span></h3>
+            <div class="card">
+              <div class="top"><span class="mono">direction A, attempt 1</span><span class="mono">7 of 9 pass</span></div>
+              <div class="chk"><span>Duration</span><span class="v">10.0s</span><span class="t">pass</span></div>
+              <div class="chk"><span>Vertical</span><span class="v">540×960</span><span class="t">pass</span></div>
+              <div class="chk h"><span>Logo on screen</span><span class="v">2.0s / 3.0</span><span class="t">hold</span></div>
+              <div class="chk h"><span>Text contrast</span><span class="v">3.8 / 4.5</span><span class="t">hold</span></div>
+              <div class="chk"><span>Hook in first second</span><span class="v">yes</span><span class="t">pass</span></div>
+              <div class="say"><b>HOLD.</b> Both numbers go back to the Director. The verifier never saw what the Director claimed it built.</div>
+            </div>
+          </article>
+
+          <article class="panel" data-step="3">
+            <span class="mono k">04 / fix</span>
+            <h3>The builder fixes <span>exactly what failed.</span></h3>
+            <div class="card">
+              <div class="top"><span class="mono">patch: logo_seconds 3.2, bg secondary</span><span class="mono">DeepSeek</span></div>
+              <div class="gif"><img src="../docs/hold-then-go.gif" alt="Direction A on the orange background with the logo too short, then on navy after the fix" loading="lazy" style="grid-column: 1 / -1"></div>
+              <div class="say go"><b>Attempt 2: 9 of 9.</b> Logo held 3.25s. White text on navy measures 13.32.</div>
+            </div>
+          </article>
+
+          <article class="panel" data-step="4">
+            <span class="mono k">05 / goal re-check</span>
+            <h3>Passing checks <span>isn't the goal.</span></h3>
+            <div class="card">
+              <div class="top"><span class="mono">fresh Nemotron Omni call</span><span class="mono">mission + 3 frames only</span></div>
+              <div class="say go" style="margin-top:0"><b>Liftoff confirmed.</b> Brand name visible in all frames, vertical, under 15 seconds, bold and direct as the mission asked, nothing prohibited.</div>
+              <div class="mini" style="margin-top:14px">
+                <div><b class="num">3 / 3</b><span>directions cleared</span></div>
+                <div><b class="num">0</b><span>human pings</span></div>
+                <div><b class="num">2 min</b><span>end to end</span></div>
+              </div>
+            </div>
+          </article>
+
+          <article class="panel" data-step="5">
+            <span class="mono k">06 / learn</span>
+            <h3>It rewrites its own playbook. <span>Keeps what works.</span></h3>
+            <div class="card">
+              <table class="tbl">
+                <thead><tr><th>held-out missions</th><th class="r">first try</th><th class="r">overall</th><th>decision</th></tr></thead>
+                <tbody>
+                  <tr><td>Flight 1</td><td class="r">0%</td><td class="r">100%</td><td>baseline</td></tr>
+                  <tr><td>Flight 2</td><td class="r big">50%</td><td class="r">100%</td><td style="color:var(--go)">kept</td></tr>
+                  <tr><td>Flight 3</td><td class="r">50%</td><td class="r">100%</td><td style="color:var(--dim)">reverted</td></tr>
+                </tbody>
+              </table>
+              <div class="rule">logo_seconds &gt;= 3.25<br>text_contrast &gt;= 4.5</div>
+            </div>
+          </article>
+
+        </div>
+
+        <div class="traj" aria-hidden="true"><svg id="trajSvg" viewBox="0 0 400 600"></svg></div>
+
+        <ol class="stops" id="stops">
+          <li class="on"><span class="name">Mission</span><span class="mono">01</span></li>
+          <li><span class="name">Flight plan</span><span class="mono">02</span></li>
+          <li><span class="name">Go/no-go poll</span><span class="mono">03</span></li>
+          <li><span class="name">Fix</span><span class="mono">04</span></li>
+          <li><span class="name">Goal re-check</span><span class="mono">05</span></li>
+          <li><span class="name">Learn</span><span class="mono">06</span></li>
+        </ol>
+      </div>
+    </div>
+  </section>
+
+  <section class="band" id="proof">
+    <div class="wrap">
+      <span class="mono">mission control</span>
+      <h2>Watch every decision, live</h2>
+      <p class="lead">Competitors with their real icons, a trend wall of real Shorts that play in place, and each direction's checks as they land.</p>
+      <div class="shot"><img src="../docs/mission-control.png" alt="Liftoff mission control showing competitors, a trend wall of real YouTube Shorts, and three directions that each passed 9 of 9 checks" loading="lazy"></div>
+      <div class="stats">
+        <div><b class="num">9 / 9</b><span>checks per direction</span></div>
+        <div><b class="num">0</b><span>human pings</span></div>
+        <div><b class="num">0 → 50%</b><span>first-try passes after learning</span></div>
+        <div><b class="num">4</b><span>models, 2 families</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="band">
+    <div class="wrap">
+      <span class="mono">independence</span>
+      <h2>The checker can't be talked into agreeing</h2>
+      <p class="lead">Enforced in code, not asked for in a prompt.</p>
+      <div class="indep">
+        <div class="card"><h4>The verifier</h4><p>Sees the video, the brand card and the flight plan. <span class="never">Never</span> the Director's notes, so it has to measure.</p></div>
+        <div class="card"><h4>The goal re-check</h4><p>Sees only your mission and three frames. <span class="never">Never</span> the checklist, so it catches a video that passes every check and misses the point.</p></div>
+        <div class="card"><h4>Two model families</h4><p>The builder runs on DeepSeek. The checkers run on NVIDIA Nemotron, so they don't share its blind spots.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="final">
+    <div class="wrap">
+      <h2>Ready for your first flight?</h2>
+      <p>Mission control runs on your machine. Start it with <code class="k">streamlit run app.py</code>, then type a mission.</p>
+      <div class="ctas">
+        <a class="btn flame mc" href="http://localhost:3000">Open mission control</a>
+        <a class="btn" href="https://github.com/techadnank9/liftoff">
+          <svg viewBox="0 0 16 16" aria-hidden="true" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8a8 8 0 0 0 5.47 7.59c.4.07.55-.17.55-.38v-1.33c-2.23.48-2.7-1.07-2.7-1.07-.36-.92-.89-1.17-.89-1.17-.73-.5.06-.49.06-.49.8.06 1.23.83 1.23.83.72 1.22 1.87.87 2.33.66.07-.52.28-.87.5-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82a7.6 7.6 0 0 1 4 0c1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48v2.2c0 .21.15.46.55.38A8 8 0 0 0 16 8c0-4.42-3.58-8-8-8Z"/></svg>
+          View on GitHub
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <div class="wrap">
+    <footer>
+      <span>Liftoff, for the Done Means Done track of the Recursive Agents Hackathon. Fizz is a fictional brand.</span>
+      <a href="https://github.com/techadnank9/liftoff">github.com/techadnank9/liftoff</a>
+    </footer>
+  </div>
+</main>
+
+<script>
+// Mission control link follows ?mc= so a hosted copy can point at a deployed app.
+(function () {
+  var mc = new URLSearchParams(location.search).get('mc');
+  if (mc && /^https?:\/\//.test(mc)) document.querySelectorAll('a.mc').forEach(function (a) { a.href = mc; });
+})();
+
+var REDUCE = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// Dot-matrix rocket on the pad, with flickering exhaust. Drawn, not an image.
+(function () {
+  var art = [
+    "            ##            ",
+    "           ####           ",
+    "          ######          ",
+    "          ##..##          ",
+    "          #....#          ",
+    "          ##..##          ",
+    "          ######          ",
+    "          ######          ",
+    "          ##  ##          ",
+    "          ######          ",
+    "          ######          ",
+    "         ########         ",
+    "        ##########        ",
+    "       ###  ##  ###       ",
+    "      ###   ##   ###      ",
+    "      ##    ##    ##      ",
+  ];
+  var tower = 9;
+  var c = document.getElementById('rocket'), ctx = c.getContext('2d');
+  function size() { var r = c.getBoundingClientRect(), d = window.devicePixelRatio || 1; c.width = r.width * d; c.height = r.height * d; ctx.setTransform(d, 0, 0, d, 0, 0); }
+  size(); window.addEventListener('resize', size);
+  var t0 = performance.now();
+  function frame(now) {
+    var r = c.getBoundingClientRect(), W = r.width, H = r.height;
+    ctx.clearRect(0, 0, W, H);
+    var cell = Math.max(6, Math.min(11, W / 70));
+    var cols = art[0].length, ox = W / 2 - (cols * cell) / 2, oy = 30;
+    var t = (now - t0) / 1000;
+    // launch tower
+    for (var y = 2; y < art.length + 6; y++) {
+      dot(ox - 3 * cell, oy + y * cell, cell, 'rgba(255,255,255,.22)');
+      if (y % 2 === 0) dot(ox - 2 * cell, oy + y * cell, cell, 'rgba(255,255,255,.12)');
+    }
+    // rocket body
+    for (var row = 0; row < art.length; row++) for (var col = 0; col < cols; col++) {
+      var ch = art[row][col];
+      if (ch === '#') dot(ox + col * cell, oy + row * cell, cell, 'rgba(242,241,238,.92)');
+      if (ch === '.') dot(ox + col * cell, oy + row * cell, cell, 'rgba(242,133,58,.9)');
+    }
+    // exhaust: flickering dots, hot at the nozzle, fading out
+    var baseY = oy + art.length * cell, mid = ox + (cols / 2) * cell;
+    for (var k = 0; k < 9; k++) {
+      var spread = 1 + k * 0.55, n = Math.round(2 + k * 1.2);
+      for (var j = -n; j <= n; j++) {
+        var flick = REDUCE ? 0.6 : (Math.sin(t * 12 + j * 1.7 + k * 2.3) + 1) / 2;
+        if (flick < 0.25 + k * 0.06) continue;
+        var a = (1 - k / 9) * (0.4 + 0.6 * flick);
+        var col2 = k < 3 ? 'rgba(255,214,160,' + a + ')' : 'rgba(242,133,58,' + a * 0.85 + ')';
+        dot(mid + j * cell * 0.55 * spread / 2 - cell / 2, baseY + k * cell, cell, col2);
+      }
+    }
+    // pad
+    for (var p = -16; p <= 16; p++) dot(mid + p * cell - cell / 2, baseY + 10 * cell, cell, 'rgba(255,255,255,' + (0.28 - Math.abs(p) / 80) + ')');
+    if (!REDUCE) requestAnimationFrame(frame);
+  }
+  function dot(x, y, s, color) { ctx.fillStyle = color; ctx.fillRect(x + s * 0.18, y + s * 0.18, s * 0.64, s * 0.64); }
+  requestAnimationFrame(frame);
+})();
+
+// Dotted launch trajectory with six numbered stops.
+var STOPS = [[60, 540], [118, 450], [178, 352], [238, 252], [298, 150], [350, 50]];
+(function () {
+  var svg = document.getElementById('trajSvg'), ns = 'http://www.w3.org/2000/svg', html = '';
+  var D = 'M60 540 C 150 420, 260 260, 350 50';
+  // Dots everywhere; a mask reveals the lit copy only along the travelled part.
+  html += '<defs><mask id="travelled" maskUnits="userSpaceOnUse"><path id="trajMask" d="' + D + '" stroke="#fff" stroke-width="16" fill="none" pathLength="100" stroke-dasharray="0 100"/></mask></defs>';
+  html += '<path d="' + D + '" stroke="rgba(255,255,255,.2)" stroke-width="5" stroke-dasharray="0.01 11" stroke-linecap="round" fill="none"/>';
+  html += '<path d="' + D + '" stroke="#F2853A" stroke-width="6" stroke-dasharray="0.01 11" stroke-linecap="round" fill="none" mask="url(#travelled)"/>';
+  STOPS.forEach(function (s, i) {
+    html += '<g class="stop" data-i="' + i + '"><rect x="' + (s[0] - 22) + '" y="' + (s[1] - 13) + '" width="44" height="26" rx="13" fill="#131315" stroke="rgba(255,255,255,.18)"/>' +
+      '<circle cx="' + (s[0] - 9) + '" cy="' + s[1] + '" r="3" fill="#66645F"/>' +
+      '<text x="' + (s[0] + 6) + '" y="' + (s[1] + 4) + '" fill="#A3A19B" font-family="JetBrains Mono, monospace" font-size="11" text-anchor="middle">0' + (i + 1) + '</text></g>';
+  });
+  svg.innerHTML = html;
+})();
+
+// Scroll drives the story: which panel, which stop, how far along the trajectory.
+(function () {
+  var story = document.getElementById('story'), panels = document.querySelectorAll('.panel'),
+      stops = document.querySelectorAll('#stops li'), groups = document.querySelectorAll('#trajSvg .stop'),
+      lit = document.getElementById('trajMask'), last = -1;
+  var mq = window.matchMedia('(max-width: 980px)');
+  function update() {
+    if (mq.matches) return;
+    var r = story.getBoundingClientRect(), total = story.offsetHeight - window.innerHeight;
+    var p = Math.min(1, Math.max(0, -r.top / total));
+    var i = Math.min(5, Math.floor(p * 6));
+    lit.setAttribute('stroke-dasharray', (p * 100).toFixed(2) + ' 100');
+    if (i === last) return;
+    last = i;
+    panels.forEach(function (el, k) { el.classList.toggle('on', k === i); });
+    stops.forEach(function (el, k) { el.classList.toggle('on', k === i); });
+    groups.forEach(function (g, k) {
+      g.querySelector('circle').setAttribute('fill', k <= i ? '#F2853A' : '#66645F');
+      g.querySelector('rect').setAttribute('stroke', k === i ? 'rgba(242,133,58,.8)' : 'rgba(255,255,255,.18)');
+      g.querySelector('text').setAttribute('fill', k === i ? '#F2F1EE' : '#A3A19B');
+    });
+  }
+  window.addEventListener('scroll', update, { passive: true });
+  window.addEventListener('resize', update);
+  update();
+})();
+</script>
+</body>
+</html>

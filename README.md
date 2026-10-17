@@ -6,7 +6,7 @@
 
 **One line of mission in. Launch video directions out. Each one proven against a written definition of done by an independent verifier, before a human ever sees it.**
 
-[Quickstart](#-quickstart) · [How it works](#-how-a-flight-works) · [Architecture](#-architecture) · [The verifier](#-the-go-no-go-poll) · [Version N+1](#-version-n1-the-team-gets-better) · [Design decisions](#-design-decisions)
+[Landing page](site/index.html) · [Quickstart](#-quickstart) · [How it works](#-how-a-flight-works) · [Architecture](#-architecture) · [The verifier](#-the-go-no-go-poll) · [Version N+1](#-version-n1-the-team-gets-better) · [Design decisions](#-design-decisions)
 
 <sub>Built for the <b>Done Means Done</b> track of the Recursive Agents Hackathon · Crusoe Managed Inference · NVIDIA Nemotron 3 · You.com</sub>
 
@@ -107,6 +107,7 @@ python -m liftoff.playbook --rounds 2 --limit 6   # Version N+1 on held-out miss
 | `python scripts/check_models.py` | Lists your Crusoe models and flags any name in `llm.MODELS` that doesn't exist |
 | `python scripts/make_assets.py` | Regenerates `assets/fizz/` (can, logo, brand card) |
 | `streamlit run app.py` | Mission control. Start flights from the sidebar; it tails `runs/latest` |
+| `python -m http.server 3001` | Then open `localhost:3001/site/`, the landing page. Its buttons open mission control (`?mc=<url>` points them elsewhere) and the repo |
 
 | Environment variable | Default | Meaning |
 |---|---|---|
