@@ -19,6 +19,7 @@ from html import escape
 from pathlib import Path
 
 import streamlit as st
+import streamlit.components.v1 as components
 
 from liftoff.arbiter import MAX_ATTEMPTS
 
@@ -28,8 +29,7 @@ RUNS = ROOT / "runs"
 st.set_page_config(page_title="Liftoff · Mission control", page_icon="🚀", layout="wide",
                    initial_sidebar_state="collapsed")
 
-st.markdown("""
-<style>
+CSS = """
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
 :root {
   --bg: #F7F6F2; --card: #FFFFFF; --line: #E9E6DF; --ink: #1F1E1B; --soft: #6F6C66; --hint: #A19E97;
@@ -71,12 +71,17 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 .lf-pats { margin-top: 22px; }
 .lf-tag { display: inline-block; background: #F4F2EE; border-radius: 12px; padding: 8px 16px; margin: 0 6px 10px 0; font-size: 19px; }
 
-.lf-wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.lf-wall { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; align-items: start; }
 @media (max-width: 700px) { .lf-wall { grid-template-columns: repeat(2, 1fr); } }
 .lf-tile { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; text-decoration: none !important; color: var(--ink) !important; display: block; }
 .lf-tile .top { height: 140px; display: grid; place-items: center; }
 .lf-tile .top i { width: 28px; height: 28px; border: 3px solid currentColor; display: block; border-radius: 2px; }
 .lf-tile .meta { padding: 12px 12px 14px; }
+.lf-tile[data-embed] { cursor: pointer; }
+.lf-tile[data-embed]:hover .top i { transform: scale(1.12); }
+.lf-tile .top.playing { height: 430px; background: #000 !important; }
+.lf-tile .top.playing iframe { width: 100%; height: 100%; border: 0; display: block; }
+.lf-tile .open { color: var(--hint); font-size: 14px; text-decoration: none; float: right; }
 .lf-tile .views { color: var(--soft); font-size: 19px; }
 .lf-tile .hook { font-size: 20px; line-height: 1.3; margin-top: 2px; }
 
@@ -109,8 +114,8 @@ p, li, label, span { font-family: 'Inter', system-ui, sans-serif; }
 .lf-tele div { display: grid; grid-template-columns: 70px 90px 120px 26px 1fr; gap: 10px; padding: 6px 0; border-bottom: 1px solid #F1EFEA;
   font: 12px ui-monospace, Menlo, monospace; color: var(--soft); }
 [data-testid="stVerticalBlockBorderWrapper"] { background: var(--card); border-color: var(--line) !important; border-radius: 18px; }
-</style>
-""", unsafe_allow_html=True)
+"""
+st.markdown(f"<style>{CSS}</style>", unsafe_allow_html=True)
 
 AVATAR = [("#FBE9E5", "#9A2A1E"), ("#E3ECFA", "#2E5BA8"), ("#E6F4EA", "#2F6B2A"), ("#F6EAF1", "#8A2E5C"),
           ("#FBF1DE", "#7A5A12")]
@@ -164,6 +169,17 @@ def thumb_for(post: dict) -> str | None:
         if "youtube.com" in url and marker in url:
             vid = url.split(marker)[1].split("?")[0].split("&")[0].split("/")[0]
             return f"https://i.ytimg.com/vi/{vid}/hqdefault.jpg"
+    return None
+
+
+def embed_url(post: dict) -> str | None:
+    """The platform's own embed player for a public post, autoplaying on click."""
+    url = post.get("url", "")
+    if "youtube.com" in url:
+        vid = thumb_for(post).split("/vi/")[1].split("/")[0] if thumb_for(post) else None
+        return f"https://www.youtube-nocookie.com/embed/{vid}?autoplay=1&playsinline=1&rel=0" if vid else None
+    if "tiktok.com" in url and "/video/" in url:
+        return f"https://www.tiktok.com/embed/v2/{url.split('/video/')[1].split('?')[0].split('/')[0]}?autoplay=1"
     return None
 
 
@@ -320,17 +336,21 @@ tiles = []
 for i, post in enumerate(res.get("trend_wall", [])[:6]):
     bg, fg = TILE[i % 6]
     linked = "REPLACE_ME" not in post.get("url", "")
-    open_tag = f'<a class="lf-tile" href="{safe(post["url"])}" target="_blank">' if linked else '<div class="lf-tile">'
+    embed = embed_url(post) if linked else None
+    # Plays in place through the platform's own embed player; nothing is downloaded.
+    open_tag = f'<div class="lf-tile" data-embed="{safe(embed)}">' if embed else '<div class="lf-tile">'
     thumb = thumb_for(post)
     # Platform-served thumbnail (i.ytimg.com), hotlinked at render time; the pastel stays as fallback.
     top = (f'<div class="top has-thumb" style="background-color:{bg};background-image:url(\'{safe(thumb)}\')">'
            f'<span class="plat">{safe({"youtube": "YouTube", "tiktok": "TikTok", "instagram": "Instagram"}.get(post.get("platform", ""), post.get("platform", "")))}</span><i></i></div>' if thumb
            else f'<div class="top" style="background:{bg};color:{fg}"><i></i></div>')
+    open_link = f'<a class="open" href="{safe(post["url"])}" target="_blank">open ↗</a>' if linked else ""
     tiles.append(
         f'{open_tag}{top}'
         f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
         f'{views(post["views"]) if post.get("views") else safe(post.get("age") or post.get("platform", ""))}</div>'
-        f'<div class="hook">{safe(post["hook"])}</div></div>{"</a>" if linked else "</div>"}'
+        f'{open_link}'
+        f'<div class="hook">{safe(post["hook"])}</div></div></div>'
     )
 
 dirs = []
@@ -346,7 +366,19 @@ for vid, v in vehicles.items():
 if not dirs:
     dirs.append('<div class="lf-st idle">The Director is planning…</div>')
 
-st.markdown(
+TOP_JS = """
+<script>
+document.querySelectorAll('.lf-tile[data-embed]').forEach(function (tile) {
+  tile.addEventListener('click', function (e) {
+    if (e.target.closest('a.open')) return;
+    var top = tile.querySelector('.top');
+    if (top.classList.contains('playing')) return;
+    top.classList.add('playing');
+    top.innerHTML = '<iframe src="' + tile.dataset.embed + '" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" allowfullscreen></iframe>';
+  });
+});
+</script>"""
+band_html = (
     f'<div class="lf-grid">'
     f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
     f'<div class="lf-card"><div class="lf-h">Trend wall <small>{"Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Last 14 days"}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
@@ -354,9 +386,12 @@ st.markdown(
     f'</div>'
     f'<div class="lf-ticker"><span class="lf-dot{" busy" if running else ""}"></span>'
     f'<span>{safe(ticker_line(events, plan_by_id))}</span>'
-    f'<span class="pings">Human pings: {state.get("human_pings", 0)}</span></div>',
-    unsafe_allow_html=True,
+    f'<span class="pings">Human pings: {state.get("human_pings", 0)}</span></div>'
 )
+# A component iframe, not st.markdown, because the click-to-play script must run.
+band_height = max(860, 140 + 300 * len(vehicles)) + 480  # room for one tile to open to 9:16
+components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}</style></head>'
+                f'<body>{band_html}{TOP_JS}</body></html>', height=band_height, scrolling=True)
 
 # ---------------- flight plan + ledger ----------------
 left, right = st.columns([1.25, 1], gap="large")
