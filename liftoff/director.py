@@ -51,9 +51,11 @@ change a field. The levers the renderer obeys:
 
 
 def plan(brand: Brand, research: dict[str, Any], tel: Telemetry, n: int = 3,
-         plant_failure: bool = True) -> list[dict[str, Any]]:
+         plant_failure: bool = True, mission: str = "") -> list[dict[str, Any]]:
     tel.emit("director", "plan_start", {"n": n})
-    user = (f"BRAND CARD:\n{json.dumps(brand.to_dict(), indent=1)}\n\n"
+    user = (f"MISSION (every direction must deliver exactly this; put its specific ask, such as an offer,"
+            f" a product, a setting or a length, into the hook, body or end card): {mission}\n\n"
+            f"BRAND CARD:\n{json.dumps(brand.to_dict(), indent=1)}\n\n"
             f"PATTERNS:\n{json.dumps(research.get('patterns', []), indent=1)}\n\nPropose {n} directions.")
     out = llm.call_json("director", [{"role": "system", "content": SYSTEM.format(n=n) + playbook_files.read("director")},
                                      {"role": "user", "content": user}])

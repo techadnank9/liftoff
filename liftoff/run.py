@@ -46,7 +46,7 @@ def flight(mission: str, brand_name: str = "fizz", n_vehicles: int = 3, plant_fa
 
     # 3. Director plans vehicles
     tel.set(phase="build")
-    directions = director.plan(brand, res, tel, n=n_vehicles, plant_failure=plant_failure)
+    directions = director.plan(brand, res, tel, n=n_vehicles, plant_failure=plant_failure, mission=mission)
 
     # 4. Build -> verify -> arbitrate loop per vehicle
     tel.set(phase="verify")

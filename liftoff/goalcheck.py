@@ -17,7 +17,8 @@ from .telemetry import Telemetry
 
 SYSTEM = """You are an independent reviewer. You will see a one-line mission, a brand card and
 three frames (first second, middle, last second) from a finished short video. Decide whether
-the video satisfies the mission AS WRITTEN. Ignore polish. Return JSON only:
+the video satisfies the mission AS WRITTEN. Ignore polish. Length and format were already
+measured exactly by other checks; judge only what the frames show (message, offer, brand, tone). Return JSON only:
 {"satisfies_goal": true|false, "reason": str}"""
 
 
@@ -25,8 +26,9 @@ def run(mission: str, brand: Brand, frames: list[Path], tel: Telemetry, vehicle:
     tel.emit("goalcheck", "start", {}, vehicle=vehicle)
     pick = [frames[1 if len(frames) > 1 else 0], frames[len(frames) // 2], frames[-1]]
     content: list[dict[str, Any]] = [{"type": "text", "text": f"MISSION: {mission}\nBRAND: {json.dumps(brand.to_dict())}"}]
-    for fp in pick:
-        content += llm.image_content(fp, f"frame {fp.name}")
+    # Label by position, never by filename: the model read "s_0032.png" as 32 seconds.
+    for label, fp in zip(("frame from the first second", "frame from the middle", "frame from the last second"), pick):
+        content += llm.image_content(fp, label)
     out = llm.call_json("goalcheck", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": content}])
     raw = out.get("satisfies_goal") if isinstance(out, dict) else None
     # Models sometimes answer "false" or "no" as strings; bool("false") would be True.

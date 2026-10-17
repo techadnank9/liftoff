@@ -91,6 +91,11 @@ def lessons(flights: list[dict[str, Any]]) -> list[dict[str, Any]]:
                            if k != "notes" and before.get(k) != after.get(k)}
                 out.append({"mission": f["mission"], "vehicle": vid, "failing": failing, "fix": changed,
                             "fixed": b["verdict"]["pass"]})
+            gc = v.get("goalcheck") or {}
+            if atts and gc and not gc.get("satisfies_goal"):
+                d = atts[-1].get("direction", {})
+                out.append({"mission": f["mission"], "vehicle": vid, "goal_recheck_failed": gc.get("reason", ""),
+                            "direction": {k: d.get(k) for k in ("hook", "body", "end_card", "pattern")}})
     return out
 
 
@@ -98,7 +103,7 @@ def write_patch(holds: list[dict[str, Any]]) -> dict[str, Any]:
     current = {r: (playbook_files.DIR / f"{r}.md").read_text() if (playbook_files.DIR / f"{r}.md").exists() else ""
                for r in ("director", "spec")}
     user = (f"CURRENT PLAYBOOK:\n{json.dumps(current, indent=1)}\n\n"
-            f"HOLDS FROM TRAIN FLIGHTS ({len(holds)}):\n{json.dumps(holds[:40], indent=1)}")
+            f"HOLDS AND GOAL RE-CHECK FAILURES FROM TRAIN FLIGHTS ({len(holds)}):\n{json.dumps(holds[:40], indent=1)}")
     out = llm.call_json("playbook", [{"role": "system", "content": SYSTEM}, {"role": "user", "content": user}])
     playbook_files.DIR.mkdir(exist_ok=True)
     for role in ("director", "spec"):
