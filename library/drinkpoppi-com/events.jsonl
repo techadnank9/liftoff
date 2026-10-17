@@ -1,93 +1,89 @@
-{"t": 0.05, "agent": "brand", "event": "cache", "vehicle": null, "payload": {"url": "https://drinkpoppi.com", "slug": "drinkpoppi-com"}}
-{"t": 0.05, "agent": "system", "event": "mission", "vehicle": null, "payload": {"mission": "Launch video for poppi sparkling soda, playful, for vertical feeds", "mock": false}}
-{"t": 0.05, "agent": "scout", "event": "start", "vehicle": null, "payload": {"brand": "poppi", "category": "sparkling soda"}}
-{"t": 1.54, "agent": "scout", "event": "you_com", "vehicle": null, "payload": {"posts": 5, "launch_articles": 10, "sources": 6}}
-{"t": 15.94, "agent": "scout", "event": "youtube_views", "vehicle": null, "payload": {"posts": 2, "total_views": 173314612}}
-{"t": 17.64, "agent": "librarian", "event": "tagged", "vehicle": null, "payload": {"competitors": ["Coca-Cola", "Sprite", "Dr Pepper", "Pepsi", "SodaStream"], "patterns": ["humor", "hook_under_1_5s", "taste_test", "countdown", "text_on_beat", "asmr", "process", "slow_motion", "challenge", "reaction"]}}
-{"t": 17.64, "agent": "librarian", "event": "trend_wall", "vehicle": null, "payload": {"posts": 5, "patterns": 10}}
-{"t": 17.64, "agent": "spec", "event": "start", "vehicle": null, "payload": {"mission": "Launch video for poppi sparkling soda, playful, for vertical feeds"}}
-{"t": 37.98, "agent": "spec", "event": "locked", "vehicle": null, "payload": {"checks": 10, "assumptions": 5, "escalations": 0}}
-{"t": 37.98, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Format: vertical 9:16 (from mission and brand card)"}}
-{"t": 37.98, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Language: English (US market, brand card)"}}
-{"t": 37.98, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Market: US (brand card)"}}
-{"t": 37.98, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Duration: 6-15s (mission says under 15s; research supports 6-15s for vertical feeds)"}}
-{"t": 37.98, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Audio: Not constrained by mission or brand card; assumed permissible (no escalation triggered)"}}
-{"t": 37.98, "agent": "director", "event": "plan_start", "vehicle": null, "payload": {"n": 3}}
-{"t": 52.79, "agent": "director", "event": "direction", "vehicle": "A", "payload": {"name": "Soda Sommelier", "pattern": "humor", "hook": "This soda has an attitude.", "duration_s": 9, "logo_seconds": 2.4}}
-{"t": 52.79, "agent": "director", "event": "direction", "vehicle": "B", "payload": {"name": "The 3-Second Rule", "pattern": "hook_under_1_5s", "hook": "3 seconds to grab it.", "duration_s": 7, "logo_seconds": 3.25}}
-{"t": 52.79, "agent": "director", "event": "direction", "vehicle": "C", "payload": {"name": "Fizz ASMR", "pattern": "asmr", "hook": "Listen to this.", "duration_s": 12, "logo_seconds": 4.0}}
-{"t": 56.79, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a1.mp4", "frames": 216, "duration_s": 9, "logo_seconds": 2.4}}
-{"t": 57.11, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "duration-001", "pass": true, "measured": 9.0, "expected": "6.0-15.0s"}}
-{"t": 57.11, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "aspect-001", "pass": true, "measured": "540x960", "expected": "9:16"}}
-{"t": 57.2, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-001", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 58.11, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-001", "pass": false, "measured": 2.25, "expected": ">= 3.0s"}}
-{"t": 59.11, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-001", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 59.7, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 61.26, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 61.34, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-calorie-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 61.34, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 64.3, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health-001", "pass": false, "measured": ["no", "yes"], "expected": "no"}}
-{"t": 64.31, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": false, "passed": 8, "total": 10}}
-{"t": 64.31, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "HOLD", "reason": "Failing: logo-001 (2.25 vs >= 3.0s), vision-no-health-001 (['no', 'yes'] vs no). Sending back to Director.", "failing": [{"pass": false, "measured": 2.25, "expected": ">= 3.0s", "first_seen_t": 6.75, "id": "logo-001", "check": "logo_seconds_at_least"}, {"pass": false, "measured": ["no", "yes"], "expected": "no", "detail": [{"frame": "s_0019.png", "answer": "no", "confidence": 1, "reason": "No health claims are visible; only the brand name and product type 'SPARKLING SODA' are shown."}, {"frame": "s_0036.png", "answer": "yes", "confidence": 0.8, "reason": "The text 'zero' in 'poppi: zero boring sips' implies a health-related attribute (e.g., zero sugar/calories), which is a common health claim."}], "id": "vision-no-health-001", "check": "vision_no"}]}}
-{"t": 64.89, "agent": "director", "event": "fix", "vehicle": "A", "payload": {"patch": {"logo_seconds": 3.4, "end_card": "poppi: boring? never."}}}
-{"t": 68.55, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a2.mp4", "frames": 216, "duration_s": 9, "logo_seconds": 3.4}}
-{"t": 68.84, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "duration-001", "pass": true, "measured": 9.0, "expected": "6.0-15.0s"}}
-{"t": 68.84, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "aspect-001", "pass": true, "measured": "540x960", "expected": "9:16"}}
-{"t": 68.98, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-001", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 69.95, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-001", "pass": true, "measured": 3.25, "expected": ">= 3.0s"}}
-{"t": 70.68, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 71.09, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-001", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 71.48, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 71.48, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 71.56, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-calorie-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 71.87, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 71.87, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": true, "passed": 10, "total": 10}}
-{"t": 71.87, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "GO", "reason": "All 10 checks pass on attempt 2."}}
-{"t": 71.88, "agent": "goalcheck", "event": "start", "vehicle": "A", "payload": {}}
-{"t": 73.91, "agent": "goalcheck", "event": "verdict", "vehicle": "A", "payload": {"satisfies_goal": true, "reason": "The video is vertical, displays the poppi brand name prominently, uses playful and bold copy, and meets all must-have requirements."}}
-{"t": 76.69, "agent": "director", "event": "rendered", "vehicle": "B", "payload": {"mp4": "vehicle_B_a1.mp4", "frames": 168, "duration_s": 7, "logo_seconds": 3.25}}
-{"t": 76.92, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "duration-001", "pass": true, "measured": 7.0, "expected": "6.0-15.0s"}}
-{"t": 76.92, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "aspect-001", "pass": true, "measured": "540x960", "expected": "9:16"}}
-{"t": 76.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "palette-001", "pass": true, "measured": 3.2, "expected": "<= 60.0"}}
-{"t": 77.63, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-001", "pass": true, "measured": 3.0, "expected": ">= 3.0s"}}
-{"t": 78.72, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "contrast-001", "pass": false, "measured": 4.06, "expected": ">= 4.5"}}
-{"t": 82.05, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-health-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 82.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-hook-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 82.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-competitor-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 82.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-endcard-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 84.58, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-calorie-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 84.58, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": false, "passed": 9, "total": 10}}
-{"t": 84.58, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "HOLD", "reason": "Failing: contrast-001 (4.06 vs >= 4.5). Sending back to Director.", "failing": [{"pass": false, "measured": 4.06, "expected": ">= 4.5", "id": "contrast-001", "check": "text_contrast_at_least"}]}}
-{"t": 85.1, "agent": "director", "event": "fix", "vehicle": "B", "payload": {"patch": {"bg": "primary"}}}
-{"t": 87.83, "agent": "director", "event": "rendered", "vehicle": "B", "payload": {"mp4": "vehicle_B_a2.mp4", "frames": 168, "duration_s": 7, "logo_seconds": 3.25}}
-{"t": 88.07, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "duration-001", "pass": true, "measured": 7.0, "expected": "6.0-15.0s"}}
-{"t": 88.07, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "aspect-001", "pass": true, "measured": "540x960", "expected": "9:16"}}
-{"t": 88.16, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "palette-001", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 88.84, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-001", "pass": true, "measured": 3.0, "expected": ">= 3.0s"}}
-{"t": 89.9, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "contrast-001", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 90.56, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-endcard-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 93.12, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-hook-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 95.08, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-health-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 97.3, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-calorie-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 97.3, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-competitor-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 97.3, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": true, "passed": 10, "total": 10}}
-{"t": 97.3, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "GO", "reason": "All 10 checks pass on attempt 2."}}
-{"t": 97.3, "agent": "goalcheck", "event": "start", "vehicle": "B", "payload": {}}
-{"t": 101.33, "agent": "goalcheck", "event": "verdict", "vehicle": "B", "payload": {"satisfies_goal": true, "reason": "The video is under 15 seconds, presented in vertical format, prominently displays the poppi brand name, and uses a playful, bold tone with concise copy that aligns with the mission and brand requirements."}}
-{"t": 106.24, "agent": "director", "event": "rendered", "vehicle": "C", "payload": {"mp4": "vehicle_C_a1.mp4", "frames": 288, "duration_s": 12, "logo_seconds": 4.0}}
-{"t": 106.59, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "duration-001", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
-{"t": 106.59, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "aspect-001", "pass": true, "measured": "540x960", "expected": "9:16"}}
-{"t": 106.65, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "palette-001", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 107.82, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-001", "pass": true, "measured": 3.75, "expected": ">= 3.0s"}}
-{"t": 108.75, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "contrast-001", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 113.83, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-endcard-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 117.79, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-health-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 117.79, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-calorie-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 117.79, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-hook-001", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 117.79, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-competitor-001", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 117.79, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": true, "passed": 10, "total": 10}}
-{"t": 117.79, "agent": "arbiter", "event": "decision", "vehicle": "C", "payload": {"decision": "GO", "reason": "All 10 checks pass on attempt 1."}}
-{"t": 117.8, "agent": "goalcheck", "event": "start", "vehicle": "C", "payload": {}}
-{"t": 125.47, "agent": "goalcheck", "event": "verdict", "vehicle": "C", "payload": {"satisfies_goal": true, "reason": "The video is vertical, features the poppi brand name prominently, uses playful, bold copy ('Listen to this.', 'Ice clink, pour, fizz, sip.', 'poppi: hear the fizz'), matches the sparkling soda category, and fits the required length and format."}}
-{"t": 125.48, "agent": "system", "event": "liftoff", "vehicle": null, "payload": {"cleared": 3, "total": 3}}
-{"t": 125.48, "agent": "system", "event": "usage", "vehicle": null, "payload": {"librarian": {"prompt": 1533, "completion": 417, "calls": 1}, "spec": {"prompt": 1598, "completion": 896, "calls": 1}, "director": {"prompt": 834, "completion": 469, "calls": 1}, "verifier_vision": {"prompt": 22975, "completion": 5281, "calls": 40}, "director_fix": {"prompt": 1233, "completion": 34, "calls": 2}, "goalcheck": {"prompt": 5664, "completion": 839, "calls": 3}}}
+{"t": 0.0, "agent": "brand", "event": "cache", "vehicle": null, "payload": {"url": "https://drinkpoppi.com", "slug": "drinkpoppi-com"}}
+{"t": 0.0, "agent": "system", "event": "mission", "vehicle": null, "payload": {"mission": "Launch video for poppi sparkling soda, playful, for vertical feeds", "mock": false}}
+{"t": 0.0, "agent": "scout", "event": "start", "vehicle": null, "payload": {"brand": "poppi", "category": "sparkling soda"}}
+{"t": 7.81, "agent": "scout", "event": "youtube_shorts", "vehicle": null, "payload": {"region": "US", "found": 30}}
+{"t": 7.81, "agent": "scout", "event": "you_com", "vehicle": null, "payload": {"posts": 20, "launch_articles": 10, "sources": 6}}
+{"t": 21.49, "agent": "scout", "event": "youtube_views", "vehicle": null, "payload": {"posts": 13, "total_views": 22281950}}
+{"t": 23.58, "agent": "librarian", "event": "tagged", "vehicle": null, "payload": {"competitors": ["Coca-Cola", "PepsiCo", "Dr Pepper", "Sprite", "SodaStream"], "patterns": ["process", "humor", "slow_motion", "taste_test"]}}
+{"t": 23.58, "agent": "librarian", "event": "trend_wall", "vehicle": null, "payload": {"posts": 7, "patterns": 4}}
+{"t": 23.58, "agent": "spec", "event": "start", "vehicle": null, "payload": {"mission": "Launch video for poppi sparkling soda, playful, for vertical feeds"}}
+{"t": 33.55, "agent": "spec", "event": "locked", "vehicle": null, "payload": {"checks": 9, "assumptions": 5, "escalations": 0}}
+{"t": 33.55, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Format: vertical 9:16 (from mission and brand card)"}}
+{"t": 33.55, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Language: English (US market, brand card)"}}
+{"t": 33.55, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Market: US (brand card)"}}
+{"t": 33.55, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Duration: 6-15s (mission says under 15s; vertical feed norm min 6s)"}}
+{"t": 33.55, "agent": "spec", "event": "assumption", "vehicle": null, "payload": {"text": "Audio: Not constrained by mission or brand card; no checks added for sound"}}
+{"t": 33.55, "agent": "director", "event": "plan_start", "vehicle": null, "payload": {"n": 3}}
+{"t": 37.23, "agent": "director", "event": "direction", "vehicle": "A", "payload": {"name": "Fizz Flip", "pattern": "humor", "hook": "Soda, but make it weird.", "duration_s": 9, "logo_seconds": 2.4}}
+{"t": 37.23, "agent": "director", "event": "direction", "vehicle": "B", "payload": {"name": "Can Drop", "pattern": "slow_motion", "hook": "Hold on to your fizz.", "duration_s": 12, "logo_seconds": 3.5}}
+{"t": 37.23, "agent": "director", "event": "direction", "vehicle": "C", "payload": {"name": "Street Fizz", "pattern": "taste_test", "hook": "Guess the flavor, win the vibe.", "duration_s": 15, "logo_seconds": 3.25}}
+{"t": 41.32, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a1.mp4", "frames": 216, "duration_s": 9, "logo_seconds": 2.4}}
+{"t": 41.71, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 9.0, "expected": "6.0-15.0s"}}
+{"t": 41.71, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 41.79, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 42.66, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": false, "measured": 2.25, "expected": ">= 3.0s"}}
+{"t": 43.6, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 43.72, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 45.97, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 45.97, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 47.14, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 47.14, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": false, "passed": 8, "total": 9}}
+{"t": 47.14, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "HOLD", "reason": "Failing: logo-1 (2.25 vs >= 3.0s). Sending back to Director.", "failing": [{"pass": false, "measured": 2.25, "expected": ">= 3.0s", "first_seen_t": 6.75, "id": "logo-1", "check": "logo_seconds_at_least"}]}}
+{"t": 47.76, "agent": "director", "event": "fix", "vehicle": "A", "payload": {"patch": {"logo_seconds": 3.4}}}
+{"t": 51.34, "agent": "director", "event": "rendered", "vehicle": "A", "payload": {"mp4": "vehicle_A_a2.mp4", "frames": 216, "duration_s": 9, "logo_seconds": 3.4}}
+{"t": 51.62, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 9.0, "expected": "6.0-15.0s"}}
+{"t": 51.62, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 51.68, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "palette-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 52.55, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": true, "measured": 3.25, "expected": ">= 3.0s"}}
+{"t": 53.61, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "contrast-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 53.91, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 56.24, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 57.13, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 60.29, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 60.29, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 60.3, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 2."}}
+{"t": 60.3, "agent": "goalcheck", "event": "start", "vehicle": "A", "payload": {}}
+{"t": 62.95, "agent": "goalcheck", "event": "verdict", "vehicle": "A", "payload": {"satisfies_goal": true, "reason": "The video features the poppi brand name clearly, uses a vertical 9:16 format, stays under 15 seconds, and conveys a playful, nostalgic tone with bold text and bright colors, meeting all mission requirements."}}
+{"t": 67.92, "agent": "director", "event": "rendered", "vehicle": "B", "payload": {"mp4": "vehicle_B_a1.mp4", "frames": 288, "duration_s": 12, "logo_seconds": 3.5}}
+{"t": 68.28, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
+{"t": 68.28, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 68.33, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "palette-1", "pass": true, "measured": 3.2, "expected": "<= 60.0"}}
+{"t": 69.45, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-1", "pass": true, "measured": 3.25, "expected": ">= 3.0s"}}
+{"t": 70.4, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "contrast-1", "pass": false, "measured": 4.06, "expected": ">= 4.5"}}
+{"t": 72.95, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 73.1, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 73.96, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 74.15, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 74.15, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": false, "passed": 8, "total": 9}}
+{"t": 74.15, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "HOLD", "reason": "Failing: contrast-1 (4.06 vs >= 4.5). Sending back to Director.", "failing": [{"pass": false, "measured": 4.06, "expected": ">= 4.5", "id": "contrast-1", "check": "text_contrast_at_least"}]}}
+{"t": 74.82, "agent": "director", "event": "fix", "vehicle": "B", "payload": {"patch": {"bg": "primary"}}}
+{"t": 79.71, "agent": "director", "event": "rendered", "vehicle": "B", "payload": {"mp4": "vehicle_B_a2.mp4", "frames": 288, "duration_s": 12, "logo_seconds": 3.5}}
+{"t": 80.06, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
+{"t": 80.06, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 80.12, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "palette-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 81.26, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-1", "pass": true, "measured": 3.25, "expected": ">= 3.0s"}}
+{"t": 82.19, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "contrast-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 84.27, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 84.43, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 84.99, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 86.51, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 86.51, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 86.51, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 2."}}
+{"t": 86.51, "agent": "goalcheck", "event": "start", "vehicle": "B", "payload": {}}
+{"t": 91.79, "agent": "goalcheck", "event": "verdict", "vehicle": "B", "payload": {"satisfies_goal": true, "reason": "The video displays the poppi brand name prominently, uses a playful and bold tone with copy like \"Hold on to your\" and \"Feel the pop,\" is formatted vertically (9:16), and runs well under the 15\u2011second limit."}}
+{"t": 98.56, "agent": "director", "event": "rendered", "vehicle": "C", "payload": {"mp4": "vehicle_C_a1.mp4", "frames": 360, "duration_s": 15, "logo_seconds": 3.25}}
+{"t": 99.02, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "dur-1", "pass": true, "measured": 15.0, "expected": "6.0-15.0s"}}
+{"t": 99.03, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "ar-1", "pass": true, "measured": "540x960", "expected": "9:16"}}
+{"t": 99.11, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "palette-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 100.69, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-1", "pass": true, "measured": 3.0, "expected": ">= 3.0s"}}
+{"t": 101.58, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "contrast-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 104.74, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 104.74, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 104.74, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-no-competitor", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 104.75, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vision-endcard", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 104.75, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": true, "passed": 9, "total": 9}}
+{"t": 104.75, "agent": "arbiter", "event": "decision", "vehicle": "C", "payload": {"decision": "GO", "reason": "All 9 checks pass on attempt 1."}}
+{"t": 104.75, "agent": "goalcheck", "event": "start", "vehicle": "C", "payload": {}}
+{"t": 106.94, "agent": "goalcheck", "event": "verdict", "vehicle": "C", "payload": {"satisfies_goal": true, "reason": "The video is vertical, features the poppi brand name prominently, uses a playful tone with copy like \"Guess the flavor, win\" and \"Taste the hype,\" and meets all must-have requirements while staying within the 15\u2011second limit."}}
+{"t": 106.94, "agent": "system", "event": "liftoff", "vehicle": null, "payload": {"cleared": 3, "total": 3}}
+{"t": 106.94, "agent": "system", "event": "usage", "vehicle": null, "payload": {"librarian": {"prompt": 1921, "completion": 937, "calls": 1}, "spec": {"prompt": 1395, "completion": 717, "calls": 1}, "director": {"prompt": 695, "completion": 477, "calls": 1}, "verifier_vision": {"prompt": 17210, "completion": 3722, "calls": 30}, "director_fix": {"prompt": 1127, "completion": 18, "calls": 2}, "goalcheck": {"prompt": 5664, "completion": 775, "calls": 3}}}

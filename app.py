@@ -220,6 +220,17 @@ def humanize_tag(tag: str) -> str:
     return t[:1].upper() + t[1:]
 
 
+def ago(iso: str) -> str:
+    """'2026-10-10' -> '7 days ago'."""
+    import datetime
+    try:
+        d = datetime.date.fromisoformat(str(iso)[:10])
+    except ValueError:
+        return ""
+    n = (datetime.date.today() - d).days
+    return "today" if n <= 0 else "yesterday" if n == 1 else f"{n} days ago" if n < 60 else f"{n // 30} months ago"
+
+
 def views(n) -> str:
     if not n:
         return "n/a"
@@ -507,7 +518,8 @@ st.markdown(
     f'<span class="pings">{("Needed you " + str(pings) + " times") if pings else "Didn&#39;t need you once"}</span></div>',
     unsafe_allow_html=True,
 )
-t_videos, t_check, t_research, t_activity = st.tabs(["Videos", "Quality checklist", "Research", "How it improves"])
+t_research, t_videos, t_post, t_check, t_activity = st.tabs(
+    ["Trending now", "Your videos", "Review & post", "Quality checklist", "How it improves"])
 
 with t_videos:
     # ---------------- the output: one card per launch video ----------------
@@ -569,6 +581,136 @@ with t_videos:
                     st.caption("Rendering…")
 
 
+# ---------------- review & post: one video at a time, approve or skip (posting is a demo) ----------------
+PLATFORMS = ["TikTok", "Instagram Reels", "YouTube Shorts"]
+
+
+def source_post(d: dict) -> dict | None:
+    """The real viral post this direction's pattern came from, if the research has one."""
+    tag = str(d.get("pattern", ""))
+    wall = res.get("trend_wall", [])
+    return next((w for w in wall if tag in (w.get("patterns") or [])), None) or (wall[0] if wall else None)
+
+
+@st.dialog("Post this video")
+def post_dialog(vid: str, v: dict) -> None:
+    key = f"post_{run_dir.name}_{vid}"
+    step = st.session_state.get(key + "_step", 1)
+    st.caption(f"Step {step} of 3 · {safe(v.get('name', ''))}")
+    if step == 1:
+        st.markdown("**What would you like to do?**")
+        c1, c2 = st.columns(2)
+        if c1.button("Save to library", use_container_width=True):
+            st.session_state.setdefault("posted", {})[key] = {"vid": vid, "what": "Saved to library"}
+            st.toast(f"Video {vid} saved to your library.")
+            st.rerun()
+        if c2.button("Schedule post", type="primary", use_container_width=True):
+            st.session_state[key + "_step"] = 2
+            st.rerun(scope="fragment")
+    elif step == 2:
+        st.markdown("**Details**")
+        st.multiselect("Post to", PLATFORMS, default=PLATFORMS[:2], key=key + "_where")
+        st.text_input("Caption", v.get("direction", {}).get("hook", ""), max_chars=150, key=key + "_cap")
+        st.selectbox("Who can see it", ["Public", "Followers", "Only me"], key=key + "_priv")
+        b, n = st.columns(2)
+        if b.button("Back", use_container_width=True):
+            st.session_state[key + "_step"] = 1
+            st.rerun(scope="fragment")
+        if n.button("Next", type="primary", use_container_width=True, disabled=not st.session_state.get(key + "_where")):
+            st.session_state[key + "_step"] = 3
+            st.rerun(scope="fragment")
+    else:
+        import datetime
+        st.markdown("**When**")
+        when = st.radio("When", ["Post now", "Schedule for later"], label_visibility="collapsed", key=key + "_when")
+        stamp = "now"
+        if when == "Schedule for later":
+            dcol, tcol = st.columns(2)
+            day = dcol.date_input("Date", datetime.date.today() + datetime.timedelta(days=1), key=key + "_day")
+            tm = tcol.time_input("Time", datetime.time(17, 0), key=key + "_time")
+            stamp = f"{day:%b %d} at {tm:%I:%M %p}".replace(" 0", " ")
+        st.info("Demo: social accounts aren't connected, so nothing is published. Connecting TikTok, Instagram "
+                "and YouTube is the next step.", icon=":material/info:")
+        b, n = st.columns(2)
+        if b.button("Back", use_container_width=True):
+            st.session_state[key + "_step"] = 2
+            st.rerun(scope="fragment")
+        if n.button("Schedule" if stamp != "now" else "Post now", type="primary", use_container_width=True):
+            where = ", ".join(st.session_state.get(key + "_where", []))
+            st.session_state.setdefault("posted", {})[key] = {
+                "vid": vid, "what": f"Scheduled for {stamp}" if stamp != "now" else "Queued to post now",
+                "where": where, "caption": st.session_state.get(key + "_cap", "")}
+            st.session_state[key + "_step"] = 1
+            st.toast(f"Video {vid} {'scheduled for ' + stamp if stamp != 'now' else 'queued'} on {where} (demo).")
+            st.rerun()
+
+
+with t_post:
+    ready = [(vid, v) for vid, v in vehicles.items() if v.get("status") == "go" and v.get("attempts")]
+    if not ready:
+        st.info("Videos appear here once they pass every check." if running else "No videos are ready to post yet.")
+    else:
+        posted = st.session_state.get("posted", {})
+        skipped = st.session_state.setdefault("skipped", set())
+        queue = [(vid, v) for vid, v in ready
+                 if f"post_{run_dir.name}_{vid}" not in posted and f"{run_dir.name}_{vid}" not in skipped]
+        st.caption(f"{len(ready)} videos ready to post. Approve the ones you want, skip the rest.")
+        if queue:
+            vid, v = queue[0]
+            d = v.get("direction", {})
+            src = source_post(d)
+            left, mid, right = st.columns([0.9, 1.1, 1.1], gap="large")
+            with left:
+                st.markdown('<div class="why" style="font-size:12px;color:var(--soft);margin-bottom:6px">Built from</div>',
+                            unsafe_allow_html=True)
+                if src and thumb_for(src):
+                    st.markdown(
+                        f'<a href="{safe(src["url"])}" target="_blank" style="text-decoration:none;color:inherit">'
+                        f'<img src="{safe(thumb_for(src))}" style="width:100%;border-radius:12px;aspect-ratio:9/12;object-fit:cover">'
+                        f'<div style="font-size:13px;margin-top:6px">{safe(src.get("hook", ""))}</div>'
+                        f'<div class="why" style="font-size:12px;color:var(--soft)">'
+                        f'{(views(src["views"]) + " views · ") if src.get("views") else ""}{safe(ago(src.get("age", "")))}</div></a>',
+                        unsafe_allow_html=True)
+                else:
+                    st.caption("A pattern from this month's viral videos.")
+            with mid:
+                st.video(str(video_path(v["attempts"][-1]["mp4"])), start_time=1)
+                b1, b2 = st.columns(2)
+                if b1.button("✕  Skip", use_container_width=True, key=f"skip_{vid}"):
+                    skipped.add(f"{run_dir.name}_{vid}")
+                    st.rerun()
+                if b2.button("✓  Approve", type="primary", use_container_width=True, key=f"ok_{vid}"):
+                    post_dialog(vid, v)
+            with right:
+                st.markdown(f"**{safe(vid)}. {safe(v.get('name', ''))}**")
+                st.markdown(f"“{safe(d.get('hook', ''))}”")
+                st.markdown('<div class="lf-sec" style="margin-top:12px">Why this video?</div>', unsafe_allow_html=True)
+                verdict = v["attempts"][-1]["verdict"]
+                gc = v.get("goalcheck") or {}
+                tries = (f" after {len(v['attempts'])} tries" if len(v["attempts"]) > 1 else " on the first try")
+                st.markdown("\n".join([
+                    f"- Uses **{safe(humanize_tag(d.get('pattern', '')).lower())}**, a pattern working in this month's viral videos",
+                    f"- Passed **{verdict['passed']} of {verdict['total']}** quality checks{tries}",
+                    "- A fresh reviewer agreed it fits your brief"]), unsafe_allow_html=True)
+                if gc.get("reason"):
+                    st.caption(gc["reason"])
+            st.caption(f"{len(queue) - 1} more to review after this one.")
+        else:
+            st.success("All videos reviewed.")
+            if st.button("Review them again"):
+                st.session_state["skipped"] = set()
+                for k in [k for k in posted if k.startswith(f"post_{run_dir.name}_")]:
+                    posted.pop(k)
+                st.rerun()
+        mine = [(k, x) for k, x in posted.items() if k.startswith(f"post_{run_dir.name}_")]
+        if mine:
+            st.markdown('<div class="lf-sec">Scheduled</div>', unsafe_allow_html=True)
+            rows = "".join(
+                f'<div class="lf-row"><div><b>Video {safe(x["vid"])}</b>'
+                f'<div class="why">{safe(x.get("where", "Library"))}{" · “" + safe(x["caption"]) + "”" if x.get("caption") else ""}</div></div>'
+                f'<div class="lf-num">{safe(x["what"])}<small>demo, not published</small></div></div>' for _, x in mine)
+            st.markdown(f'<div class="lf-card">{rows}</div>', unsafe_allow_html=True)
+
 with t_check:
     # ---------------- what ready to post means ----------------
     left, right = st.columns([1.35, 1], gap="large")
@@ -608,7 +750,7 @@ with t_research:
     )
     pats = "".join(f'<span class="lf-tag">{safe(humanize_tag(p["tag"]))}</span>' for p in res.get("patterns", [])[:5])
     tiles = []
-    for i, post in enumerate(res.get("trend_wall", [])[:6]):
+    for i, post in enumerate(res.get("trend_wall", [])[:9]):
         bg, fg = TILE[i % 6]
         linked = "REPLACE_ME" not in post.get("url", "")
         embed = embed_url(post) if linked else None
@@ -622,7 +764,7 @@ with t_research:
         tiles.append(
             f'{open_tag}{top}'
             f'<div class="meta"><div class="views"><span class="lf-sq sm"></span>'
-            f'{views(post["views"]) if post.get("views") else safe(post.get("age") or {"tiktok": "TikTok", "youtube": "YouTube", "instagram": "Instagram"}.get(post.get("platform", ""), ""))}</div>'
+            f'{(views(post["views"]) + " views") if post.get("views") else ""}{" · " if post.get("views") and post.get("age") else ""}{safe(ago(post.get("age", "")))}</div>'
             f'{open_link}<div class="hook">{safe(post["hook"])}</div></div></div>')
 
     TOP_JS = """
@@ -638,14 +780,14 @@ with t_research:
     });
     </script>"""
     if res:
-        st.markdown('<div class="lf-sec">What the videos are based on</div>', unsafe_allow_html=True)
-        st.caption("Live research: who the brand competes with, what is working in the category right now, and the "
-                   "real posts behind it. Tap a post to play it here.")
+        st.markdown('<div class="lf-sec">Recent, viral videos in your category</div>', unsafe_allow_html=True)
+        st.caption("Short videos from the last 30 days with 100K+ views, most watched first. Your videos are built "
+                   "from what is working here. Tap one to play it.")
         source = "Live from You.com" if res.get("live") is True else "Cached search" if res.get("live") else "Sample research"
         research_html = (
             f'<div class="lf-research">'
             f'<div class="lf-card"><div class="lf-h">Competitors</div>{comps}<div class="lf-pats"><div class="lf-h">Patterns found</div>{pats}</div></div>'
-            f'<div class="lf-card"><div class="lf-h">Trend wall <small>{source}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
+            f'<div class="lf-card"><div class="lf-h">Viral this month <small>{source}</small></div><div class="lf-wall">{"".join(tiles)}</div></div>'
             f'</div>')
         components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}'
                         f'.lf-research{{display:grid;grid-template-columns:1fr 2.6fr;gap:24px}}@media(max-width:900px){{.lf-research{{grid-template-columns:1fr}}}}</style></head>'

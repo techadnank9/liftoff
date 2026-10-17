@@ -140,6 +140,49 @@ def _youtube_id(url: str) -> str | None:
     return None
 
 
+VIRAL_VIEWS = 100_000
+
+
+def region_code(market: str) -> str:
+    m = (market or "US").strip().upper()
+    return {"UK": "GB", "UNITED KINGDOM": "GB", "GREAT BRITAIN": "GB", "USA": "US", "UNITED STATES": "US"}.get(m, m[:2])
+
+
+def youtube_shorts(query: str, region: str, days: int, order: str, n: int = 6) -> list[dict[str, Any]]:
+    """Public Shorts from the official YouTube Data API: recent uploads in a country, ranked by
+    views ("trending") or by date ("new"). Search metadata only, nothing downloaded. [] without a key."""
+    import datetime
+    import ssl
+    import urllib.parse
+    import urllib.request
+
+    import certifi
+
+    key = os.environ.get("YOUTUBE_API_KEY")
+    if not key:
+        return []
+    after = (datetime.datetime.now(datetime.timezone.utc) - datetime.timedelta(days=days)).strftime("%Y-%m-%dT%H:%M:%SZ")
+    q = urllib.parse.urlencode({"part": "snippet", "type": "video", "videoDuration": "short", "q": query,
+                                "regionCode": region, "relevanceLanguage": "en", "publishedAfter": after,
+                                "order": order, "maxResults": n * 2, "safeSearch": "moderate", "key": key})
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    with urllib.request.urlopen(f"https://www.googleapis.com/youtube/v3/search?{q}", timeout=15, context=ctx) as r:
+        items = json.load(r).get("items", [])
+    import html
+
+    out = []
+    for it in items:
+        vid, sn = it.get("id", {}).get("videoId"), it.get("snippet", {})
+        title = html.unescape(sn.get("title", ""))
+        letters = [c for c in title if c.isalpha()]
+        if not vid or (letters and sum(c.isascii() for c in letters) / len(letters) < 0.8):
+            continue  # English-language market: skip posts whose titles are mostly another script
+        out.append({"url": f"https://www.youtube.com/shorts/{vid}", "title": title,
+                    "description": html.unescape(sn.get("description", "")), "page_age": sn.get("publishedAt", ""),
+                    "platform": "youtube"})
+    return out[:n]
+
+
 def youtube_views(urls: list[str]) -> dict[str, int]:
     """Public view counts from the YouTube Data API (statistics only, no footage). {} without a key."""
     import urllib.parse
@@ -200,7 +243,7 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
         cat, market = brand.category, brand.market
         queries = {
             "posts": (f"{cat} brand ad #shorts", dict(count=20, include_domains=["youtube.com", "tiktok.com"])),
-            "posts2": (f"soda {cat} challenger brand tiktok ad", dict(count=15, include_domains=["youtube.com", "tiktok.com"])),
+            "posts2": (f"{cat} trend", dict(count=20, include_domains=["tiktok.com"], country=region_code(market))),
             "rivals": (f"top {cat} brands {market} market share and fastest growing challenger brands", dict(count=8)),
             "launches": (f"new {cat} brand launch campaign short-form video {market}", dict(count=10)),
             "sources": ("short-form video ads brand logo visible first seconds recall best practices", dict(count=6)),
@@ -209,14 +252,29 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
             futs = {k: pool.submit(_search, you, q, **kw) for k, (q, kw) in queries.items()}
             got = {k: f.result(timeout=30) for k, f in futs.items()}
 
+        # Trending and new Shorts in the brand's country come first (official YouTube API), then
+        # public TikToks and Shorts found by You.com. Each keeps a label the UI shows.
+        region = region_code(brand.market)
+        yt: list[dict[str, Any]] = []
+        try:
+            # Recent and viral: the last 30 days in the brand's market, most watched first.
+            seen_q = set()
+            for q in (f"{cat} #shorts", f"{cat.split()[-1]} #shorts"):  # e.g. "sparkling soda", then "soda"
+                if q in seen_q:
+                    continue
+                seen_q.add(q)
+                yt += [{**v, "label": "Viral"} for v in youtube_shorts(q, region, 30, "viewCount", 15)]
+            tel.emit("scout", "youtube_shorts", {"region": region, "found": len(yt)})
+        except Exception as e:  # noqa: BLE001
+            tel.emit("scout", "youtube_failed", {"error": str(e)[:200]})
         posts = []
         seen = set()
-        for r in got["posts"] + got["posts2"]:
-            plat = _platform(r["url"])
+        for r in yt + got["posts2"] + got["posts"]:
+            plat = r.get("platform") or _platform(r["url"])
             if plat and r["url"] not in seen:
                 seen.add(r["url"])
                 posts.append({**r, "platform": plat})
-        posts = posts[:16]
+        posts = posts[:20]
         if len(posts) < 3:
             raise RuntimeError(f"only {len(posts)} public posts found")
         tel.emit("scout", "you_com", {"posts": len(posts), "launch_articles": len(got["launches"]),
@@ -238,7 +296,7 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
                 continue
             tags = [x for x in t.get("tags", []) if x in PATTERN_TAGS]
             yt = _youtube_id(p["url"])
-            wall.append({"platform": p["platform"], "url": p["url"], "views": None,
+            wall.append({"platform": p["platform"], "url": p["url"], "views": None, "label": p.get("label"),
                          # Platform-served thumbnail, hotlinked at render time; never downloaded.
                          "thumb": f"https://i.ytimg.com/vi/{yt}/hqdefault.jpg" if yt else p.get("thumbnail_url") or None,
                          "age": str(p.get("page_age") or "")[:10], "title": p["title"],
@@ -254,6 +312,10 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
         if views:
             tel.emit("scout", "youtube_views", {"posts": len(views), "total_views": sum(views.values())})
         # Most watched first; posts without a count (TikTok) keep their order after them.
+        # Only recent, viral videos on the wall: 100K+ views. Anything else is a fallback when
+        # YouTube returns too few (no key, quota, a niche category).
+        viral = [w for w in wall if w.get("label") == "Viral" and (w["views"] or 0) >= VIRAL_VIEWS]
+        wall = viral if len(viral) >= 4 else viral + [w for w in wall if w not in viral]
         wall.sort(key=lambda w: -(w["views"] or 0))
 
         counts: dict[str, int] = {}
