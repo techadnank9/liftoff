@@ -1,5 +1,5 @@
 """
-Real footage for a direction: licensed stock video from Pexels, cached locally.
+Real footage for a direction: licensed stock video from Pixabay or Pexels, cached locally.
 
     clip = find("friends laughing at a street food stall", seconds=9)
     # -> {"path": ".../footage_cache/123.mp4", "credit": "Jane Doe", "url": "https://www.pexels.com/video/..."}
@@ -9,8 +9,11 @@ We ask Pexels for portrait clips at least as long as the footage part of the vid
 720-ish wide file, and cache it under footage_cache/<id>.mp4. The Pexels license allows
 commercial use; the UI credits the creator, as Pexels asks.
 
-No PEXELS_API_KEY, practice mode, or any failure: returns None and the renderer falls back to
-the animated product shot, so a launch never fails on footage.
+Pixabay (PIXABAY_API_KEY) is tried first, then Pexels (PEXELS_API_KEY); both licenses allow
+commercial use. The clip fills a near-square area under the words, so landscape clips crop fine.
+
+No key, practice mode, or any failure: returns None and the renderer falls back to the animated
+product shot, so a launch never fails on footage.
 """
 from __future__ import annotations
 
@@ -52,12 +55,42 @@ def _best_file(video: dict[str, Any]) -> dict[str, Any] | None:
     return min(files, key=lambda f: abs(f["width"] - 720))
 
 
-def find(query: str, seconds: float, avoid: set[int] | None = None) -> dict[str, Any] | None:
-    """A cached portrait clip for this scene, at least `seconds` long, or None."""
-    key = os.environ.get("PEXELS_API_KEY")
-    if llm.MOCK or not key or not query.strip():
+def _pixabay(query: str, seconds: float, avoid: set) -> dict[str, Any] | None:
+    key = os.environ.get("PIXABAY_API_KEY")
+    if not key:
+        return None
+    q = urllib.parse.urlencode({"key": key, "q": query[:100], "per_page": 20, "safesearch": "true"})
+    for hit in json.loads(_get(f"https://pixabay.com/api/videos/?{q}")).get("hits", []):
+        vid = f"px{hit.get('id')}"
+        if vid in avoid or (hit.get("duration") or 0) < seconds:
+            continue
+        files = hit.get("videos") or {}
+        f = files.get("medium") or files.get("small") or files.get("large")
+        if not f or not f.get("url"):
+            continue
+        CACHE.mkdir(exist_ok=True)
+        path = CACHE / f"{vid}.mp4"
+        if not path.exists():
+            path.write_bytes(_get(f["url"], limit=60_000_000))
+        return {"id": vid, "path": str(path), "query": query, "source": "Pixabay",
+                "credit": hit.get("user", "Pixabay"), "url": hit.get("pageURL", "https://pixabay.com")}
+    return None
+
+
+def find(query: str, seconds: float, avoid: set | None = None) -> dict[str, Any] | None:
+    """A cached clip for this scene, at least `seconds` long, or None."""
+    if llm.MOCK or not query.strip():
         return None
     avoid = avoid or set()
+    try:
+        got = _pixabay(query, seconds, avoid)
+        if got:
+            return got
+    except Exception:  # noqa: BLE001
+        pass
+    key = os.environ.get("PEXELS_API_KEY")
+    if not key:
+        return None
     try:
         q = urllib.parse.urlencode({"query": query, "orientation": "portrait", "size": "medium", "per_page": 15})
         results = json.loads(_get(f"{API}?{q}", key)).get("videos", [])
@@ -72,7 +105,7 @@ def find(query: str, seconds: float, avoid: set[int] | None = None) -> dict[str,
             if not path.exists():
                 path.write_bytes(_get(f["link"], limit=60_000_000))
             user = video.get("user") or {}
-            return {"id": video["id"], "path": str(path), "query": query,
+            return {"id": video["id"], "path": str(path), "query": query, "source": "Pexels",
                     "credit": user.get("name", "Pexels"), "url": video.get("url", "https://www.pexels.com")}
     except Exception:  # noqa: BLE001
         return None

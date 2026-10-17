@@ -348,7 +348,7 @@ def footage_credit(d: dict) -> str:
     if not f:
         return ""
     return (f'<div class="why" style="font-size:11px;margin-top:8px;color:var(--hint)">Footage: '
-            f'<a href="{safe(f.get("url", ""))}" target="_blank" style="color:var(--hint)">{safe(f.get("credit", ""))} on Pexels</a></div>')
+            f'<a href="{safe(f.get("url", ""))}" target="_blank" style="color:var(--hint)">{safe(f.get("credit", ""))} on {safe(f.get("source", "Pexels"))}</a></div>')
 
 
 def try_trail(attempts: list[dict], plan_by_id: dict) -> str:
