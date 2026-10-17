@@ -115,6 +115,7 @@ python -m liftoff.playbook --rounds 2 --limit 6   # Version N+1 on held-out miss
 | `YDC_API_KEY` | | You.com key for live research |
 | `LIFTOFF_MOCK` | `0` | `1` = fixtures only, zero network, always works |
 | `LIFTOFF_LIVE_RESEARCH` | `1` | `0` = use the research fixture |
+| `YOUTUBE_API_KEY` | | optional: real view counts on YouTube posts. TikTok has no public views API, so TikTok tiles show the post date |
 | `LIFTOFF_MAX_INFLIGHT` | `8` | Cap on concurrent model calls (Crusoe rate limits by concurrency) |
 
 </details>
@@ -534,18 +535,19 @@ Questions are written for a single still: *"Is there a readable hook in the firs
 - **Crusoe Managed Inference**: every model call, through one OpenAI compatible endpoint in `liftoff/llm.py`.
 - **NVIDIA Nemotron 3**: Super (Spec, playbook), Nano (Librarian), Nano Omni (vision verifier, goal re-check).
 - **You.com**: live competitor discovery, public post URLs for the trend wall, and citations for the Spec agent's thresholds.
+- **YouTube Data API**: public view counts for the trend wall (statistics only, no footage).
 
 ## 🗺 Roadmap
 
 - [x] Every model call on Crusoe, verified against the account
 - [x] Live You.com research with Nemotron pattern tagging and fallbacks
+- [x] Real view counts on the trend wall (YouTube Data API, statistics only)
 - [x] Parallel verification with a shared concurrency cap
 - [x] Loop detection with a Director strategy switch
 - [x] Version N+1 playbook scored on held-out missions
 - [ ] Drift as a Nemotron judge, HOLD on drift above 0.5
 - [ ] Brand card learned from a URL (You.com Contents)
 - [ ] Safe zone and caption OCR checks
-- [ ] View counts on the trend wall (YouTube Data API)
 - [ ] NemoClaw sandbox with network limited to Crusoe and You.com
 
 ---

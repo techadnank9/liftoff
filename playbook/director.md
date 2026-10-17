@@ -1,0 +1,2 @@
+- logo_seconds must be greater than or equal to 3.25 seconds
+- text_contrast must be greater than or equal to 4.5

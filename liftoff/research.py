@@ -130,6 +130,40 @@ def _platform(url: str) -> str | None:
     return None
 
 
+def _youtube_id(url: str) -> str | None:
+    if "youtube.com/shorts/" in url:
+        return url.split("/shorts/")[1].split("?")[0].split("/")[0]
+    if "youtube.com/watch" in url and "v=" in url:
+        return url.split("v=")[1].split("&")[0]
+    return None
+
+
+def youtube_views(urls: list[str]) -> dict[str, int]:
+    """Public view counts from the YouTube Data API (statistics only, no footage). {} without a key."""
+    import urllib.parse
+    import urllib.request
+
+    key = os.environ.get("YOUTUBE_API_KEY")
+    ids = {u: _youtube_id(u) for u in urls}
+    wanted = sorted({i for i in ids.values() if i})
+    if not key or not wanted:
+        return {}
+    import ssl
+
+    import certifi  # ships with the openai SDK; python.org builds have no system roots
+
+    ctx = ssl.create_default_context(cafile=certifi.where())
+    views: dict[str, int] = {}
+    for chunk in (wanted[i:i + 50] for i in range(0, len(wanted), 50)):
+        q = urllib.parse.urlencode({"part": "statistics", "id": ",".join(chunk), "key": key})
+        with urllib.request.urlopen(f"https://www.googleapis.com/youtube/v3/videos?{q}", timeout=15,
+                                    context=ctx) as r:
+            for item in json.load(r).get("items", []):
+                if item.get("statistics", {}).get("viewCount"):
+                    views[item["id"]] = int(item["statistics"]["viewCount"])
+    return {u: views[i] for u, i in ids.items() if i in views}
+
+
 def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
     """You.com Search for posts, competitors and citations; Nemotron Nano tags patterns from text.
 
@@ -185,6 +219,18 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
             wall.append({"platform": p["platform"], "url": p["url"], "views": None,
                          "age": str(p.get("page_age") or "")[:10], "title": p["title"],
                          "hook": t.get("hook") or p["title"][:40], "patterns": tags})
+
+        try:
+            views = youtube_views([w["url"] for w in wall])
+        except Exception as e:  # noqa: BLE001
+            views = {}
+            tel.emit("scout", "youtube_failed", {"error": str(e)[:200]})
+        for w in wall:
+            w["views"] = views.get(w["url"])
+        if views:
+            tel.emit("scout", "youtube_views", {"posts": len(views), "total_views": sum(views.values())})
+        # Most watched first; posts without a count (TikTok) keep their order after them.
+        wall.sort(key=lambda w: -(w["views"] or 0))
 
         counts: dict[str, int] = {}
         for w in wall:
