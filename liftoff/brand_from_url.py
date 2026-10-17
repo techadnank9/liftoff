@@ -183,12 +183,19 @@ def from_url(url: str, tel: Telemetry | None = None) -> Brand:
         if _luminance(sec) > _luminance(prim):
             prim, sec = sec, prim  # white overlay text needs the darker colour available as bg
 
+        # One overlay text colour that can pass WCAG AA (4.5) on at least one brand colour:
+        # white when it can, otherwise near-black. Bright palettes (yellow, pink) need dark text.
+        def ratio(a: str, b: str) -> float:
+            la, lb = _luminance(a), _luminance(b)
+            return (max(la, lb) + 0.05) / (min(la, lb) + 0.05)
+        text_hex = "#FFFFFF" if max(ratio("#FFFFFF", prim), ratio("#FFFFFF", sec)) >= 4.5 else "#141414"
+
         name = re.sub(r"\s+", " ", str(raw.get("name") or slug.split("-")[0].title())).strip()[:24]
         tone = [str(t).lower() for t in (raw.get("tone") or [])][:3] or ["bold", "clear", "direct"]
         card = {
             "name": name, "category": str(raw.get("category") or "product").lower()[:24],
             "market": str(raw.get("market") or "US")[:20], "primary_hex": prim, "secondary_hex": sec,
-            "text_hex": "#FFFFFF", "tone": tone,
+            "text_hex": text_hex, "tone": tone,
             "logo_path": str(out / "logo.png"), "can_path": str(out / "can.png"),
             "must_haves": must,
             "never": sorted({"health claims", "competitor logos", *[str(n).lower() for n in raw.get("never") or []][:3]}),

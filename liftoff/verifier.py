@@ -65,29 +65,35 @@ def aspect_ratio(ctx: dict, ratio: str) -> dict:
     return {"pass": ok, "measured": f"{w}x{h}", "expected": ratio}
 
 
-def logo_seconds_at_least(ctx: dict, min_s: float) -> dict:
-    """Template-match the brand logo badge in sampled frames at a few scales."""
+def logo_scores(ctx: dict) -> list[float]:
+    """Best template-match score of the brand logo per sampled frame. Cached on ctx: the logo
+    check uses it, and the contrast check uses it to leave logo frames to the logo check."""
+    if "logo_scores" in ctx:
+        return ctx["logo_scores"]
     logo = cv2.imread(ctx["brand"].logo_path, cv2.IMREAD_COLOR)
-    # Work at half resolution: 4x faster, template matching is scale-tolerant enough.
     logo = cv2.resize(logo, None, fx=0.5, fy=0.5)
-    hits = 0
-    first_hit_t = None
-    for i, fp in enumerate(ctx["frames"]):
+    scores = []
+    for fp in ctx["frames"]:
         frame = cv2.resize(_bgr(fp), None, fx=0.5, fy=0.5)
         best = 0.0
         for scale in (0.75, 1.0, 1.25):
             tpl = cv2.resize(logo, None, fx=scale, fy=scale)
             if tpl.shape[0] >= frame.shape[0] or tpl.shape[1] >= frame.shape[1]:
                 continue
-            res = cv2.matchTemplate(frame, tpl, cv2.TM_CCOEFF_NORMED)
-            best = max(best, float(res.max()))
-        if best > 0.75:
-            hits += 1
-            if first_hit_t is None:
-                first_hit_t = i / SAMPLE_FPS
+            best = max(best, float(cv2.matchTemplate(frame, tpl, cv2.TM_CCOEFF_NORMED).max()))
+        scores.append(best)
+    ctx["logo_scores"] = scores
+    return scores
+
+
+def logo_seconds_at_least(ctx: dict, min_s: float) -> dict:
+    """Template-match the brand logo badge in sampled frames at a few scales."""
+    scores = logo_scores(ctx)
+    hits = sum(1 for s in scores if s > 0.75)
+    first = next((i for i, s in enumerate(scores) if s > 0.75), None)
     seconds = hits / SAMPLE_FPS
     return {"pass": seconds >= min_s, "measured": round(seconds, 2), "expected": f">= {min_s}s",
-            "first_seen_t": first_hit_t}
+            "first_seen_t": None if first is None else first / SAMPLE_FPS}
 
 
 def palette_within(ctx: dict, max_distance: float) -> dict:
@@ -110,21 +116,26 @@ def _luminance(rgb: np.ndarray) -> float:
 
 
 def text_contrast_at_least(ctx: dict, min_ratio: float) -> dict:
-    """In the text region (top 45%), find the background mode and the dominant non-bg color."""
+    """WCAG contrast of the overlay text as rendered against the background it sits on.
+
+    Text pixels are found by the brand card's text colour, not by "the second most common
+    colour": a white product rim or logo badge passing through the frame is not the text.
+    Frames with no text pixels are skipped; logo frames are left to the logo check."""
+    text_rgb = np.array(hex_to_rgb(ctx["brand"].text_hex), dtype=float)
     ratios = []
-    for fp in ctx["frames"][:: max(1, len(ctx["frames"]) // 6)]:
+    scores = logo_scores(ctx)
+    text_frames = [fp for fp, sc in zip(ctx["frames"], scores) if sc <= 0.75] or ctx["frames"]
+    for fp in text_frames[:: max(1, len(text_frames) // 6)]:
         reg = cv2.cvtColor(_bgr(fp), cv2.COLOR_BGR2RGB)[: int(0.45 * ctx["probe"]["height"]), :, :].reshape(-1, 3)
         q = (reg // 16) * 16
         vals, counts = np.unique(q, axis=0, return_counts=True)
         order = np.argsort(-counts)
         bg = vals[order[0]].astype(float)
-        fg = None
-        for k in order[1:]:
-            if np.linalg.norm(vals[k].astype(float) - bg) > 60:
-                fg = vals[k].astype(float)
-                break
-        if fg is None:
+        # rendered text: bins close to the declared text colour, with enough pixels to be words
+        near = [k for k in order[1:] if np.linalg.norm(vals[k].astype(float) - text_rgb) < 60 and counts[k] >= 400]
+        if not near:
             continue
+        fg = vals[near[0]].astype(float)
         l1, l2 = _luminance(fg), _luminance(bg)
         ratios.append((max(l1, l2) + 0.05) / (min(l1, l2) + 0.05))
     worst = min(ratios) if ratios else 0.0

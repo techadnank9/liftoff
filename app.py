@@ -154,7 +154,10 @@ def load(run_dir: Path):
 
 
 def brand_icon(c: dict) -> str | None:
-    """The brand site's own icon, served by You.com's favicon service; never downloaded."""
+    """The brand site's own icon, served by You.com's favicon service; never downloaded.
+    Research checks it isn't the service's generic placeholder; older runs guessed the domain."""
+    if "icon" in c:
+        return c["icon"]
     domain = c.get("domain") or (c["name"].lower().replace(" ", "").replace("'", "") + ".com")
     return f"https://you.com/favicon?domain={domain}&size=128"
 
@@ -273,24 +276,49 @@ def ticker_line(events: list[dict], plan_by_id: dict) -> str:
     return "Awaiting telemetry…"
 
 
+DEFAULT_MISSION = "Launch video for Fizz cola, bold, for vertical feeds"
+
+
+def start_flight(mission: str, brand: str, n: int, plant: bool, mock: bool, brand_url: str = "") -> None:
+    env = dict(os.environ, LIFTOFF_MOCK="1" if mock else "0")
+    cmd = [sys.executable, "-m", "liftoff.run", "--mission", mission, "--brand", brand, "--vehicles", str(n)]
+    if brand_url:
+        cmd += ["--brand-url", brand_url]  # run.py writes the mission from the brand when it is the default
+    if not plant:
+        cmd.append("--no-plant")
+    subprocess.Popen(cmd, cwd=ROOT, env=env)
+    time.sleep(1.5)
+
+
+# A brand URL from the landing page (?brand_url=...) prefills the sidebar and offers a one-click flight.
+url_param = (st.query_params.get("brand_url") or "").strip()[:120]
+
 # ---------------- sidebar: launch a flight ----------------
 with st.sidebar:
     st.title("Liftoff")
     st.caption("Your launch video doesn't leave the pad until mission control says go.")
-    mission = st.text_input("Mission", "Launch video for Fizz cola, bold, for vertical feeds")
-    brand_in = st.text_input("Brand", "fizz")
+    brand_url = st.text_input("Brand website", url_param, placeholder="yourbrand.com",
+                              help="We read the site for name, colours and tone. Leave empty for the Fizz demo.")
+    mission = st.text_input("Mission", DEFAULT_MISSION,
+                            help="With a website, leave this as is and the mission is written from the brand.")
+    brand_in = "fizz"
     n = st.slider("Directions to build", 1, 5, 3)
     plant = st.checkbox("Plant a failure on direction A (demo)", True)
     mock = st.checkbox("Mock inference (no API key)", os.environ.get("LIFTOFF_MOCK", "0") == "1")
     if st.button("Start flight", type="primary"):
-        env = dict(os.environ, LIFTOFF_MOCK="1" if mock else "0")
-        cmd = [sys.executable, "-m", "liftoff.run", "--mission", mission, "--brand", brand_in, "--vehicles", str(n)]
-        if not plant:
-            cmd.append("--no-plant")
-        subprocess.Popen(cmd, cwd=ROOT, env=env)
-        time.sleep(1.5)
+        start_flight(mission, brand_in, n, plant, mock, brand_url.strip())
     auto = st.checkbox("Live refresh", True)
     st.caption("Crusoe Managed Inference. Spec and verifier on Nemotron 3; Director on a different model family.")
+
+if url_param and st.session_state.get("launched_for") != url_param:
+    with st.container(border=True):
+        st.markdown(f"#### Build a launch video for **{safe(url_param)}**")
+        st.caption("Liftoff reads the site for its name, colours and tone, researches its category live, writes the "
+                   "definition of done, then builds and proves three directions. About two minutes.")
+        if st.button(f"Launch a flight for {url_param}", type="primary"):
+            st.session_state["launched_for"] = url_param
+            start_flight(DEFAULT_MISSION, "fizz", 3, True, mock, url_param)
+            st.rerun()
 
 run_dir = latest_run_dir()
 if not run_dir:
@@ -326,7 +354,7 @@ st.markdown(
 comps = "".join(
     f'<div class="lf-comp"><div class="lf-av" style="background:{AVATAR[i % 5][0]};color:{AVATAR[i % 5][1]}">'
     f'{safe(initials(c["name"]))}'
-    f'{f"<img alt=\"\" src=\"{safe(brand_icon(c))}\">" if res.get("live") else ""}</div><div><b>{safe(c["name"])}</b>'
+    f'{f"<img alt=\"\" src=\"{safe(brand_icon(c))}\">" if res.get("live") and brand_icon(c) else ""}</div><div><b>{safe(c["name"])}</b>'
     f'<span>{c["videos"]} {"mentions" if res.get("live") else "videos"}</span></div></div>'
     for i, c in enumerate(res.get("competitors", [])[:3])
 )

@@ -166,6 +166,25 @@ def youtube_views(urls: list[str]) -> dict[str, int]:
     return {u: views[i] for u, i in ids.items() if i in views}
 
 
+def real_icon(domain: str | None) -> str | None:
+    """The brand's icon URL from You.com's favicon service, or None when the service has none
+    for that domain (it answers 404), so the UI shows initials instead of a broken image."""
+    if not domain:
+        return None
+    import ssl
+    import urllib.request
+
+    import certifi
+
+    url = f"https://you.com/favicon?domain={domain}&size=128"
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=6, context=ssl.create_default_context(cafile=certifi.where())) as r:
+            return url if r.status == 200 and r.headers.get("Content-Type", "").startswith("image/") else None
+    except Exception:  # noqa: BLE001
+        return None
+
+
 def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
     """You.com Search for posts, competitors and citations; Nemotron Nano tags patterns from text.
 
@@ -254,6 +273,8 @@ def _live(brand: Brand, tel: Telemetry) -> dict[str, Any] | None:
                                 "domain": str(c.get("domain", "")).strip().lower().removeprefix("www.") or None,
                                 "videos": text.count(name.lower().split()[0])})
 
+        for c in competitors:
+            c["icon"] = real_icon(c.get("domain"))
         data = {
             "competitors": competitors or FIXTURE["competitors"],
             "trend_wall": wall,
