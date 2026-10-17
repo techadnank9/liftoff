@@ -15,7 +15,9 @@ from __future__ import annotations
 import base64
 import json
 import os
+import random
 import re
+import threading
 import time
 from pathlib import Path
 from typing import Any
@@ -61,6 +63,11 @@ MODELS: dict[str, str] = {
 # Spec on Super with thinking took ~56s; the prompt is strict enough to run without it.
 THINKING_OFF = {"spec", "librarian", "scout"}
 
+# Crusoe rate limits by concurrent requests ("max_requests_limit"). Every call in the
+# process shares this cap, so parallel flights and parallel vision checks stay under it.
+MAX_INFLIGHT = int(os.environ.get("LIFTOFF_MAX_INFLIGHT", "8"))
+_inflight = threading.BoundedSemaphore(MAX_INFLIGHT)
+
 _client = None
 _usage: dict[str, dict[str, int]] = {}
 
@@ -85,7 +92,7 @@ def usage_report() -> dict[str, dict[str, int]]:
 
 
 def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
-         temperature: float = 0.2, max_tokens: int = 4000, retries: int = 2) -> str:
+         temperature: float = 0.2, max_tokens: int = 4000, retries: int = 5) -> str:
     """Chat completion for a role. Returns the text content."""
     if MOCK:
         from . import mock
@@ -103,7 +110,8 @@ def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
     last_err: Exception | None = None
     for attempt in range(retries + 1):
         try:
-            resp = client.chat.completions.create(**kwargs)
+            with _inflight:
+                resp = client.chat.completions.create(**kwargs)
             if resp.usage:
                 u = _usage.setdefault(role, {"prompt": 0, "completion": 0, "calls": 0})
                 u["prompt"] += resp.usage.prompt_tokens or 0
@@ -121,6 +129,10 @@ def call(role: str, messages: list[dict[str, Any]], *, json_mode: bool = False,
             return text
         except Exception as e:  # noqa: BLE001
             last_err = e
+            if "429" in str(e) or "rate_limit" in str(e):
+                # Back off and let other in-flight calls drain; jitter so threads don't retry together.
+                time.sleep(min(30.0, 2.0 * 2 ** attempt) + random.uniform(0, 2))
+                continue
             if json_mode and "response_format" in kwargs:
                 # Some models reject json_object. Drop it and ask in the prompt instead.
                 kwargs.pop("response_format")

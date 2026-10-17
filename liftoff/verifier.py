@@ -13,6 +13,7 @@ import math
 import shutil
 import subprocess
 from pathlib import Path
+from concurrent.futures import ThreadPoolExecutor
 from typing import Any, Callable
 
 import cv2
@@ -142,16 +143,20 @@ def _pick_frames(ctx: dict, question: str) -> list[Path]:
     return [fr[len(fr) // 2], fr[-1]]
 
 
+def _ask_frame(ctx: dict, question: str, fp: Path) -> dict:
+    prompt = (f"Brand in the overlay: {ctx['brand'].name}. Question: {question} "
+              'Answer JSON only: {"answer":"yes"|"no","confidence":0-1,"reason":str}')
+    out = llm.call_json("verifier_vision", [{"role": "user", "content": llm.image_content(fp, prompt)}])
+    if not isinstance(out, dict):
+        out = {"answer": str(out)}
+    out["answer"] = str(out.get("answer", "")).strip().lower()
+    return {"frame": fp.name, **out}
+
+
 def _vision(ctx: dict, question: str, want: str) -> dict:
-    answers = []
-    for fp in _pick_frames(ctx, question):
-        prompt = (f"Brand in the overlay: {ctx['brand'].name}. Question: {question} "
-                  'Answer JSON only: {"answer":"yes"|"no","confidence":0-1,"reason":str}')
-        out = llm.call_json("verifier_vision", [{"role": "user", "content": llm.image_content(fp, prompt)}])
-        if not isinstance(out, dict):
-            out = {"answer": str(out)}
-        out["answer"] = str(out.get("answer", "")).strip().lower()
-        answers.append({"frame": fp.name, **out})
+    frames = _pick_frames(ctx, question)
+    with ThreadPoolExecutor(len(frames)) as pool:
+        answers = list(pool.map(lambda fp: _ask_frame(ctx, question, fp), frames))
     ok = all(str(a.get("answer", "")).lower().startswith(want) for a in answers)
     return {"pass": ok, "measured": [a.get("answer") for a in answers], "expected": want, "detail": answers}
 
@@ -178,18 +183,22 @@ CHECKS: dict[str, Callable[..., dict]] = {
 def verify(mp4: str, brand: Brand, flight_plan: list[dict[str, Any]], work_dir: Path,
            tel: Telemetry, vehicle: str) -> dict[str, Any]:
     ctx = {"probe": probe(mp4), "brand": brand, "frames": sample_frames(mp4, work_dir / "samples")}
-    results = []
-    for p in flight_plan:
-        fn = CHECKS[p["check"]]
+
+    def run_one(p: dict[str, Any]) -> dict[str, Any]:
         try:
-            r = fn(ctx, **p["args"])
+            r = CHECKS[p["check"]](ctx, **p["args"])
         except Exception as e:  # noqa: BLE001
             r = {"pass": False, "measured": f"error: {e}", "expected": p["args"]}
         r["id"] = p["id"]
         r["check"] = p["check"]
-        results.append(r)
         tel.emit("verifier", "check", {"id": p["id"], "pass": r["pass"], "measured": r["measured"],
                                        "expected": r["expected"]}, vehicle=vehicle)
+        return r
+
+    # Vision checks are network bound, so they all run at once (llm.call caps concurrency);
+    # pixel checks are CPU bound and quick. Results keep flight plan order.
+    with ThreadPoolExecutor(max(1, len(flight_plan))) as pool:
+        results = list(pool.map(run_one, flight_plan))
     passed = sum(1 for r in results if r["pass"])
     verdict = {"pass": passed == len(results), "passed": passed, "total": len(results), "results": results}
     tel.emit("verifier", "poll", {"go": verdict["pass"], "passed": passed, "total": len(results)}, vehicle=vehicle)
