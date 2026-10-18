@@ -526,8 +526,8 @@ t_research, t_videos, t_post, t_check, t_activity = (st.container() for _ in ran
 with t_videos:
     # ---------------- the output: one card per launch video ----------------
     st.markdown('<div class="lf-sec">Your launch videos</div>', unsafe_allow_html=True)
-    st.caption("You only see a video once it passes every check on the Quality checklist. One that fails a "
-               "check is sent back with exactly what failed, fixed, and checked again.")
+    st.caption("You only see a video once it passes every quality check. One that fails a check is sent back "
+               "with exactly what failed, fixed, and checked again.")
     if not vehicles:
         st.info("The Director is writing the directions…" if running else "No videos in this launch.")
     else:
@@ -689,32 +689,36 @@ with t_post:
                 f'<div class="lf-num">{safe(x["what"])}<small>demo, not published</small></div></div>' for _, x in mine)
             st.markdown(f'<div class="lf-card">{rows}</div>', unsafe_allow_html=True)
 
+# Hidden for now (Adnan, 2026-10-17): the checks still run; the list is not shown.
+SHOW_CHECKLIST = False
 with t_check:
-    # ---------------- what ready to post means ----------------
-    left, right = st.columns([1.35, 1], gap="large")
-    with left:
-        st.markdown('<div class="lf-sec">Quality checklist</div>', unsafe_allow_html=True)
-        st.caption("Every video is checked against this list before you see it. Liftoff wrote it from your brief "
-                   "before making anything, so the videos are held to it and not the other way round.")
+    if SHOW_CHECKLIST:
+        # ---------------- what ready to post means ----------------
+        left, right = st.columns([1.35, 1], gap="large")
+        with left:
+            st.markdown('<div class="lf-sec">Quality checklist</div>', unsafe_allow_html=True)
+            st.caption("Every video is checked against this list before you see it. Liftoff wrote it from your brief "
+                       "before making anything, so the videos are held to it and not the other way round.")
 
-        def promise_row(p: dict) -> str:
-            title, bar, how = promise(p)
-            why = WHY.get(title, "")
-            return (f'<div class="lf-row"><div><b style="font-weight:600">{safe(title)}</b>'
-                    f'<div class="why" style="font-size:14px;color:var(--ink);margin-top:2px">{safe(bar)}</div>'
-                    f'{f"<div class=why>{safe(why)}</div>" if why else ""}</div>'
-                    f'<div class="lf-num"><small style="font-size:12px">{safe(how)}</small></div></div>')
+            def promise_row(p: dict) -> str:
+                title, bar, how = promise(p)
+                why = WHY.get(title, "")
+                return (f'<div class="lf-row"><div><b style="font-weight:600">{safe(title)}</b>'
+                        f'<div class="why" style="font-size:14px;color:var(--ink);margin-top:2px">{safe(bar)}</div>'
+                        f'{f"<div class=why>{safe(why)}</div>" if why else ""}</div>'
+                        f'<div class="lf-num"><small style="font-size:12px">{safe(how)}</small></div></div>')
 
-        rows = "".join(promise_row(p) for p in state.get("flight_plan", [])) or '<div class="lf-row">Writing it down…</div>'
-        st.markdown(f'<div class="lf-card">{rows}</div>', unsafe_allow_html=True)
-    with right:
-        st.markdown('<div class="lf-sec">What we assumed</div>', unsafe_allow_html=True)
-        st.caption("Your brief didn't say these, so Liftoff chose and tells you. Put them in the brief to change them.")
-        led = "".join(f'<div class="lf-row"><div>{safe(a.removeprefix("Assumed ").rstrip("."))}</div></div>'
-                      for a in state.get("assumptions", []))
-        esc = "".join(f'<div class="lf-note callcard"><b>Needs your decision:</b> {safe(e)}</div>'
-                      for e in state.get("escalations", []))
-        st.markdown(f'<div class="lf-card">{led or "<div class=lf-row>Nothing yet</div>"}{esc}</div>', unsafe_allow_html=True)
+            rows = "".join(promise_row(p) for p in state.get("flight_plan", [])) or '<div class="lf-row">Writing it down…</div>'
+            st.markdown(f'<div class="lf-card">{rows}</div>', unsafe_allow_html=True)
+        with right:
+            st.markdown('<div class="lf-sec">What we assumed</div>', unsafe_allow_html=True)
+            st.caption("Your brief didn't say these, so Liftoff chose and tells you. Put them in the brief to change them.")
+            led = "".join(f'<div class="lf-row"><div>{safe(a.removeprefix("Assumed ").rstrip("."))}</div></div>'
+                          for a in state.get("assumptions", []))
+            esc = "".join(f'<div class="lf-note callcard"><b>Needs your decision:</b> {safe(e)}</div>'
+                          for e in state.get("escalations", []))
+            st.markdown(f'<div class="lf-card">{led or "<div class=lf-row>Nothing yet</div>"}{esc}</div>', unsafe_allow_html=True)
+
 
 
 with t_research:

@@ -1,0 +1,882 @@
+{
+ "mission": "Launch video for poppi sparkling soda, playful, for vertical feeds",
+ "brand": {
+  "name": "poppi (Remotion)",
+  "category": "sparkling soda",
+  "market": "US",
+  "primary_hex": "#FFF200",
+  "secondary_hex": "#EC008C",
+  "text_hex": "#141414",
+  "tone": [
+   "playful",
+   "nostalgic",
+   "bold"
+  ],
+  "logo_path": "/Users/adnan/Documents/liftoff/assets/drinkpoppi-com/logo.png",
+  "can_path": "/Users/adnan/Documents/liftoff/assets/drinkpoppi-com/can.png",
+  "must_haves": [
+   "brand name visible",
+   "vertical 9:16",
+   "under 15 seconds"
+  ],
+  "never": [
+   "calorie count",
+   "competitor logos",
+   "health claims",
+   "sugar content"
+  ]
+ },
+ "phase": "done",
+ "flight_plan": [
+  {
+   "id": "dur-1",
+   "check": "duration_between",
+   "args": {
+    "min_s": 6.0,
+    "max_s": 15.0
+   },
+   "why": "Mission requires under 15 seconds; vertical feed norm is 6-15s per research on short-form ads."
+  },
+  {
+   "id": "ar-1",
+   "check": "aspect_ratio",
+   "args": {
+    "ratio": "9:16"
+   },
+   "why": "Mission specifies vertical feeds; brand card requires vertical 9:16."
+  },
+  {
+   "id": "logo-1",
+   "check": "logo_seconds_at_least",
+   "args": {
+    "min_s": 3.0
+   },
+   "why": "Research sources cite category norm: brand visible 3s+ in short-form video."
+  },
+  {
+   "id": "pal-1",
+   "check": "palette_within",
+   "args": {
+    "max_distance": 60.0
+   },
+   "why": "Brand card provides primary (#FFF200) and secondary (#EC008C) hex; background must stay within 60 RGB distance to remain on-brand."
+  },
+  {
+   "id": "tc-1",
+   "check": "text_contrast_at_least",
+   "args": {
+    "min_ratio": 4.5
+   },
+   "why": "WCAG AA standard for text readability; brand card text_hex is #141414, requiring sufficient contrast against backgrounds."
+  },
+  {
+   "id": "vis-hook",
+   "check": "vision_yes",
+   "args": {
+    "question": "Is there a readable hook (text or visual cue) in the first-second frame?"
+   },
+   "why": "Research: 'The First Five Seconds' emphasizes immediate hook to prevent skip; mission calls for playful tone needing quick engagement."
+  },
+  {
+   "id": "vis-end",
+   "check": "vision_yes",
+   "args": {
+    "question": "Is the brand name 'poppi' shown as an end card in the last-second frame?"
+   },
+   "why": "Brand card requires 'brand name visible'; end-card ensures recall; research shows last-frame branding boosts lift."
+  },
+  {
+   "id": "vis-no-comp",
+   "check": "vision_no",
+   "args": {
+    "question": "Are any competitor logos visible in this frame?"
+   },
+   "why": "Brand card 'never' list includes competitor logos; must be absent in all frames."
+  },
+  {
+   "id": "vis-no-health",
+   "check": "vision_no",
+   "args": {
+    "question": "Is a health claim visible in this frame?"
+   },
+   "why": "Brand card 'never' list includes health claims; mission is for sparkling soda, not functional beverage; avoids implied benefits."
+  },
+  {
+   "id": "vis-no-cal",
+   "check": "vision_no",
+   "args": {
+    "question": "Is calorie count or sugar content visible in this frame?"
+   },
+   "why": "Brand card 'never' list includes calorie count and sugar content; must not appear to avoid nutritional claims."
+  }
+ ],
+ "assumptions": [
+  "Format: vertical 9:16 (from mission and brand card)",
+  "Language: English (US market per brand card)",
+  "Market: US (explicit in brand card)",
+  "Duration: 6-15s (mission says under 15s; research and platform norms support 6s minimum for effectiveness)",
+  "Audio: Not specified; assumed optional (music, SFX, or voiceover allowed but not required for vision checks)"
+ ],
+ "escalations": [],
+ "research": {
+  "competitors": [
+   {
+    "name": "Coca-Cola",
+    "role": "incumbent",
+    "domain": "coca-cola.com",
+    "videos": 11,
+    "icon": "https://you.com/favicon?domain=coca-cola.com&size=128"
+   },
+   {
+    "name": "PepsiCo",
+    "role": "challenger_won",
+    "domain": "pepsi.com",
+    "videos": 1,
+    "icon": "https://you.com/favicon?domain=pepsi.com&size=128"
+   },
+   {
+    "name": "Dr Pepper",
+    "role": "challenger_won",
+    "domain": "drpepper.com",
+    "videos": 21,
+    "icon": "https://you.com/favicon?domain=drpepper.com&size=128"
+   },
+   {
+    "name": "Sprite",
+    "role": "wildcard",
+    "domain": "sprite.com",
+    "videos": 10,
+    "icon": "https://you.com/favicon?domain=sprite.com&size=128"
+   },
+   {
+    "name": "SodaStream",
+    "role": "wildcard",
+    "domain": "sodastream.com",
+    "videos": 4,
+    "icon": "https://you.com/favicon?domain=sodastream.com&size=128"
+   }
+  ],
+  "trend_wall": [
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/W3ANwFulGrk",
+    "views": 11466391,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/W3ANwFulGrk/hqdefault.jpg",
+    "age": "2026-09-23",
+    "title": "Nails vs Impossible Open Cans \ud83d\udc85 #relatablestories #comedy #funnymemes",
+    "hook": "Nails vs Impossible cans",
+    "patterns": [
+     "humor"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/r1Xd4HcGbHg",
+    "views": 5137055,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/r1Xd4HcGbHg/hqdefault.jpg",
+    "age": "2026-10-10",
+    "title": "Full Soda Can Crushing Experiment | Satisfying ASMR #shorts #satisfying #viral #asmr #crushing #DIY",
+    "hook": "Full soda can crushing",
+    "patterns": [
+     "slow_motion"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/VoxcFtGnqG8",
+    "views": 2851524,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/VoxcFtGnqG8/hqdefault.jpg",
+    "age": "2026-09-28",
+    "title": "\ud83e\udd64 Homemade Pepsi Recipe | Ammutty\u2019s Special \u2764\ufe0f| #shorts",
+    "hook": "Homemade Pepsi recipe",
+    "patterns": [
+     "process"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/yXE5FmqKnpM",
+    "views": 1719058,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/yXE5FmqKnpM/hqdefault.jpg",
+    "age": "2026-10-10",
+    "title": "Pomegranate vodka fizz \ud83c\udf79#shorts",
+    "hook": "Pomegranate vodka fizz recipe",
+    "patterns": [
+     "taste_test"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/fE4m9jSaUMA",
+    "views": 337795,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/fE4m9jSaUMA/hqdefault.jpg",
+    "age": "2026-10-03",
+    "title": "Street Style Imli Soda Recipe",
+    "hook": "Imli Soda recipe tutorial",
+    "patterns": [
+     "process"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/Jv4Cc934QxE",
+    "views": 169137,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/Jv4Cc934QxE/hqdefault.jpg",
+    "age": "2026-10-16",
+    "title": "Testing Baking Soda in Three Different Soft Drinks! #shorts",
+    "hook": "Baking soda soda test",
+    "patterns": [
+     "process"
+    ]
+   },
+   {
+    "platform": "youtube",
+    "url": "https://www.youtube.com/shorts/1zwM0c0N3DI",
+    "views": 113915,
+    "label": "Viral",
+    "thumb": "https://i.ytimg.com/vi/1zwM0c0N3DI/hqdefault.jpg",
+    "age": "2026-10-07",
+    "title": "Homemade Sprite without the high fructose corn syrup \ud83d\ude0c #homemade #gutfriendly #shorts",
+    "hook": "Homemade Sprite recipe",
+    "patterns": [
+     "process"
+    ]
+   }
+  ],
+  "patterns": [
+   {
+    "tag": "process",
+    "share": 0.57,
+    "note": "How it's made, factory or recipe"
+   },
+   {
+    "tag": "humor",
+    "share": 0.14,
+    "note": "Joke or meme format"
+   },
+   {
+    "tag": "slow_motion",
+    "share": 0.14,
+    "note": "Slow motion product hero shot"
+   },
+   {
+    "tag": "taste_test",
+    "share": 0.14,
+    "note": "Blind or street taste test"
+   }
+  ],
+  "stats": {
+   "posts_scanned": 27,
+   "public_posts": 7
+  },
+  "sources": [
+   {
+    "title": "The First Five Seconds: Creating Unskippable Video Ads - Think with Google",
+    "url": "https://business.google.com/aunz/think/marketing-strategies/creating-youtube-ads-that-break-through-in-a-skippable-world/"
+   },
+   {
+    "title": "Video Ad Tricks to Win Viewers Fast - Zeely AI",
+    "url": "https://zeely.ai/blog/mastering-video-ad-best-practices/"
+   },
+   {
+    "title": "YouTube Shorts: Is It the Right Platform for Your Brand? A Guide to Short-Form Video Advertising",
+    "url": "https://www.collectivemeasures.com/insights/youtube-shorts-is-it-the-right-platform-for-your-brand-a-guide-to-short-form-video-advertising"
+   },
+   {
+    "title": "2025 Video Ads Best Practices for Your Next Campaign",
+    "url": "https://www.makeitbloom.com/blog/11-best-practices-to-create-effective-video-ads/"
+   },
+   {
+    "title": "Master Short-Form Video Ads: Insights for Advertisers",
+    "url": "https://target-video.com/short-form-video-advertising/"
+   },
+   {
+    "title": "Best Practices for Short-Form Video Ads - Techlasi",
+    "url": "https://techlasi.com/savvy/best-practices-for-short-form-video-ads/"
+   },
+   {
+    "title": "Category norm: brand visible 3s+ in short-form",
+    "url": "https://example.com/replace-with-you-com-citation"
+   }
+  ],
+  "live": true
+ },
+ "vehicles": {
+  "A": {
+   "id": "A",
+   "name": "Fizz Factory",
+   "pattern": "process",
+   "drift": 0.33,
+   "status": "go",
+   "mp4": "studio_A.mp4",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "A",
+      "name": "Fizz Factory",
+      "pattern": "process",
+      "hook": "Ever seen soda born?",
+      "body": "Watch the bubbles go wild",
+      "end_card": "poppi, made playful",
+      "duration_s": 10,
+      "logo_seconds": 3.4,
+      "bg": "primary",
+      "footage_query": "colorful soda bubbles macro close up",
+      "notes": "Hand made in Remotion (studio/), from this direction's words.",
+      "footage": null,
+      "style": "remotion"
+     },
+     "mp4": "studio_A.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 10,
+      "total": 10,
+      "results": [
+       {
+        "pass": true,
+        "measured": 10.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "1080x1920",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.5,
+        "expected": ">= 3.0s",
+        "first_seen_t": 6.5,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.6,
+        "expected": "<= 60.0",
+        "id": "pal-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 15.56,
+        "expected": ">= 4.5",
+        "id": "tc-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 1,
+          "reason": "The text 'Ever seen soda born?' is clearly visible and readable in the first-second frame."
+         }
+        ],
+        "id": "vis-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0040.png",
+          "answer": "yes",
+          "confidence": 1,
+          "reason": "The last-second frame displays 'poppi' in a white box, confirming the brand name is shown."
+         }
+        ],
+        "id": "vis-end",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the poppi brand is present."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No competitor logos are visible; only the 'poppi' brand logo and text are present."
+         }
+        ],
+        "id": "vis-no-comp",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 0.9,
+          "reason": "No health claim is visible; the text on the can is 'poppi SPARKLING SODA' which is a product description, not a health claim."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "The visible text 'poppi, made playful' does not contain any health-related claim; it focuses on playfulness, not health benefits."
+         }
+        ],
+        "id": "vis-no-health",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0021.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No calorie count or sugar content is visible on the can or elsewhere in the frame."
+         },
+         {
+          "frame": "s_0040.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No calorie count or sugar content is visible in the frame."
+         }
+        ],
+        "id": "vis-no-cal",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "decision": {
+    "decision": "GO",
+    "reason": "10 of 10 checks pass on the Remotion cut."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video displays the poppi brand name prominently, is formatted vertically (9:16), runs under 15 seconds, and uses a playful tone with copy such as \"poppi, made playful\" and bubble visuals, meeting all must\u2011haves and avoiding prohibited content."
+   }
+  },
+  "B": {
+   "id": "B",
+   "name": "Soda Swap",
+   "pattern": "humor",
+   "drift": 0.33,
+   "status": "go",
+   "mp4": "studio_B.mp4",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "B",
+      "name": "Soda Swap",
+      "pattern": "humor",
+      "hook": "My soda has a secret.",
+      "body": "It's not boring, promise.",
+      "end_card": "poppi, obviously",
+      "duration_s": 8,
+      "logo_seconds": 3.25,
+      "bg": "primary",
+      "footage_query": "friends laughing swapping drinks cafe",
+      "notes": "Hand made in Remotion (studio/), from this direction's words.",
+      "footage": null,
+      "style": "remotion"
+     },
+     "mp4": "studio_B.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 10,
+      "total": 10,
+      "results": [
+       {
+        "pass": true,
+        "measured": 8.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "1080x1920",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 3.5,
+        "expected": ">= 3.0s",
+        "first_seen_t": 4.5,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.6,
+        "expected": "<= 60.0",
+        "id": "pal-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 15.56,
+        "expected": ">= 4.5",
+        "id": "tc-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 0.95,
+          "reason": "The text 'My soda has a secret.' is a clear readable hook in the first frame, and the visual elements (smiley face, can) in the second frame provide additional cues, making the hook present across the first-second frames."
+         }
+        ],
+        "id": "vis-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0032.png",
+          "answer": "yes",
+          "confidence": 0.9,
+          "reason": "The last-second frame contains the brand name 'poppi' in a white box, confirming its presence as an end card element."
+         }
+        ],
+        "id": "vis-end",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0017.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible in the frame; only the poppi brand is present."
+         },
+         {
+          "frame": "s_0032.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No competitor logos are visible; only the poppi brand is shown."
+         }
+        ],
+        "id": "vis-no-comp",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0017.png",
+          "answer": "no",
+          "confidence": 0.9,
+          "reason": "No health claim is visible in the frame; the text on the can is 'poppi SPARKLING SODA' and the main text is 'It's not boring, promise.' which is not a health claim."
+         },
+         {
+          "frame": "s_0032.png",
+          "answer": "no",
+          "confidence": 0.9,
+          "reason": "No health claim is visible; only the brand name 'poppi' and 'poppi, obviously' are present."
+         }
+        ],
+        "id": "vis-no-health",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0017.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "The visible label on the can only shows 'poppi SPARKLING SODA' with no calorie count or sugar content information."
+         },
+         {
+          "frame": "s_0032.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No calorie count or sugar content is visible in the frame."
+         }
+        ],
+        "id": "vis-no-cal",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "decision": {
+    "decision": "GO",
+    "reason": "10 of 10 checks pass on the Remotion cut."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video is vertical (9:16), prominently displays the poppi brand name, uses playful bold copy, and is clearly under 15 seconds as indicated by the three sequential frames."
+   }
+  },
+  "C": {
+   "id": "C",
+   "name": "Slow Fizz",
+   "pattern": "slow_motion",
+   "drift": 0.33,
+   "status": "go",
+   "mp4": "studio_C.mp4",
+   "attempts": [
+    {
+     "attempt": 1,
+     "direction": {
+      "id": "C",
+      "name": "Slow Fizz",
+      "pattern": "slow_motion",
+      "hook": "Pop. Fizz. Repeat.",
+      "body": "The can that steals focus",
+      "end_card": "poppi in slow-mo",
+      "duration_s": 12,
+      "logo_seconds": 4.0,
+      "bg": "primary",
+      "footage_query": "soda can opening splash slow motion",
+      "notes": "Hand made in Remotion (studio/), from this direction's words.",
+      "footage": null,
+      "style": "remotion"
+     },
+     "mp4": "studio_C.mp4",
+     "verdict": {
+      "pass": true,
+      "passed": 10,
+      "total": 10,
+      "results": [
+       {
+        "pass": true,
+        "measured": 12.0,
+        "expected": "6.0-15.0s",
+        "id": "dur-1",
+        "check": "duration_between"
+       },
+       {
+        "pass": true,
+        "measured": "1080x1920",
+        "expected": "9:16",
+        "id": "ar-1",
+        "check": "aspect_ratio"
+       },
+       {
+        "pass": true,
+        "measured": 4.5,
+        "expected": ">= 3.0s",
+        "first_seen_t": 7.5,
+        "id": "logo-1",
+        "check": "logo_seconds_at_least"
+       },
+       {
+        "pass": true,
+        "measured": 3.6,
+        "expected": "<= 60.0",
+        "id": "pal-1",
+        "check": "palette_within"
+       },
+       {
+        "pass": true,
+        "measured": 15.56,
+        "expected": ">= 4.5",
+        "id": "tc-1",
+        "check": "text_contrast_at_least"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0002.png",
+          "answer": "yes",
+          "confidence": 1.0,
+          "reason": "The first frame contains the text 'Pop. Fizz. Repeat.' and the second frame shows the 'poppi' brand name on the can, both of which are readable hooks."
+         }
+        ],
+        "id": "vis-hook",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "yes"
+        ],
+        "expected": "yes",
+        "detail": [
+         {
+          "frame": "s_0048.png",
+          "answer": "yes",
+          "confidence": 0.9,
+          "reason": "The last-second frame contains a white box with 'poppi' in yellow text, indicating the brand name is displayed."
+         }
+        ],
+        "id": "vis-end",
+        "check": "vision_yes"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the poppi brand is present."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No competitor logos are visible; only the 'poppi' brand is present."
+         }
+        ],
+        "id": "vis-no-comp",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 0.9,
+          "reason": "The visible text on the can is 'poppi' and 'SPARKLING SODA', with no health-related claims present."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 0.95,
+          "reason": "No health claim is visible; only the brand name 'poppi' and 'poppi in slow-mo' are present."
+         }
+        ],
+        "id": "vis-no-health",
+        "check": "vision_no"
+       },
+       {
+        "pass": true,
+        "measured": [
+         "no",
+         "no"
+        ],
+        "expected": "no",
+        "detail": [
+         {
+          "frame": "s_0025.png",
+          "answer": "no",
+          "confidence": 1,
+          "reason": "The visible label only shows 'poppi SPARKLING SODA' with no calorie count or sugar content information."
+         },
+         {
+          "frame": "s_0048.png",
+          "answer": "no",
+          "confidence": 1.0,
+          "reason": "No calorie count or sugar content is visible in the frame."
+         }
+        ],
+        "id": "vis-no-cal",
+        "check": "vision_no"
+       }
+      ]
+     }
+    }
+   ],
+   "decision": {
+    "decision": "GO",
+    "reason": "10 of 10 checks pass on the Remotion cut."
+   },
+   "goalcheck": {
+    "satisfies_goal": true,
+    "reason": "The video satisfies the mission as the brand name 'poppi' is clearly visible on the can in the first and middle frames and prominently displayed in a text box in the last frame. The color scheme matches the brand's primary yellow and secondary magenta. The tone is playful ('Pop. Fizz. Repeat.', 'poppi in slow-mo') and bold, fitting the 'vertical feeds' requirement with a 9:16 aspect ratio."
+   }
+  }
+ },
+ "goalcheck": null,
+ "human_pings": 0,
+ "started_at": 1792281081.723584,
+ "finished_at": 1792283394.70492,
+ "brand_url": "drinkpoppi.com",
+ "spec_locked": true,
+ "summary": {
+  "cleared": 3,
+  "total": 3,
+  "human_pings": 0
+ },
+ "saved_from": "studio-poppi-1792283366"
+}
