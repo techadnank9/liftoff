@@ -32,6 +32,10 @@ for vid, comp in videos.items():
                      notes="Hand made in Remotion (studio/), from this direction's words.")
     ok = verdict["pass"]
     cleared += ok
+    tel.emit("arbiter", "decision", {"decision": "GO" if ok else "HOLD",
+                                     "failing": [r for r in verdict["results"] if not r["pass"]]}, vehicle=vid)
+    if old.get("goalcheck"):
+        tel.emit("goalcheck", "verdict", old["goalcheck"], vehicle=vid)
     state["vehicles"][vid] = {
         "id": vid, "name": old["name"], "pattern": old["pattern"], "drift": old.get("drift"),
         "status": "go" if ok else "hold", "mp4": str(mp4),
@@ -41,6 +45,7 @@ for vid, comp in videos.items():
         "goalcheck": old.get("goalcheck"),
     }
 state["brand"] = dict(src["brand"], name="poppi (Remotion)")
+tel.emit("system", "liftoff", {"cleared": cleared, "total": len(videos)})
 state["summary"] = {"cleared": cleared, "total": len(videos), "human_pings": 0}
 state["phase"] = "done"
 state["finished_at"] = time.time()

@@ -385,8 +385,8 @@
          {
           "frame": "s_0002.png",
           "answer": "yes",
-          "confidence": 1,
-          "reason": "The text 'Ever seen soda born?' is clearly visible and readable in the first-second frame."
+          "confidence": 0.95,
+          "reason": "The text 'Ever seen soda born?' is clearly visible and readable in the first frame, serving as a hook."
          }
         ],
         "id": "vis-hook",
@@ -402,8 +402,8 @@
          {
           "frame": "s_0040.png",
           "answer": "yes",
-          "confidence": 1,
-          "reason": "The last-second frame displays 'poppi' in a white box, confirming the brand name is shown."
+          "confidence": 0.95,
+          "reason": "The image shows 'poppi' in a white box with yellow text, which is characteristic of an end card displaying the brand name."
          }
         ],
         "id": "vis-end",
@@ -421,13 +421,13 @@
           "frame": "s_0021.png",
           "answer": "no",
           "confidence": 1,
-          "reason": "No competitor logos are visible; only the poppi brand is present."
+          "reason": "No competitor logos are visible; only the poppi brand is shown."
          },
          {
           "frame": "s_0040.png",
           "answer": "no",
-          "confidence": 1.0,
-          "reason": "No competitor logos are visible; only the 'poppi' brand logo and text are present."
+          "confidence": 1,
+          "reason": "No competitor logos are visible; only the poppi brand logo and tagline are present."
          }
         ],
         "id": "vis-no-comp",
@@ -445,13 +445,13 @@
           "frame": "s_0021.png",
           "answer": "no",
           "confidence": 0.9,
-          "reason": "No health claim is visible; the text on the can is 'poppi SPARKLING SODA' which is a product description, not a health claim."
+          "reason": "No health claim is visible; the text on the can is 'poppi SPARKLING SODA' which describes the product type, not a health-related claim."
          },
          {
           "frame": "s_0040.png",
           "answer": "no",
           "confidence": 1.0,
-          "reason": "The visible text 'poppi, made playful' does not contain any health-related claim; it focuses on playfulness, not health benefits."
+          "reason": "The visible text 'poppi, made playful' refers to playfulness, not a health claim."
          }
         ],
         "id": "vis-no-health",
@@ -469,7 +469,7 @@
           "frame": "s_0021.png",
           "answer": "no",
           "confidence": 1,
-          "reason": "No calorie count or sugar content is visible on the can or elsewhere in the frame."
+          "reason": "The visible text on the can is 'poppi SPARKLING SODA' with no calorie count or sugar content information shown."
          },
          {
           "frame": "s_0040.png",
@@ -572,7 +572,7 @@
           "frame": "s_0002.png",
           "answer": "yes",
           "confidence": 0.95,
-          "reason": "The text 'My soda has a secret.' is a clear readable hook in the first frame, and the visual elements (smiley face, can) in the second frame provide additional cues, making the hook present across the first-second frames."
+          "reason": "The text 'My soda has a secret.' is clearly visible and readable in the first frame, serving as a readable hook."
          }
         ],
         "id": "vis-hook",
@@ -588,8 +588,8 @@
          {
           "frame": "s_0032.png",
           "answer": "yes",
-          "confidence": 0.9,
-          "reason": "The last-second frame contains the brand name 'poppi' in a white box, confirming its presence as an end card element."
+          "confidence": 1,
+          "reason": "The last-second frame displays 'poppi' in a white box, confirming it as an end card."
          }
         ],
         "id": "vis-end",
@@ -613,7 +613,7 @@
           "frame": "s_0032.png",
           "answer": "no",
           "confidence": 1.0,
-          "reason": "No competitor logos are visible; only the poppi brand is shown."
+          "reason": "No competitor logos are visible; only the poppi brand is present."
          }
         ],
         "id": "vis-no-comp",
@@ -631,13 +631,13 @@
           "frame": "s_0017.png",
           "answer": "no",
           "confidence": 0.9,
-          "reason": "No health claim is visible in the frame; the text on the can is 'poppi SPARKLING SODA' and the main text is 'It's not boring, promise.' which is not a health claim."
+          "reason": "The visible text includes 'poppi SPARKLING SODA' which is a product description, not a health claim. No health-related statements (e.g., 'low sugar', 'healthy') are present."
          },
          {
           "frame": "s_0032.png",
           "answer": "no",
-          "confidence": 0.9,
-          "reason": "No health claim is visible; only the brand name 'poppi' and 'poppi, obviously' are present."
+          "confidence": 1.0,
+          "reason": "The visible text includes only the brand name 'poppi' and 'poppi, obviously', with no health-related statements or claims present."
          }
         ],
         "id": "vis-no-health",
@@ -660,7 +660,7 @@
          {
           "frame": "s_0032.png",
           "answer": "no",
-          "confidence": 1,
+          "confidence": 1.0,
           "reason": "No calorie count or sugar content is visible in the frame."
          }
         ],
@@ -757,8 +757,8 @@
          {
           "frame": "s_0002.png",
           "answer": "yes",
-          "confidence": 1.0,
-          "reason": "The first frame contains the text 'Pop. Fizz. Repeat.' and the second frame shows the 'poppi' brand name on the can, both of which are readable hooks."
+          "confidence": 0.95,
+          "reason": "The text 'Pop. Fizz. Repeat.' is a clear, readable hook in the first frame."
          }
         ],
         "id": "vis-hook",
@@ -774,8 +774,8 @@
          {
           "frame": "s_0048.png",
           "answer": "yes",
-          "confidence": 0.9,
-          "reason": "The last-second frame contains a white box with 'poppi' in yellow text, indicating the brand name is displayed."
+          "confidence": 0.95,
+          "reason": "The last-second frame contains a white box with 'poppi' in yellow text, indicating the brand name is shown as an end card."
          }
         ],
         "id": "vis-end",
@@ -793,13 +793,13 @@
           "frame": "s_0025.png",
           "answer": "no",
           "confidence": 1,
-          "reason": "No competitor logos are visible; only the poppi brand is present."
+          "reason": "No competitor logos are visible in the frame; only the poppi brand is present."
          },
          {
           "frame": "s_0048.png",
           "answer": "no",
           "confidence": 1.0,
-          "reason": "No competitor logos are visible; only the 'poppi' brand is present."
+          "reason": "No competitor logos are visible; only the poppi brand is present."
          }
         ],
         "id": "vis-no-comp",
@@ -816,13 +816,13 @@
          {
           "frame": "s_0025.png",
           "answer": "no",
-          "confidence": 0.9,
-          "reason": "The visible text on the can is 'poppi' and 'SPARKLING SODA', with no health-related claims present."
+          "confidence": 1.0,
+          "reason": "The visible text on the can is 'poppi SPARKLING SODA', which is a product description, not a health claim."
          },
          {
           "frame": "s_0048.png",
           "answer": "no",
-          "confidence": 0.95,
+          "confidence": 0.9,
           "reason": "No health claim is visible; only the brand name 'poppi' and 'poppi in slow-mo' are present."
          }
         ],
@@ -840,8 +840,8 @@
          {
           "frame": "s_0025.png",
           "answer": "no",
-          "confidence": 1,
-          "reason": "The visible label only shows 'poppi SPARKLING SODA' with no calorie count or sugar content information."
+          "confidence": 1.0,
+          "reason": "The visible text on the can only shows the brand 'poppi' and 'SPARKLING SODA'; there is no calorie count or sugar content information displayed."
          },
          {
           "frame": "s_0048.png",
@@ -870,7 +870,7 @@
  "goalcheck": null,
  "human_pings": 0,
  "started_at": 1792281081.723584,
- "finished_at": 1792283394.70492,
+ "finished_at": 1792283664.034286,
  "brand_url": "drinkpoppi.com",
  "spec_locked": true,
  "summary": {
@@ -878,5 +878,5 @@
   "total": 3,
   "human_pings": 0
  },
- "saved_from": "studio-poppi-1792283366"
+ "saved_from": "studio-poppi-1792283639"
 }

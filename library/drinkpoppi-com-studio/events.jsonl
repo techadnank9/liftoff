@@ -1,33 +1,40 @@
-{"t": 0.61, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 10.0, "expected": "6.0-15.0s"}}
-{"t": 0.61, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
-{"t": 0.84, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 4.51, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
-{"t": 7.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 7.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 7.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 7.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 7.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 8.51, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 8.51, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": true, "passed": 10, "total": 10}}
-{"t": 9.09, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "dur-1", "pass": true, "measured": 8.0, "expected": "6.0-15.0s"}}
-{"t": 9.09, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
-{"t": 9.27, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 12.11, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
-{"t": 13.24, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 15.54, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 17.89, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 18.1, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 18.21, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 18.36, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 18.36, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": true, "passed": 10, "total": 10}}
-{"t": 19.42, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
-{"t": 19.42, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
-{"t": 19.62, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
-{"t": 22.35, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 24.21, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-1", "pass": true, "measured": 4.5, "expected": ">= 3.0s"}}
-{"t": 24.78, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 24.78, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 24.78, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
-{"t": 25.44, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
-{"t": 27.8, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
-{"t": 27.8, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": true, "passed": 10, "total": 10}}
+{"t": 0.63, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "dur-1", "pass": true, "measured": 10.0, "expected": "6.0-15.0s"}}
+{"t": 0.63, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
+{"t": 0.88, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 3.8, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 3.87, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 3.93, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 4.01, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 4.37, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 4.57, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
+{"t": 8.79, "agent": "verifier", "event": "check", "vehicle": "A", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 8.79, "agent": "verifier", "event": "poll", "vehicle": "A", "payload": {"go": true, "passed": 10, "total": 10}}
+{"t": 8.79, "agent": "arbiter", "event": "decision", "vehicle": "A", "payload": {"decision": "GO", "failing": []}}
+{"t": 8.79, "agent": "goalcheck", "event": "verdict", "vehicle": "A", "payload": {"satisfies_goal": true, "reason": "The video displays the poppi brand name prominently, is formatted vertically (9:16), runs under 15 seconds, and uses a playful tone with copy such as \"poppi, made playful\" and bubble visuals, meeting all must\u2011haves and avoiding prohibited content."}}
+{"t": 9.43, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "dur-1", "pass": true, "measured": 8.0, "expected": "6.0-15.0s"}}
+{"t": 9.43, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
+{"t": 9.63, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 12.69, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "logo-1", "pass": true, "measured": 3.5, "expected": ">= 3.0s"}}
+{"t": 13.25, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 14.95, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 14.95, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 15.51, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 15.51, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 16.07, "agent": "verifier", "event": "check", "vehicle": "B", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 16.08, "agent": "verifier", "event": "poll", "vehicle": "B", "payload": {"go": true, "passed": 10, "total": 10}}
+{"t": 16.08, "agent": "arbiter", "event": "decision", "vehicle": "B", "payload": {"decision": "GO", "failing": []}}
+{"t": 16.08, "agent": "goalcheck", "event": "verdict", "vehicle": "B", "payload": {"satisfies_goal": true, "reason": "The video is vertical (9:16), prominently displays the poppi brand name, uses playful bold copy, and is clearly under 15 seconds as indicated by the three sequential frames."}}
+{"t": 17.05, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "dur-1", "pass": true, "measured": 12.0, "expected": "6.0-15.0s"}}
+{"t": 17.05, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "ar-1", "pass": true, "measured": "1080x1920", "expected": "9:16"}}
+{"t": 17.24, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "pal-1", "pass": true, "measured": 3.6, "expected": "<= 60.0"}}
+{"t": 19.1, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-health", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 19.82, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-cal", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 19.85, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-end", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 20.14, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-hook", "pass": true, "measured": ["yes"], "expected": "yes"}}
+{"t": 20.16, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "vis-no-comp", "pass": true, "measured": ["no", "no"], "expected": "no"}}
+{"t": 21.54, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "logo-1", "pass": true, "measured": 4.5, "expected": ">= 3.0s"}}
+{"t": 24.91, "agent": "verifier", "event": "check", "vehicle": "C", "payload": {"id": "tc-1", "pass": true, "measured": 15.56, "expected": ">= 4.5"}}
+{"t": 24.91, "agent": "verifier", "event": "poll", "vehicle": "C", "payload": {"go": true, "passed": 10, "total": 10}}
+{"t": 24.91, "agent": "arbiter", "event": "decision", "vehicle": "C", "payload": {"decision": "GO", "failing": []}}
+{"t": 24.91, "agent": "goalcheck", "event": "verdict", "vehicle": "C", "payload": {"satisfies_goal": true, "reason": "The video satisfies the mission as the brand name 'poppi' is clearly visible on the can in the first and middle frames and prominently displayed in a text box in the last frame. The color scheme matches the brand's primary yellow and secondary magenta. The tone is playful ('Pop. Fizz. Repeat.', 'poppi in slow-mo') and bold, fitting the 'vertical feeds' requirement with a 9:16 aspect ratio."}}
+{"t": 24.91, "agent": "system", "event": "liftoff", "vehicle": null, "payload": {"cleared": 3, "total": 3}}

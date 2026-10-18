@@ -126,6 +126,13 @@ section.band { border-top: 1px solid var(--line); padding: 100px 0; }
 .shot { border-radius: 20px; border: 1px solid var(--line-2); overflow: hidden; background: var(--panel);
   box-shadow: 0 40px 120px -40px rgba(242,133,58,.25); }
 .shot img { width: 100%; display: block; }
+.reels { display: grid; grid-template-columns: repeat(3, 1fr); gap: 18px; }
+.reel { margin: 0; }
+.reel video { width: 100%; aspect-ratio: 9 / 16; border-radius: 18px; border: 1px solid var(--line-2); background: var(--panel); display: block; object-fit: cover; }
+.reel figcaption { margin-top: 12px; color: var(--soft); font-size: 15px; line-height: 1.45; }
+.reel figcaption b { color: var(--ink, #fff); display: block; font-weight: 600; }
+@media (max-width: 720px) { .reels { grid-template-columns: 1fr; max-width: 320px; margin: 0 auto; } }
+
 .stats { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid var(--line-2); border-radius: 18px; margin-top: 28px; background: var(--panel); }
 .stats div { padding: 22px; }
 .stats div + div { border-left: 1px solid var(--line); }
@@ -328,14 +335,30 @@ footer { border-top: 1px solid var(--line); padding: 36px 0 48px; display: flex;
     </div>
   </section>
 
+  <section class="band" id="reels">
+    <div class="wrap">
+      <span class="mono">made for poppi</span>
+      <h2>Three videos, each one proved</h2>
+      <p class="lead">Animated in Remotion from the three ideas Liftoff wrote for poppi, then put through the same 10 checks as everything else. All three passed.</p>
+      <div class="reels">
+        <figure class="reel"><video src="docs/remotion/poppi_A.mp4" poster="docs/remotion/poppi_A.jpg" autoplay muted loop playsinline preload="metadata"></video>
+          <figcaption><b>Ever seen soda born?</b>A glass fills, fruit splashes in, the can arrives. 10 of 10 checks.</figcaption></figure>
+        <figure class="reel"><video src="docs/remotion/poppi_B.mp4" poster="docs/remotion/poppi_B.jpg" autoplay muted loop playsinline preload="metadata"></video>
+          <figcaption><b>My soda has a secret.</b>A face goes curious, surprised, then delighted. 10 of 10 checks.</figcaption></figure>
+        <figure class="reel"><video src="docs/remotion/poppi_C.mp4" poster="docs/remotion/poppi_C.jpg" autoplay muted loop playsinline preload="metadata"></video>
+          <figcaption><b>Pop. Fizz. Repeat.</b>The can bounces on a 120 bpm beat. 10 of 10 checks.</figcaption></figure>
+      </div>
+    </div>
+  </section>
+
   <section class="band" id="proof">
     <div class="wrap">
       <span class="mono">mission control</span>
       <h2>Watch every decision, live</h2>
-      <p class="lead">Competitors with their real icons, a trend wall of real Shorts that play in place, and each direction's checks as they land.</p>
-      <div class="shot"><img src="docs/mission-control.png" alt="Liftoff mission control showing competitors, a trend wall of real YouTube Shorts, and three directions that each passed 9 of 9 checks" loading="lazy"></div>
+      <p class="lead">This month's viral Shorts in your category, your launch videos with what each check measured, and a review step before anything posts.</p>
+      <div class="shot"><img src="docs/mission-control.png" alt="Liftoff mission control showing this month's viral YouTube Shorts and the poppi launch videos that passed every check" loading="lazy"></div>
       <div class="stats">
-        <div><b class="num">9 / 9</b><span>checks per direction</span></div>
+        <div><b class="num">10 / 10</b><span>checks per direction</span></div>
         <div><b class="num">0</b><span>human pings</span></div>
         <div><b class="num">0 → 50%</b><span>first-try passes after learning</span></div>
         <div><b class="num">4</b><span>models, 2 families</span></div>

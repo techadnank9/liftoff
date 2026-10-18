@@ -22,6 +22,18 @@
 
 <sub>Mission control: what's viral in the category this month, then the videos Liftoff made and proved.</sub>
 
+<br><br>
+
+<img src="docs/mission-control-videos.png" alt="Mission control: the three poppi launch videos, each marked ready after passing every check" width="100%">
+
+<sub>Further down: the launch videos, each shown only after it passes every check.</sub>
+
+<br><br>
+
+<img src="docs/remotion-poppi.gif" alt="Three poppi launch videos made in Remotion: a glass filling with fruit, a cartoon face reacting to the can, and the can bouncing on a beat" width="100%">
+
+<sub>Three poppi videos animated in Remotion from Liftoff's three ideas, each passing all 10 checks. Full quality: <a href="docs/remotion/poppi_A.mp4">A</a> · <a href="docs/remotion/poppi_B.mp4">B</a> · <a href="docs/remotion/poppi_C.mp4">C</a>.</sub>
+
 </div>
 
 ---
@@ -460,7 +472,8 @@ liftoff/
 └── run.py           one flight, end to end
 app.py               mission control (Streamlit)
 eval/brands.json     20 missions: 10 train, 10 held out
-scripts/             make_assets.py · check_models.py
+scripts/             make_assets.py · check_models.py · save_studio.py
+studio/              Remotion project for the hand-animated poppi videos
 playbook/            rules the team wrote for itself (kept only if held-out improved)
 runs/<timestamp>/    run.json · events.jsonl · vehicle_*.mp4 · verify_*/samples
 ```
@@ -499,7 +512,7 @@ Every agent writes to one flat event stream. The UI is deliberately dumb: it onl
 <details>
 <summary><b>Why render with Pillow and ffmpeg instead of a video model?</b></summary>
 
-Because "done" has to be checkable. A deterministic renderer means the Director's levers (`logo_seconds`, `bg`, `duration_s`, the copy) map one to one onto what the verifier measures. When the verifier says "logo 2.0s, needs 3.0", the Director can actually fix it, and you can prove it did. A generative video model would turn every HOLD into a reroll. No Blender, no Remotion, no generative video APIs, by rule.
+Because "done" has to be checkable. A deterministic renderer means the Director's levers (`logo_seconds`, `bg`, `duration_s`, the copy) map one to one onto what the verifier measures. When the verifier says "logo 2.0s, needs 3.0", the Director can actually fix it, and you can prove it did. A generative video model would turn every HOLD into a reroll, so the main pipeline uses no generative video APIs. The poppi showcase videos in `studio/` are hand animated in Remotion from the Director's ideas and held to exactly the same checks (`scripts/save_studio.py`).
 
 </details>
 
