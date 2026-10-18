@@ -12,9 +12,9 @@
 
 <br>
 
-<a href="docs/liftoff-demo.mp4"><img src="docs/liftoff-demo.jpg" alt="Watch the 69 second Liftoff demo" width="100%"></a>
+<a href="docs/liftoff-demo.mp4"><img src="docs/liftoff-demo.jpg" alt="Watch the 84 second Liftoff demo" width="100%"></a>
 
-<sub><b>▶ <a href="docs/liftoff-demo.mp4">Watch the 69 second demo</a></b>: a brand URL in, three proven launch videos out, and how it learns.</sub>
+<sub><b>▶ <a href="docs/liftoff-demo.mp4">Watch the 84 second demo</a></b>: a brand URL in, three proven launch videos out, and how it learns.</sub>
 
 <br><br>
 

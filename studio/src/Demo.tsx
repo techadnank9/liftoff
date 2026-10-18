@@ -1,5 +1,5 @@
 import React from 'react';
-import {AbsoluteFill, Easing, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
+import {AbsoluteFill, Audio, Easing, Img, OffthreadVideo, Sequence, interpolate, staticFile, useCurrentFrame, useVideoConfig} from 'remotion';
 import {loadFont} from '@remotion/google-fonts/InterTight';
 import {loadFont as loadMono} from '@remotion/google-fonts/JetBrainsMono';
 
@@ -13,11 +13,14 @@ const clamp = {extrapolateLeft: 'clamp', extrapolateRight: 'clamp'} as const;
 const ease = Easing.bezier(0.2, 0.8, 0.2, 1);
 
 const s = (t: number) => Math.round(t * 30);
+// each scene's own length, so fades and drifts follow it however long the narration runs
+const SceneLen = React.createContext(150);
 const rise = (frame: number, at: number, len = 14) => interpolate(frame, [at, at + len], [0, 1], {...clamp, easing: ease});
 
 // fade a whole scene in and out so cuts never jump
-const Scene: React.FC<{len: number; children: React.ReactNode; bg?: string}> = ({len, children, bg = BG}) => {
+const Scene: React.FC<{len?: number; children: React.ReactNode; bg?: string}> = ({children, bg = BG}) => {
 	const f = useCurrentFrame();
+	const len = React.useContext(SceneLen);
 	const o = interpolate(f, [0, 10, len - 10, len], [0, 1, 1, 0], clamp);
 	return <AbsoluteFill style={{background: bg, opacity: o, fontFamily, color: INK}}>{children}</AbsoluteFill>;
 };
@@ -46,7 +49,7 @@ const Body: React.FC<{children: React.ReactNode; at?: number; style?: React.CSSP
 // A screenshot in a browser frame that slowly drifts, so a still image reads as a live screen.
 const Screen: React.FC<{src: string; at?: number; from?: number; to?: number; zoom?: [number, number]; w?: number; h?: number}> = ({src, at = 0, from = 0, to = 0, zoom = [1, 1.04], w = 1240, h = 698}) => {
 	const f = useCurrentFrame();
-	const {durationInFrames} = useVideoConfig();
+	const durationInFrames = React.useContext(SceneLen);
 	const p = rise(f, at, 20);
 	const t = interpolate(f, [at, durationInFrames], [0, 1], {...clamp, easing: Easing.inOut(Easing.quad)});
 	return (
@@ -102,7 +105,7 @@ const Problem: React.FC = () => {
 				right={
 					<div style={{display: 'flex', flexDirection: 'column', gap: 22, width: 760}}>
 						{misses.map(([what, got, need], i) => {
-							const p = rise(f, s(1.6) + i * 12);
+							const p = rise(f, s(4.4) + i * 22);
 							return (
 								<div key={what} style={{display: 'flex', alignItems: 'center', gap: 26, padding: '30px 36px', borderRadius: 18,
 									background: PANEL, border: '1px solid rgba(255,255,255,.08)', opacity: p, translate: `${(1 - p) * 60}px 0px`}}>
@@ -206,8 +209,8 @@ const Checklist: React.FC = () => {
 // 6. Checked by someone else
 const Verify: React.FC = () => {
 	const f = useCurrentFrame();
-	const holdP = rise(f, s(1.0));
-	const goP = rise(f, s(4.0));
+	const holdP = rise(f, s(4.6));
+	const goP = rise(f, s(9.6));
 	return (
 		<Scene len={s(9)}>
 			<Split
@@ -270,7 +273,7 @@ const Result: React.FC = () => {
 // 8. It learns
 const Learn: React.FC = () => {
 	const f = useCurrentFrame();
-	const n = Math.round(interpolate(f, [s(2.2), s(3.6)], [0, 50], {...clamp, easing: ease}));
+	const n = Math.round(interpolate(f, [s(7.6), s(8.8)], [0, 50], {...clamp, easing: ease}));
 	return (
 		<Scene len={s(9)}>
 			<Split
@@ -278,12 +281,12 @@ const Learn: React.FC = () => {
 					<Label>and it learns</Label>
 					<Head>Every miss becomes a rule. A rule stays only if it helps.</Head>
 					<Body>Tested on launch briefs it has never seen.</Body>
-					<div style={{display: 'flex', alignItems: 'baseline', gap: 24, marginTop: 10, opacity: rise(f, s(1.8))}}>
+					<div style={{display: 'flex', alignItems: 'baseline', gap: 24, marginTop: 10, opacity: rise(f, s(7.2))}}>
 						<span style={{fontSize: 110, fontWeight: 600, color: DIM, letterSpacing: '-0.04em'}}>0%</span>
 						<span style={{fontSize: 60, color: DIM}}>→</span>
 						<span style={{fontSize: 110, fontWeight: 600, color: GO, letterSpacing: '-0.04em'}}>{n}%</span>
 					</div>
-					<Body at={s(2.4)} style={{fontSize: 26}}>of videos passed every check on the first try</Body>
+					<Body at={s(7.8)} style={{fontSize: 26}}>of videos passed every check on the first try</Body>
 				</>}
 				right={<Screen src="demo/mc_learn_crop.png" from={0} to={0} zoom={[1, 1.04]} />}
 			/>
@@ -308,17 +311,23 @@ const End: React.FC = () => {
 	);
 };
 
-export const SCENES: [React.FC, number][] = [[Title, 5], [Problem, 7], [Paste, 7], [Research, 7], [Checklist, 8], [Verify, 9], [Result, 11], [Learn, 9], [End, 6]];
-export const DEMO_SECONDS = SCENES.reduce((a, [, d]) => a + d, 0);
+export const SCENES: [React.FC, number][] = [[Title, 5.5], [Problem, 10.5], [Paste, 9.5], [Research, 8.5], [Checklist, 9.5], [Verify, 12.5], [Result, 11], [Learn, 11], [End, 6]];
+const VO_AT = 0.5; // narration starts half a second into each scene
+export const DEMO_FRAMES = SCENES.reduce((a, [, d]) => a + s(d), 0);
 
 export const Demo: React.FC = () => {
 	let at = 0;
 	return (
 		<AbsoluteFill style={{background: BG}}>
 			{SCENES.map(([C, d], i) => {
-				const from = s(at);
-				at += d;
-				return <Sequence key={i} from={from} durationInFrames={s(d)}><C /></Sequence>;
+				const from = at;
+				at += s(d);
+				return (
+					<Sequence key={i} from={from} durationInFrames={s(d)}>
+						<SceneLen.Provider value={s(d)}><C /></SceneLen.Provider>
+						<Sequence from={s(VO_AT)}><Audio src={staticFile(`demo/vo/vo${i}.wav`)} /></Sequence>
+					</Sequence>
+				);
 			})}
 		</AbsoluteFill>
 	);
