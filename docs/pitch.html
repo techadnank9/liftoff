@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Liftoff pitch</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0A0A0B; --panel: #131315; --panel-2: #1A1A1D; --line: rgba(255,255,255,.08); --line-2: rgba(255,255,255,.14);
+  --ink: #F2F1EE; --soft: #A3A19B; --dim: #66645F; --flame: #F2853A; --go: #5BD08A; --hold: #F2C063;
+  --mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) { --bg: #F7F6F2; --panel: #FFFFFF; --panel-2: #EFEDE7; --line: rgba(0,0,0,.08); --line-2: rgba(0,0,0,.14);
+    --ink: #17161A; --soft: #5C5A55; --dim: #8F8C85; --flame: #C9601A; --go: #1F8A4C; --hold: #A26A00; }
+}
+:root[data-theme="light"] { --bg: #F7F6F2; --panel: #FFFFFF; --panel-2: #EFEDE7; --line: rgba(0,0,0,.08); --line-2: rgba(0,0,0,.14);
+  --ink: #17161A; --soft: #5C5A55; --dim: #8F8C85; --flame: #C9601A; --go: #1F8A4C; --hold: #A26A00; }
+* { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body { margin: 0; background: var(--bg); color: var(--ink); font: 400 18px/1.6 'Inter Tight', system-ui, sans-serif; }
+.wrap { max-width: 860px; margin: 0 auto; padding: 0 20px; }
+header { padding: 64px 0 28px; border-bottom: 1px solid var(--line); }
+h1 { font-size: clamp(40px, 6vw, 64px); letter-spacing: -0.04em; line-height: 1; margin: 0 0 14px; font-weight: 600; }
+header p { color: var(--soft); margin: 0; max-width: 60ch; }
+.prep { margin-top: 24px; padding: 18px 20px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); font-size: 16px; }
+.prep b { display: block; margin-bottom: 6px; }
+.prep ol { margin: 0; padding-left: 20px; color: var(--soft); }
+.prep code, code { font-family: var(--mono); font-size: .86em; background: var(--panel-2); padding: 1px 6px; border-radius: 6px; color: var(--ink); }
+
+nav.toc { position: sticky; top: 0; z-index: 2; background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px);
+  border-bottom: 1px solid var(--line); }
+nav.toc .wrap { display: flex; gap: 6px; overflow-x: auto; padding-top: 10px; padding-bottom: 10px; scrollbar-width: none; }
+nav.toc a { white-space: nowrap; color: var(--soft); text-decoration: none; font-size: 14px; padding: 6px 12px; border-radius: 999px; border: 1px solid var(--line); }
+nav.toc a:hover, nav.toc a:focus-visible { color: var(--ink); border-color: var(--line-2); outline: none; }
+.timer { margin-left: auto; font-family: var(--mono); font-size: 14px; color: var(--ink); background: var(--panel); border: 1px solid var(--line-2);
+  border-radius: 999px; padding: 6px 12px; cursor: pointer; white-space: nowrap; }
+
+section { padding: 44px 0; border-bottom: 1px solid var(--line); scroll-margin-top: 60px; }
+.beat { display: flex; align-items: baseline; gap: 14px; margin-bottom: 16px; }
+.beat h2 { font-size: 30px; letter-spacing: -0.03em; margin: 0; font-weight: 600; }
+.beat .time { font-family: var(--mono); font-size: 14px; color: var(--flame); }
+.say { font-size: 24px; line-height: 1.5; margin: 0 0 18px; padding-left: 18px; border-left: 3px solid var(--flame); }
+.say strong { color: var(--flame); font-weight: 600; }
+.do { font-size: 15px; color: var(--soft); margin: 4px 0 12px; display: flex; gap: 10px; }
+.do::before { content: "On screen"; font-family: var(--mono); font-size: 12px; color: var(--dim); padding-top: 3px; white-space: nowrap; }
+.note { font-size: 15px; color: var(--dim); margin: 0 0 18px; }
+ol.rules { margin: 0 0 18px; padding: 0; list-style: none; display: grid; gap: 10px; }
+ol.rules li { font-size: 22px; line-height: 1.45; padding: 14px 18px; border-radius: 14px; background: var(--panel); border: 1px solid var(--line); }
+ol.rules li strong { color: var(--flame); font-weight: 600; }
+
+.ref h2 { font-size: 30px; letter-spacing: -0.03em; margin: 0 0 18px; font-weight: 600; }
+.ref dl { margin: 0; display: grid; gap: 16px; }
+.ref dt { font-weight: 600; }
+.ref dd { margin: 4px 0 0; color: var(--soft); }
+.sponsors { display: grid; gap: 14px; }
+.sp { padding: 20px; border-radius: 16px; background: var(--panel); border: 1px solid var(--line); }
+.sp h3 { margin: 0 0 8px; font-size: 20px; }
+.sp p, .sp ul { margin: 0; color: var(--soft); font-size: 16px; }
+.sp ul { padding-left: 18px; }
+.sp li { margin: 4px 0; }
+.oneliner { font-size: 22px; padding: 16px 20px; border-radius: 14px; border: 1px dashed var(--line-2); margin-bottom: 18px; }
+details { border-top: 1px solid var(--line); padding: 14px 0; }
+details:last-child { border-bottom: 1px solid var(--line); }
+summary { cursor: pointer; font-weight: 600; font-size: 18px; list-style: none; display: flex; justify-content: space-between; gap: 16px; }
+summary::after { content: "+"; color: var(--dim); font-family: var(--mono); }
+details[open] summary::after { content: "−"; }
+details p { margin: 10px 0 0; color: var(--soft); }
+footer { padding: 40px 0 70px; color: var(--dim); font-size: 14px; }
+a { color: var(--flame); }
+
+@media (max-width: 600px) { .say { font-size: 20px; } ol.rules li { font-size: 18px; } .beat h2 { font-size: 24px; } .do { flex-direction: column; gap: 2px; } }
+@media print { nav.toc { display: none; } body { background: #fff; color: #000; } section { break-inside: avoid; } }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <h1>Liftoff pitch</h1>
+    <p>About 3 minutes. Big text is what you say. Grey lines are what to do on screen.</p>
+    <div class="prep">
+      <b>Open before you start</b>
+      <ol>
+        <li>Landing page: <code>http://localhost:3000</code></li>
+        <li>Mission control on poppi: <code>http://localhost:8501/?flight=drinkpoppi-com-studio</code></li>
+        <li>Demo video <code>docs/liftoff-demo.mp4</code>, as a backup if anything live misbehaves</li>
+      </ol>
+    </div>
+  </div>
+</header>
+
+<nav class="toc" aria-label="Sections">
+  <div class="wrap">
+    <a href="#open">Opening</a><a href="#what">What it is</a><a href="#demo">Demo</a><a href="#trust">Trust</a>
+    <a href="#learn">Learns</a><a href="#close">Close</a><a href="#tech">Technical</a><a href="#sponsors">Sponsors</a><a href="#qa">Q&amp;A</a>
+    <button class="timer" id="timer" type="button" aria-label="Start or reset the pitch timer">Start 0:00</button>
+  </div>
+</nav>
+
+<main class="wrap">
+
+<section id="open">
+  <div class="beat"><h2>The opening</h2><span class="time">0:00 · 20s</span></div>
+  <p class="say">Every AI tool will make you a launch video in seconds now. Nobody checks them.</p>
+  <p class="say">The logo flashes by in under two seconds. The text is yellow on white, so you can't read it on a phone. The colours are a little off brand. And a human finds that out after it's posted.</p>
+  <p class="say"><strong>Liftoff doesn't let a video out until it can prove it's done.</strong></p>
+  <p class="note">Start with the problem, not the product. Let "nobody checks them" land before you move on.</p>
+</section>
+
+<section id="what">
+  <div class="beat"><h2>What it is</h2><span class="time">0:20 · 15s</span></div>
+  <p class="say">Liftoff is a team of AI agents. You give it a brand's website. It writes down what "done" means for that launch, makes three videos, and has a separate checker measure every one. If a video misses, it goes back with exactly what failed. And it learns from its own misses.</p>
+</section>
+
+<section id="demo">
+  <div class="beat"><h2>Live demo</h2><span class="time">0:35 · 90s</span></div>
+  <p class="do">Landing page. Type drinkpoppi.com and press Launch.</p>
+  <p class="say">I paste poppi's website. That's the whole brief.</p>
+  <p class="do">Mission control opens. Point at the top.</p>
+  <p class="say">First it learns the brand from the site itself: name, colours pulled from poppi's own CSS, the logo, the tone. Then it looks at what's working right now.</p>
+  <p class="do">Scroll through the viral Shorts. Tap one so it plays in place.</p>
+  <p class="say">These are real Shorts in poppi's category from the last 30 days, over 100,000 views each. It tags what's working, like process videos and slow motion, and builds from that.</p>
+  <p class="do">Scroll to Your launch videos.</p>
+  <p class="say"><strong>Before it makes a single frame, it writes the checklist.</strong> Ten checks. Logo on screen at least three seconds. Text contrast at 4.5 or better, the accessibility standard. Brand colours. A hook in the first second. No competitor logos, no health claims. Every one is a number it can measure, or a yes or no a model can answer from a frame.</p>
+  <p class="do">Open "Every check, in detail" on one video.</p>
+  <p class="say">Here's the evidence. Logo: measured 4.5 seconds. Contrast: 15.6. It doesn't say "looks good". It shows the number.</p>
+  <p class="do">Show the Fizz HOLD then GO (the GIF in the README, or the demo video at 0:50).</p>
+  <p class="say">And this is what happens on a miss. First try, logo on screen for 2 seconds and contrast 3.8. Sent back. The fix: 3.25 seconds and 13.3. Passed. <strong>Nobody had to tell it.</strong></p>
+  <p class="do">Scroll to Review and post.</p>
+  <p class="say">When they pass, you review and approve. For poppi, three for three, and it didn't need me once.</p>
+</section>
+
+<section id="trust">
+  <div class="beat"><h2>Why you can trust it</h2><span class="time">2:05 · 30s</span></div>
+  <p class="say">Three rules make the checking honest, and they're enforced in code, not asked for in a prompt.</p>
+  <ol class="rules">
+    <li><strong>The checker never sees the maker's notes.</strong> It can't be told "the logo is on for 3.4 seconds". It has to measure.</li>
+    <li><strong>The maker and the checker are different model families.</strong> DeepSeek makes, NVIDIA Nemotron checks, so they don't share blind spots.</li>
+    <li><strong>A final reviewer sees only your original ask and three frames.</strong> Never the checklist. That catches a video that passes every check but misses the point.</li>
+  </ol>
+  <p class="note">This is the "Done Means Done" part. Say it plainly.</p>
+</section>
+
+<section id="learn">
+  <div class="beat"><h2>It learns</h2><span class="time">2:35 · 20s</span></div>
+  <p class="do">Scroll to "It checks itself, and it learns".</p>
+  <p class="say">After each launch it looks at what failed and writes itself rules. But a rule stays only if it helps on launch briefs it has never seen. We tested on held-out briefs: <strong>first-try passes went from 0% to 50%</strong>. A second round of rules didn't help, so it threw them away.</p>
+</section>
+
+<section id="close">
+  <div class="beat"><h2>The close</h2><span class="time">2:55 · 10s</span></div>
+  <p class="say">Paste a website, get launch videos that are proven before they go out. Liftoff. <strong>Done means done.</strong></p>
+</section>
+
+<section id="tech" class="ref">
+  <h2>The technical parts</h2>
+  <p class="note">If they ask, or you have time.</p>
+  <dl>
+    <div><dt>The flow</dt><dd>Brand card, then research, then the Spec agent writes the checklist, then the Director writes three directions, they're rendered, the verifier checks each, the Arbiter decides GO, HOLD, SCRUB or ask a human, and a goal re-check gives the final yes.</dd></div>
+    <div><dt>The checker is mostly maths, not vibes</dt><dd>Pixel checks run in Python: logo time by template matching on sampled frames, WCAG contrast measured on the actual text pixels, colour distance from the brand palette, duration, aspect ratio. Only things that need eyes, like "is there a hook in the first second", go to a vision model, one frame and one yes or no question at a time.</dd></div>
+    <div><dt>The fix loop</dt><dd>On a HOLD, the Arbiter hands the Director exactly what failed with the measured number. The Director can only move real levers, like logo time, background colour or the footage, so every fix maps to something the checker measures. Up to three tries, then it's dropped.</dd></div>
+    <div><dt>Learning (Version N+1)</dt><dd>20 missions: 10 to train on, 10 held out. A playbook agent reads every miss and writes at most six rules per role. They're kept only if the held-out first-try pass rate goes up and the overall pass rate doesn't go down.</dd></div>
+    <div><dt>Speed</dt><dd>Checks run in parallel with a shared limit, and retry with backoff on rate limits. A full launch, with research, checklist, three videos, every check, retries and the final review, takes about two minutes.</dd></div>
+    <div><dt>The videos</dt><dd>The pipeline renders with Pillow and ffmpeg so every lever is measurable. The poppi showcase videos were animated in Remotion from the ideas Liftoff wrote, then held to exactly the same 10 checks. All three passed.</dd></div>
+    <div><dt>Runs offline</dt><dd><code>LIFTOFF_MOCK=1</code> runs the whole thing end to end with no keys, for testing.</dd></div>
+  </dl>
+</section>
+
+<section id="sponsors" class="ref">
+  <h2>How each sponsor is used</h2>
+  <p class="oneliner">"Every model call runs on Crusoe. Nemotron is the checker. You.com does the research."</p>
+  <div class="sponsors">
+    <div class="sp"><h3>Crusoe Managed Inference</h3>
+      <p>Every model call goes through Crusoe, behind one wrapper (<code>liftoff/llm.py</code>) that maps each agent role to a model. Having Nemotron, DeepSeek, GLM and Qwen on one key let us run a real 8-model bake-off to pick the video writer, and keep maker and checker in different families. Turning thinking off for the checklist call cut it from 56 seconds to about 25.</p></div>
+    <div class="sp"><h3>NVIDIA Nemotron 3</h3>
+      <ul>
+        <li><b>Super 120B</b> writes the checklist for each launch, and the rules the system learns from its failures.</li>
+        <li><b>Nano 30B</b> reads the brand's website into a brand card and tags what's working in viral videos.</li>
+        <li><b>Nano Omni</b> is the checker's eyes: hook, end card, competitor logos and health claims on sampled frames. It's also the final reviewer, since it takes three frames in one prompt.</li>
+      </ul></div>
+    <div class="sp"><h3>You.com</h3>
+      <p>Contents reads the brand's own website, so brand colours come from the site's real CSS and are never made up. Search finds what's happening in the category and backs the checklist's thresholds with sources.</p></div>
+    <div class="sp"><h3>Also used</h3>
+      <p>YouTube Data API for real viral Shorts and view counts, with no scraping. ElevenLabs for the demo video's voiceover. Remotion for the poppi showcase videos and the demo video.</p></div>
+  </div>
+</section>
+
+<section id="qa" class="ref">
+  <h2>Questions you'll probably get</h2>
+  <details><summary>Isn't this just an AI checking an AI?</summary>
+    <p>Mostly not. Logo time, contrast, colour, length and shape are measured in code. The model only answers narrow yes or no questions about single frames, and it's a different family from the one that made the video.</p></details>
+  <details><summary>Why not use a video generation model?</summary>
+    <p>Because "done" has to be fixable. If the checker says the logo was on for 2 seconds and needs 3, our maker can change exactly that. A generative model would just roll the dice again.</p></details>
+  <details><summary>How do you know the learning is real?</summary>
+    <p>It's scored on briefs it never trained on, and a rule that doesn't improve that score gets thrown away. One round helped, 0 to 50%. The next didn't, so it was reverted.</p></details>
+  <details><summary>What would you build next?</summary>
+    <p>Real footage from stock libraries, posting straight to TikTok and Instagram after approval, and running the agents in a locked-down sandbox on Crusoe Cloud.</p></details>
+  <details><summary>What's the human's role?</summary>
+    <p>Approve or skip. It only asks you something mid-launch when a check can't be measured, and for poppi that was zero times.</p></details>
+</section>
+
+</main>
+
+<footer><div class="wrap">Liftoff · <a href="https://github.com/techadnank9/liftoff">github.com/techadnank9/liftoff</a></div></footer>
+
+<script>
+// A simple pitch clock: tap to start, tap again to reset. Turns amber past 3:00.
+(() => {
+  const b = document.getElementById('timer');
+  let t0 = null, id = null;
+  const fmt = (s) => `${Math.floor(s / 60)}:${String(s % 60).padStart(2, '0')}`;
+  b.addEventListener('click', () => {
+    if (id) { clearInterval(id); id = null; t0 = null; b.textContent = 'Start 0:00'; b.style.color = ''; return; }
+    t0 = Date.now();
+    id = setInterval(() => {
+      const s = Math.floor((Date.now() - t0) / 1000);
+      b.textContent = fmt(s);
+      b.style.color = s >= 180 ? 'var(--hold)' : '';
+    }, 250);
+    b.textContent = '0:00';
+  });
+})();
+</script>
+</body>
+</html>
