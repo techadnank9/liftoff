@@ -12,6 +12,12 @@
 
 <br>
 
+<a href="docs/liftoff-demo.mp4"><img src="docs/liftoff-demo.jpg" alt="Watch the 69 second Liftoff demo" width="100%"></a>
+
+<sub><b>▶ <a href="docs/liftoff-demo.mp4">Watch the 69 second demo</a></b>: a brand URL in, three proven launch videos out, and how it learns.</sub>
+
+<br><br>
+
 <img src="docs/landing.png" alt="Liftoff landing page: paste your brand's website and launch a flight" width="100%">
 
 <sub>Paste a brand's website on the landing page, and Liftoff takes it from there.</sub>
