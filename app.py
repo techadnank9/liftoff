@@ -587,13 +587,6 @@ with t_videos:
 PLATFORMS = ["TikTok", "Instagram Reels", "YouTube Shorts"]
 
 
-def source_post(d: dict) -> dict | None:
-    """The real viral post this direction's pattern came from, if the research has one."""
-    tag = str(d.get("pattern", ""))
-    wall = res.get("trend_wall", [])
-    return next((w for w in wall if tag in (w.get("patterns") or [])), None) or (wall[0] if wall else None)
-
-
 @st.dialog("Post this video")
 def post_dialog(vid: str, v: dict) -> None:
     key = f"post_{run_dir.name}_{vid}"
@@ -659,43 +652,27 @@ with t_post:
         if queue:
             vid, v = queue[0]
             d = v.get("direction", {})
-            src = source_post(d)
-            left, mid, right = st.columns([0.9, 1.1, 1.1], gap="large")
-            with left:
-                st.markdown('<div class="why" style="font-size:12px;color:var(--soft);margin-bottom:6px">Built from</div>',
-                            unsafe_allow_html=True)
-                if src and thumb_for(src):
-                    st.markdown(
-                        f'<a href="{safe(src["url"])}" target="_blank" style="text-decoration:none;color:inherit">'
-                        f'<img src="{safe(thumb_for(src))}" style="width:100%;border-radius:12px;aspect-ratio:9/12;object-fit:cover">'
-                        f'<div style="font-size:13px;margin-top:6px">{safe(src.get("hook", ""))}</div>'
-                        f'<div class="why" style="font-size:12px;color:var(--soft)">'
-                        f'{(views(src["views"]) + " views · ") if src.get("views") else ""}{safe(ago(src.get("age", "")))}</div></a>',
-                        unsafe_allow_html=True)
-                else:
-                    st.caption("A pattern from this month's viral videos.")
-            with mid:
+            vcol, info = st.columns([0.8, 1.2], gap="large")
+            with vcol:
                 st.video(str(video_path(v["attempts"][-1]["mp4"])), start_time=1)
+            with info:
+                verdict = v["attempts"][-1]["verdict"]
+                tries = len(v["attempts"])
+                st.markdown(f"#### {safe(vid)}. {safe(v.get('name', ''))}")
+                st.markdown(f"“{safe(d.get('hook', ''))}”")
+                st.markdown(
+                    f'<div class="lf-st ok" style="font-size:14px;margin:14px 0 4px"><span class="ic">✓</span>'
+                    f'Ready to post: passed {verdict["passed"]} of {verdict["total"]} checks</div>'
+                    f'<div class="why" style="font-size:13px;color:var(--soft);margin:0 0 18px 22px">'
+                    f'{"Fixed and rechecked " + str(tries - 1) + (" time" if tries == 2 else " times") if tries > 1 else "Passed on the first try"}'
+                    f' · {safe(d.get("duration_s", ""))}s vertical</div>', unsafe_allow_html=True)
                 b1, b2 = st.columns(2)
-                if b1.button("✕  Skip", use_container_width=True, key=f"skip_{vid}"):
+                if b1.button("Skip", use_container_width=True, key=f"skip_{vid}"):
                     skipped.add(f"{run_dir.name}_{vid}")
                     st.rerun()
-                if b2.button("✓  Approve", type="primary", use_container_width=True, key=f"ok_{vid}"):
+                if b2.button("Approve", type="primary", use_container_width=True, key=f"ok_{vid}"):
                     post_dialog(vid, v)
-            with right:
-                st.markdown(f"**{safe(vid)}. {safe(v.get('name', ''))}**")
-                st.markdown(f"“{safe(d.get('hook', ''))}”")
-                st.markdown('<div class="lf-sec" style="margin-top:12px">Why this video?</div>', unsafe_allow_html=True)
-                verdict = v["attempts"][-1]["verdict"]
-                gc = v.get("goalcheck") or {}
-                tries = (f" after {len(v['attempts'])} tries" if len(v["attempts"]) > 1 else " on the first try")
-                st.markdown("\n".join([
-                    f"- Uses **{safe(humanize_tag(d.get('pattern', '')).lower())}**, a pattern working in this month's viral videos",
-                    f"- Passed **{verdict['passed']} of {verdict['total']}** quality checks{tries}",
-                    "- A fresh reviewer agreed it fits your brief"]), unsafe_allow_html=True)
-                if gc.get("reason"):
-                    st.caption(gc["reason"])
-            st.caption(f"{len(queue) - 1} more to review after this one.")
+                st.caption(f"{len(queue) - 1} more to review after this one." if len(queue) > 1 else "Last one.")
         else:
             st.success("All videos reviewed.")
             if st.button("Review them again"):
@@ -802,37 +779,90 @@ with t_activity:
         fl = rep.get("flights", [])
         if fl:
             n_missions = (rep.get("missions_per_split") or 6)
-            st.markdown('<div class="lf-sec">It learns from every launch</div>', unsafe_allow_html=True)
-            st.caption(
-                "Every time a video is sent back, Liftoff records what failed, the number it measured, and the fix "
-                "that made it pass. After a batch of launches it turns those into rules for itself, like \"keep the "
-                "logo on screen at least 3.25 seconds\". Before trusting a rule it tries it on launch briefs it has "
-                "never seen. If more videos pass on the first try, the rule stays. If not, it is thrown away.")
+            st.markdown('<div class="lf-sec">It checks itself, and it learns</div>', unsafe_allow_html=True)
+            st.caption("Two loops. Every video goes round the inner one until it passes. Every launch goes round the "
+                       "outer one: what failed becomes a rule, and a rule is kept only if it helps on briefs it has never seen.")
+            import re as _re
 
-            def label(f: dict) -> tuple[str, str]:
-                if f["flight"] == 1:
-                    return "Before learning", "no rules yet"
-                if f["kept"]:
-                    return f"After learning round {f['flight'] - 1}", "rules kept: more videos passed first time"
-                return f"After learning round {f['flight'] - 1}", "rules thrown away: no improvement"
+            def plain_rule(line: str) -> str:
+                t = line.lstrip("- ").strip()
+                m = _re.search(r"logo[_ ]seconds?\D*?([\d.]+)", t, _re.I)
+                if m:
+                    return f"Keep the logo on screen at least {float(m.group(1)):g} seconds"
+                m = _re.search(r"(text[_ ])?contrast\D*?([\d.]+)", t, _re.I)
+                if m:
+                    return f"Keep text contrast at {float(m.group(2)):g} to 1 or better"
+                m = _re.search(r"duration\D*?([\d.]+)", t, _re.I)
+                if m:
+                    return f"Keep videos to about {float(m.group(1)):g} seconds"
+                return t.replace("_", " ").replace(">=", "at least").replace("<=", "at most")
 
-            rows = ""
-            for f in fl:
-                title, sub = label(f)
-                ho = f["held_out"]
-                rows += (f'<div class="lf-row"><div>{safe(title)}<div class="why">{safe(sub)}</div></div>'
-                         f'<div class="lf-num"><b class="{"ok" if f["kept"] and f["flight"] > 1 else "idle"}">'
-                         f'{ho["first_attempt_go_rate"]:.0%}</b><small>passed on the first try</small></div></div>')
+            base = fl[0]["held_out"]["first_attempt_go_rate"]
+            best = max((f["held_out"]["first_attempt_go_rate"] for f in fl if f["kept"]), default=base)
             kept = next((f["playbook"] for f in reversed(fl) if f["kept"]), {})
-            who = {"director": "The video maker follows", "spec": "The checklist writer follows"}
-            rules = "".join(f'<div class="lf-row"><div><div class="why">{safe(who.get(role, role))}</div>{safe(line.lstrip("- "))}</div></div>'
-                            for role, text in kept.items() for line in text.splitlines() if line.strip())
-            c1, c2 = st.columns([1, 1.25], gap="large")
-            c1.markdown(f'<div class="lf-card"><div class="why" style="padding:10px 0 4px">Tested on new launch briefs '
-                        f'it had never seen</div>{rows}</div>', unsafe_allow_html=True)
-            c2.markdown(f'<div class="lf-card"><div class="why" style="padding:10px 0 4px">Rules it wrote for itself '
-                        f'and kept</div>{rules or "<div class=lf-row>No rules kept yet</div>"}</div>',
-                        unsafe_allow_html=True)
+            rules = [plain_rule(x) for role, text in kept.items() for x in text.splitlines() if x.strip()]
+            rounds = "".join(
+                f'<div class="rd {"keep" if f["kept"] and f["flight"] > 1 else "drop" if f["flight"] > 1 else ""}">'
+                f'<b>{f["held_out"]["first_attempt_go_rate"]:.0%}</b>'
+                f'<span>{"Before learning" if f["flight"] == 1 else "Round " + str(f["flight"] - 1)}</span>'
+                f'<em>{"no rules yet" if f["flight"] == 1 else "rules kept" if f["kept"] else "thrown away, no gain"}</em></div>'
+                for f in fl)
+            rule_html = "".join(f"<li>{safe(r)}</li>" for r in rules) or "<li>No rules kept yet</li>"
+
+            def arc_labels(r: float, labels: list[str], start: float, cls: str) -> str:
+                import math as _m
+                out = ""
+                for i, lab in enumerate(labels):
+                    a = _m.radians(start + i * 360 / len(labels))
+                    x, y = 200 + r * _m.cos(a), 200 + r * _m.sin(a)
+                    out += (f'<g class="{cls}"><rect x="{x - len(lab) * 3.6 - 10:.0f}" y="{y - 13:.0f}" '
+                            f'width="{len(lab) * 7.2 + 20:.0f}" height="26" rx="13"/>'
+                            f'<text x="{x:.0f}" y="{y + 4:.0f}">{safe(lab)}</text></g>')
+                return out
+
+            svg = f"""<svg viewBox="-70 0 540 400" role="img" aria-label="Two loops: each video is made, checked and fixed; each launch's failures become rules that are tested and kept only if they help">
+<defs><marker id="ah" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2E5BA8"/></marker>
+<marker id="ag" viewBox="0 0 10 10" refX="6" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#2F6B2A"/></marker></defs>
+<circle cx="200" cy="200" r="165" class="ring outer"/><circle cx="200" cy="200" r="78" class="ring inner"/>
+<path d="M 200 35 A 165 165 0 0 1 365 200" class="flow outer" marker-end="url(#ah)"/>
+<path d="M 200 365 A 165 165 0 0 1 35 200" class="flow outer" marker-end="url(#ah)"/>
+<path d="M 278 200 A 78 78 0 0 1 200 278" class="flow inner" marker-end="url(#ag)"/>
+<path d="M 122 200 A 78 78 0 0 1 200 122" class="flow inner" marker-end="url(#ag)"/>
+<circle r="6" class="dot outer"><animateMotion dur="9s" repeatCount="indefinite" path="M 200 35 A 165 165 0 1 1 199.9 35"/></circle>
+<circle r="5" class="dot inner"><animateMotion dur="4s" repeatCount="indefinite" path="M 200 122 A 78 78 0 1 1 199.9 122"/></circle>
+{arc_labels(165, ["Launch", "Spot what failed", "Write a rule", "Test on new briefs", "Keep only if better"], -90, "lbl o")}
+{arc_labels(78, ["Make", "Check", "Fix"], -90, "lbl i")}
+<text x="200" y="196" class="ctr">every</text><text x="200" y="213" class="ctr">video</text>
+</svg>"""
+            html_block = f"""<!doctype html><html><head><style>
+body{{margin:0;font-family:Inter,system-ui,sans-serif;color:#1F1E1B;background:#F7F6F2}}
+.wrap{{display:grid;grid-template-columns:500px 1fr;gap:28px;align-items:center}}
+@media(max-width:820px){{.wrap{{grid-template-columns:1fr}}}}
+svg{{width:100%;max-width:500px;display:block}}
+.ring{{fill:none;stroke-width:22}} .ring.outer{{stroke:#DCE8FB}} .ring.inner{{stroke:#E6F2E4}}
+.flow{{fill:none;stroke-width:2}} .flow.outer{{stroke:#2E5BA8}} .flow.inner{{stroke:#2F6B2A}}
+.dot.outer{{fill:#2E5BA8}} .dot.inner{{fill:#2F6B2A}}
+.lbl rect{{stroke-width:1}} .lbl.o rect{{fill:#fff;stroke:#9DBDF0}} .lbl.i rect{{fill:#fff;stroke:#9BC79A}}
+.lbl text{{font-size:11.5px;font-weight:600;text-anchor:middle}} .lbl.o text{{fill:#2E5BA8}} .lbl.i text{{fill:#2F6B2A}}
+.ctr{{font-size:12px;fill:#6F6C66;text-anchor:middle}}
+.big{{display:flex;align-items:baseline;gap:14px;margin:0 0 4px}} .big b{{font-size:54px;letter-spacing:-.03em}}
+.big .from{{color:#A19E97}} .big .arrow{{font-size:28px;color:#A19E97}} .big .to{{color:#2F6B2A}}
+.sub{{color:#6F6C66;font-size:14px;margin:0 0 18px}}
+.rounds{{display:flex;gap:10px;margin-bottom:20px;flex-wrap:wrap}}
+.rd{{flex:1;min-width:120px;background:#fff;border:1px solid #E9E6DF;border-radius:12px;padding:10px 12px}}
+.rd b{{display:block;font-size:22px}} .rd span{{display:block;font-size:13px;font-weight:600}} .rd em{{font-style:normal;font-size:12px;color:#A19E97}}
+.rd.keep{{border-color:#9BC79A}} .rd.keep b{{color:#2F6B2A}} .rd.drop b{{color:#A19E97}}
+h4{{margin:0 0 8px;font-size:13px;color:#6F6C66;font-weight:600}}
+ul{{margin:0;padding:0;list-style:none}} li{{background:#fff;border:1px solid #E9E6DF;border-radius:10px;padding:9px 12px;margin-bottom:6px;font-size:14px}}
+li::before{{content:"✓";color:#2F6B2A;font-weight:700;margin-right:8px}}
+@media (prefers-reduced-motion: reduce){{.dot{{display:none}}}}
+</style></head><body><div class="wrap"><div>{svg}</div><div>
+<div class="big"><b class="from">{base:.0%}</b><span class="arrow">→</span><b class="to">{best:.0%}</b></div>
+<p class="sub">of videos passed every check on the first try, tested on launch briefs it had never seen.</p>
+<div class="rounds">{rounds}</div>
+<h4>Rules it wrote for itself and kept</h4><ul>{rule_html}</ul>
+</div></div></body></html>"""
+            components.html(html_block, height=460)
 
     # ---------------- raw telemetry ----------------
     with st.expander("Full activity log"):
