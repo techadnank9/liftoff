@@ -105,7 +105,7 @@ const Problem: React.FC = () => {
 				right={
 					<div style={{display: 'flex', flexDirection: 'column', gap: 22, width: 760}}>
 						{misses.map(([what, got, need], i) => {
-							const p = rise(f, s(4.4) + i * 22);
+							const p = rise(f, s(4.6) + i * 22);
 							return (
 								<div key={what} style={{display: 'flex', alignItems: 'center', gap: 26, padding: '30px 36px', borderRadius: 18,
 									background: PANEL, border: '1px solid rgba(255,255,255,.08)', opacity: p, translate: `${(1 - p) * 60}px 0px`}}>
@@ -209,8 +209,8 @@ const Checklist: React.FC = () => {
 // 6. Checked by someone else
 const Verify: React.FC = () => {
 	const f = useCurrentFrame();
-	const holdP = rise(f, s(4.6));
-	const goP = rise(f, s(9.6));
+	const holdP = rise(f, s(5.4));
+	const goP = rise(f, s(10.5));
 	return (
 		<Scene len={s(9)}>
 			<Split
@@ -273,7 +273,7 @@ const Result: React.FC = () => {
 // 8. It learns
 const Learn: React.FC = () => {
 	const f = useCurrentFrame();
-	const n = Math.round(interpolate(f, [s(7.6), s(8.8)], [0, 50], {...clamp, easing: ease}));
+	const n = Math.round(interpolate(f, [s(8.6), s(9.8)], [0, 50], {...clamp, easing: ease}));
 	return (
 		<Scene len={s(9)}>
 			<Split
@@ -281,12 +281,12 @@ const Learn: React.FC = () => {
 					<Label>and it learns</Label>
 					<Head>Every miss becomes a rule. A rule stays only if it helps.</Head>
 					<Body>Tested on launch briefs it has never seen.</Body>
-					<div style={{display: 'flex', alignItems: 'baseline', gap: 24, marginTop: 10, opacity: rise(f, s(7.2))}}>
+					<div style={{display: 'flex', alignItems: 'baseline', gap: 24, marginTop: 10, opacity: rise(f, s(7.9))}}>
 						<span style={{fontSize: 110, fontWeight: 600, color: DIM, letterSpacing: '-0.04em'}}>0%</span>
 						<span style={{fontSize: 60, color: DIM}}>→</span>
 						<span style={{fontSize: 110, fontWeight: 600, color: GO, letterSpacing: '-0.04em'}}>{n}%</span>
 					</div>
-					<Body at={s(7.8)} style={{fontSize: 26}}>of videos passed every check on the first try</Body>
+					<Body at={s(8.4)} style={{fontSize: 26}}>of videos passed every check on the first try</Body>
 				</>}
 				right={<Screen src="demo/mc_learn_crop.png" from={0} to={0} zoom={[1, 1.04]} />}
 			/>
@@ -311,7 +311,7 @@ const End: React.FC = () => {
 	);
 };
 
-export const SCENES: [React.FC, number][] = [[Title, 5.5], [Problem, 10.5], [Paste, 9.5], [Research, 8.5], [Checklist, 9.5], [Verify, 12.5], [Result, 11], [Learn, 11], [End, 6]];
+export const SCENES: [React.FC, number][] = [[Title, 5.5], [Problem, 10.5], [Paste, 9.5], [Research, 8.5], [Checklist, 10.5], [Verify, 13], [Result, 11], [Learn, 12.5], [End, 6]];
 const VO_AT = 0.5; // narration starts half a second into each scene
 export const DEMO_FRAMES = SCENES.reduce((a, [, d]) => a + s(d), 0);
 

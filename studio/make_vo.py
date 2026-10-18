@@ -3,15 +3,18 @@
     python make_vo.py              # macOS voice (Samantha), free and local
     ELEVENLABS_API_KEY=... python make_vo.py   # ElevenLabs, if a key is set
 """
-import json, os, subprocess, urllib.request
+import json, os, ssl, subprocess, urllib.request
+
+import certifi  # python.org Python ships without root certificates
 from pathlib import Path
 
 HERE = Path(__file__).parent
 OUT = HERE / "public/demo/vo"
 OUT.mkdir(parents=True, exist_ok=True)
 lines = json.loads((HERE / "vo_script.json").read_text())
-key = os.environ.get("ELEVENLABS_API_KEY")
-voice = os.environ.get("ELEVENLABS_VOICE_ID", "21m00Tcm4TlvDq8ikWAM")  # Rachel
+env = {k: v for k, v in (l.split("=", 1) for l in (HERE.parent / ".env").read_text().splitlines() if "=" in l and not l.startswith("#"))} if (HERE.parent / ".env").exists() else {}
+key = os.environ.get("ELEVENLABS_API_KEY") or env.get("ELEVENLABS_API_KEY")
+voice = os.environ.get("ELEVENLABS_VOICE_ID", "EXAVITQu4vr4xnSDxMaL")  # Sarah
 
 for i, text in enumerate(lines):
     wav = OUT / f"vo{i}.wav"
@@ -22,7 +25,7 @@ for i, text in enumerate(lines):
                              "voice_settings": {"stability": 0.5, "similarity_boost": 0.75}}).encode(),
             headers={"xi-api-key": key, "Content-Type": "application/json", "Accept": "audio/mpeg"})
         src = OUT / f"vo{i}.mp3"
-        src.write_bytes(urllib.request.urlopen(req, timeout=60).read())
+        src.write_bytes(urllib.request.urlopen(req, timeout=60, context=ssl.create_default_context(cafile=certifi.where())).read())
     else:
         src = Path(f"/tmp/vo{i}.aiff")
         subprocess.run(["say", "-v", "Samantha (English (US))", "-r", "178", "-o", str(src), text], check=True)
