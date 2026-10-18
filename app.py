@@ -767,8 +767,12 @@ with t_research:
             f'{f"<div class=lf-pats style=margin:0 0 12px><span class=why style=font-size:12px;color:var(--soft);margin-right:6px>Working now:</span>{pats}</div>" if pats else ""}'
             f'<div class="lf-wall">{"".join(tiles)}</div></div>')
         components.html(f'<!doctype html><html><head><style>{CSS}\nbody{{margin:0;background:var(--bg);font-family:Inter,system-ui,sans-serif;color:var(--ink)}}'
-                        f'.lf-wall{{grid-template-columns:repeat(4,1fr)}}@media(max-width:900px){{.lf-wall{{grid-template-columns:repeat(2,1fr)}}}}</style></head>'
-                        f'<body>{research_html}{TOP_JS}</body></html>', height=560, scrolling=False)
+                        f'.lf-wall{{display:flex;gap:14px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px}}'
+                        f'.lf-wall .lf-tile{{flex:0 0 220px;scroll-snap-align:start}}'
+                        f'.lf-tile .top{{aspect-ratio:9/16 !important}}'
+                        f'.lf-tile .top.has-thumb{{background-size:cover;background-position:center}}'
+                        f'.lf-wall::-webkit-scrollbar{{height:8px}}.lf-wall::-webkit-scrollbar-thumb{{background:#E0DCD3;border-radius:8px}}</style></head>'
+                        f'<body>{research_html}{TOP_JS}</body></html>', height=600, scrolling=False)
 
 
 with t_activity:
